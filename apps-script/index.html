@@ -396,6 +396,12 @@ a.btn{text-decoration:none;display:inline-block;color:var(--fg)}
 .panel.paper #panelFoot{border-color:rgba(43,28,18,.15)}
 .panel.paper .foot-info{color:var(--ink-soft)}.panel.paper .foot-info b{color:var(--ink)}
 .panel.paper .btn{background:rgba(43,28,18,.1)}
+.pq{display:flex;flex-direction:column;gap:10px}
+.pq-q{border:1px solid rgba(43,28,18,.18);border-radius:9px;padding:8px 12px 10px;margin:0}
+.pq-q legend{font-weight:800;padding:0 4px}
+.pq-q label{display:flex;gap:8px;align-items:flex-start;padding:5px 2px;cursor:pointer;line-height:1.35}
+.pq-q input{accent-color:var(--menu-red);margin-top:3px}
+.panel.paper .opt{background:rgba(43,28,18,.06);border-color:rgba(43,28,18,.15);color:var(--ink)}
 .panel.paper .btn.primary{background:var(--menu-red);color:#fff}
 .panel.paper .x{background:rgba(43,28,18,.12);color:var(--ink)}
 .menu-cols{columns:2 300px;column-gap:28px}
@@ -454,6 +460,22 @@ a.btn{text-decoration:none;display:inline-block;color:var(--fg)}
 #resStars{font-size:44px;color:var(--gold);letter-spacing:4px;line-height:1}
 #resStars .off{color:#555}
 .res-fob{display:flex;align-items:center;gap:6px;font-weight:900;font-size:18px}
+.res-cardwin{display:flex;gap:16px;align-items:center;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:12px}
+.res-cardwin p{margin:4px 0 0;color:var(--muted);line-height:1.45;font-size:14px}
+.cards-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:12px}
+.tcard{position:relative;overflow:hidden;border-radius:12px;padding:6px 6px 8px;background:#1d1f21;border:3px solid var(--tc);display:flex;flex-direction:column;gap:3px;text-align:center;box-shadow:0 4px 14px rgba(0,0,0,.35);min-width:0}
+.tcard .tc-art{aspect-ratio:1/1;border-radius:8px;background:var(--bg);display:grid;place-items:center;font-size:40px}
+.tcard b{font-size:12px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tcard small{font-size:11px;font-weight:800;color:var(--tc);text-transform:uppercase;letter-spacing:.04em}
+.tcard.locked{border-color:#4b4e52;filter:grayscale(1);opacity:.45}
+.tcard.locked .tc-art{background:#2b2d30}
+.tcard.big{width:150px;flex:none}.tcard.big .tc-art{font-size:58px}
+.tc-shine{position:absolute;inset:-40%;background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.45) 50%,transparent 60%);animation:shine 3.2s ease-in-out infinite;pointer-events:none}
+@keyframes shine{0%{transform:translateX(-60%)}60%,100%{transform:translateX(60%)}}
+@media (prefers-reduced-motion:reduce){.tc-shine{animation:none;opacity:.25}}
+.thumb .medals{position:absolute;top:8px;right:8px;display:flex;gap:4px}
+.thumb .medals i{width:12px;height:12px;border-radius:50%;border:2px solid rgba(255,255,255,.8)}
+.practice{display:block;margin-top:6px;color:var(--gold)}
 .metric{display:grid;grid-template-columns:120px 1fr 48px;gap:10px;align-items:center;font-weight:800;font-size:14px;font-variant-numeric:tabular-nums}
 .bar{height:12px;border-radius:6px;background:var(--card);overflow:hidden}
 .bar i{display:block;height:100%;border-radius:6px}
@@ -526,6 +548,8 @@ a.btn{text-decoration:none;display:inline-block;color:var(--fg)}
       <button class="nation-hero" id="nationHero"></button>
       <div><div class="row-title"><h2>Play now</h2><span>Scenario-based roleplay · Functional English</span></div></div>
       <div class="grid" id="rowPlay"></div>
+      <div class="row-title"><h2>My cards <span id="cardsHead"></span></h2><span>Win a card for every mission and level (score 65+). Bronze = Easy · Silver = Normal · Gold = Hard</span></div>
+      <div class="cards-row" id="cardsRow"></div>
       <div class="row-title"><h2>Coming soon</h2><span>New scenarios in development</span></div>
       <div class="grid" id="rowSoon"></div>
       <div class="method">
@@ -713,6 +737,7 @@ a.btn{text-decoration:none;display:inline-block;color:var(--fg)}
           <div id="resStars"></div>
           <div class="res-fob"><i class="gx">G</i><span id="resFob"></span></div>
         </div>
+        <div class="res-cardwin" id="resCard" hidden></div>
         <div id="resMetrics" style="display:grid;gap:8px"></div>
         <div class="res-cols">
           <div><h3>What went well</h3><ul id="resGood"></ul></div>
@@ -746,7 +771,8 @@ const store = {
   get(k, d) { try { const v = localStorage.getItem('goblox:' + k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
   set(k, v) { try { localStorage.setItem('goblox:' + k, JSON.stringify(v)); } catch (e) {} }
 };
-let profile = Object.assign({ name: 'Player', skin: '#f5cd30', shirt: '#0d69ac', pants: '#a4bd47', xp: 0, granted: 0, best: {}, vocab: [], plays: 0, grants: [] }, store.get('profile', {}));
+let profile = Object.assign({ name: 'Player', skin: '#f5cd30', shirt: '#0d69ac', pants: '#a4bd47', xp: 0, granted: 0, best: {}, vocab: [], plays: 0, grants: [], cards: [] }, store.get('profile', {}));
+if (!Array.isArray(profile.cards)) profile.cards = [];
 
 /* ---------------- cloud: Google Apps Script backend ----------------
    When the game is served by Apps Script (see apps-script/LEEME.md), google.script.run exists:
@@ -827,10 +853,30 @@ const GAMES = [
     desc: 'School starts tomorrow and you need a uniform. Three shops, one budget. One shop is cheap but never gives refunds, one is fair, one is fancy. Read the labels, ask the right questions, try things on, watch the till and pass the dress-code check at school. The dress code, your sizes, the prices and the surprises change every game.',
     goals: ['Clothes, colours and sizes', 'Shop phrases: Can I try it on? I\'ll take it.', 'Return policies, refunds, exchanges and discounts', 'Comparing price and quality to stay on budget'],
     chips: ['🛍 Shopping street', '💵 Budget: 60–120 GOYUX', '🎲 New surprises every game', '⏱ 15–20 min'] },
+  { id: 'er', title: 'A&E: Emergency!', emoji: '🚑', bg: 'linear-gradient(150deg,#42a5f5,#005eb8 55%,#002f5c)', level: 'A2–B1',
+    desc: 'You are on a school exchange in Manchester and you\'ve just hurt yourself. Go to A&E (the UK emergency department): explain what happened, fill in the hospital form (careful with British dates!), answer the triage nurse, survive the waiting room and tell the doctor about your allergy. Every game brings a different injury and different surprises.',
+    goals: ['Describing injuries and symptoms (I\'ve twisted my ankle, it\'s swollen…)', 'Past continuous + past simple: I was playing when I fell', 'Giving personal details: dates, addresses, phone numbers', 'Understanding medical instructions'],
+    chips: ['🏥 Hospital', '🇬🇧 Manchester', '🎲 New surprises every game', '⏱ 10–15 min'] },
+  { id: 'hotel', title: 'Hotel Trouble', emoji: '🏨', bg: 'linear-gradient(150deg,#ab47bc,#6a1b9a 55%,#2a0a3d)', level: 'A2–B1',
+    desc: 'Your family has arrived in Edinburgh and you have to check in alone. Spell your name the English way, check the booking, find your room, solve the problems (no towels? a key card that doesn\'t work?), try a Scottish breakfast and read the bill carefully at check-out.',
+    goals: ['Checking in: I have a reservation under the name…', 'Spelling with the English alphabet', 'Complaining politely on the phone: I\'m afraid… isn\'t working', 'Reading a bill and finding mistakes'],
+    chips: ['🏨 Hotel', '🏴 Edinburgh', '💵 Budget: 18–30 GOYUX', '⏱ 15 min'] },
+  { id: 'london', title: 'Lost in London', emoji: '🚇', bg: 'linear-gradient(150deg,#ffa726,#e65100 55%,#5a1f00)', level: 'A2–B1',
+    desc: 'You lost your school group at Camden Market and your phone is dead. Ask for directions, read the map, pay for the tube, choose the right Northern line train (via Bank or via Charing Cross?) and the right exit, and meet your teacher at a famous London landmark.',
+    goals: ['Asking for and understanding directions', 'Reading maps and signs: southbound, way out, exit', 'London culture: the tube, contactless, stand on the right', 'Telling a story in the past simple: I got lost, so I took the tube'],
+    chips: ['🚇 London Underground', '🇬🇧 London', '🎲 4 meeting points', '⏱ 10–15 min'] },
   { id: 'airport', soon: true, title: 'Airport Check-in', emoji: '✈️', bg: 'linear-gradient(150deg,#26c6da,#00838f)' },
-  { id: 'doctor', soon: true, title: 'At the Doctor\'s', emoji: '🩺', bg: 'linear-gradient(150deg,#66bb6a,#2e7d32)' },
-  { id: 'hotel', soon: true, title: 'Hotel Trouble', emoji: '🏨', bg: 'linear-gradient(150deg,#ab47bc,#6a1b9a)' },
-  { id: 'train', soon: true, title: 'Lost in London', emoji: '🚇', bg: 'linear-gradient(150deg,#ffa726,#e65100)' }
+  { id: 'cinema', soon: true, title: 'Movie Night', emoji: '🍿', bg: 'linear-gradient(150deg,#ef5350,#880e4f)' },
+  { id: 'school', soon: true, title: 'New School in Dublin', emoji: '🏫', bg: 'linear-gradient(150deg,#66bb6a,#1b5e20)' },
+  { id: 'gym', soon: true, title: 'Join the Gym', emoji: '🏋️', bg: 'linear-gradient(150deg,#ffca28,#f57f17)' },
+  { id: 'museumvisit', soon: true, title: 'Night at the Museum', emoji: '🦖', bg: 'linear-gradient(150deg,#8d6e63,#3e2723)' },
+  { id: 'vet', soon: true, title: 'At the Vet', emoji: '🐶', bg: 'linear-gradient(150deg,#4db6ac,#00695c)' },
+  { id: 'job', soon: true, title: 'Summer Job Interview', emoji: '💼', bg: 'linear-gradient(150deg,#78909c,#263238)' },
+  { id: 'party', soon: true, title: 'Birthday Party Plans', emoji: '🎉', bg: 'linear-gradient(150deg,#f06292,#6a1b9a)' },
+  { id: 'police', soon: true, title: 'Lost Passport', emoji: '🛂', bg: 'linear-gradient(150deg,#5c6bc0,#1a237e)' },
+  { id: 'camping', soon: true, title: 'Camping in the Rockies', emoji: '🏕', bg: 'linear-gradient(150deg,#9ccc65,#33691e)' },
+  { id: 'phone', soon: true, title: 'Phone Shop Problem', emoji: '📱', bg: 'linear-gradient(150deg,#29b6f6,#01579b)' },
+  { id: 'football', soon: true, title: 'Match Day Tickets', emoji: '⚽', bg: 'linear-gradient(150deg,#26a69a,#004d40)' }
 ];
 
 /* ---------------- difficulty ---------------- */
@@ -874,8 +920,26 @@ function renderHome() {
       <div class="gname">${escH(g.title)}</div>
       <div class="gmeta">${g.soon ? 'In development' : `<span class="stars">${'★'.repeat(b)}${'☆'.repeat(3 - b)}</span><span>${g.level}</span>`}</div>`;
     if (g.soon) card.disabled = true; else card.onclick = () => openDetail(g);
+    if (!g.soon) card.querySelector('.thumb').insertAdjacentHTML('beforeend', `<span class="medals">${Object.keys(TIER).map(d => `<i style="background:${hasCard(g.id, d) ? TIER[d][1] : 'rgba(0,0,0,.35)'}" title="${TIER[d][0]}"></i>`).join('')}</span>`);
     (g.soon ? rs : rp).append(card);
   });
+  renderCards();
+}
+/* ---------------- cards: one per mission and difficulty ----------------
+   Finish a mission with 2+ stars (score ≥ 65) and you win its card for that level.
+   Replaying a level you already have gives no GOYUX (practice mode). Must match CARD_SCORE in Code.gs. */
+const CARD_SCORE = 65;
+const TIER = { easy: ['Bronze', '#cd7f32'], normal: ['Silver', '#c0c7cf'], hard: ['Gold', '#ffd24a'] };
+const hasCard = (id, d) => (profile.cards || []).includes(id + ':' + d);
+function cardHtml(g, d, own, big) {
+  const [tn, tc] = TIER[d];
+  return `<div class="tcard${own ? '' : ' locked'}${big ? ' big' : ''}" style="--tc:${tc};--bg:${g.bg}" title="${escH(g.title)} · ${DIFF[d].label}">
+    <div class="tc-art"><span>${own ? g.emoji : '🔒'}</span></div><b>${escH(g.title)}</b><small>${tn} · ${DIFF[d].label}</small>${own ? '<i class="tc-shine"></i>' : ''}</div>`;
+}
+function renderCards() {
+  const games = GAMES.filter(g => !g.soon), got = games.reduce((a, g) => a + Object.keys(TIER).filter(d => hasCard(g.id, d)).length, 0);
+  $('#cardsHead').textContent = `${got} / ${games.length * 3}`;
+  $('#cardsRow').innerHTML = games.map(g => Object.keys(TIER).map(d => cardHtml(g, d, hasCard(g.id, d))).join('')).join('');
 }
 const SKINS = ['#f5cd30', '#ffdbac', '#f1c27d', '#e0ac69', '#c68642', '#8d5524', '#5c3a1e'];
 const SHIRTS = ['#0d69ac', '#e53935', '#43a047', '#fb8c00', '#8e24aa', '#212121', '#f5f5f5', '#00acc1'];
@@ -926,7 +990,7 @@ function openDetail(g) {
 }
 function renderDiff() {
   $('#dDiff').innerHTML = Object.entries(DIFF).map(([k, d]) => `<button data-d="${k}" aria-pressed="${k === difficulty}"><b>${d.label}</b><small>${d.cefr}</small></button>`).join('');
-  $('#dDiffInfo').textContent = DIFF[difficulty].info;
+  $('#dDiffInfo').innerHTML = escH(DIFF[difficulty].info) + (detailGame && hasCard(detailGame.id, difficulty) ? ` <b class="practice">🃏 You already have the ${TIER[difficulty][0].toLowerCase()} card for this level: you can practise as much as you like, but it gives no more GOYUX. Try another level to earn more!</b>` : ` <b class="practice">🃏 Score 65 or more to win the ${TIER[difficulty][0].toLowerCase()} card.</b>`);
   $('#dDiff').querySelectorAll('[data-d]').forEach(b => b.onclick = () => { difficulty = b.dataset.d; store.set('difficulty', difficulty); renderDiff(); });
 }
 $('#detailX').onclick = () => $('#detail').hidden = true;
@@ -1522,8 +1586,12 @@ function showResults(o) {
   $('#resTitle').textContent = o.title;
   $('#resWho').innerHTML = `<b>${escH(profile.name)}</b>${account ? ' · ' + escH(account.guest ? 'Guest' : account.email) : ''} · ${escH(G.sc.title)} (${DIFF[G.diff] ? DIFF[G.diff].label : 'Normal'}) · ${new Date().toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}`;
   $('#resStars').innerHTML = [0, 1, 2].map(i => `<span class="${i < stars ? '' : 'off'}">★</span>`).join('');
-  const dmul = DIFF[G.diff] ? DIFF[G.diff].mult : 1, earnedLocal = Math.round(overall * dmul);
-  $('#resFob').textContent = `+${earnedLocal} GOYUX · score ${overall}/100`;
+  const dmul = DIFF[G.diff] ? DIFF[G.diff].mult : 1, game = GAMES.find(x => x.id === G.id), had = hasCard(G.id, G.diff), win = !had && overall >= CARD_SCORE;
+  const earnedLocal = had ? 0 : Math.round(overall * dmul);
+  $('#resFob').textContent = had ? `Practice: no GOYUX (you already have this card) · score ${overall}/100` : `+${earnedLocal} GOYUX · score ${overall}/100`;
+  const rc = $('#resCard'); rc.hidden = !(win || had);
+  if (win) { profile.cards.push(G.id + ':' + G.diff); rc.innerHTML = `${cardHtml(game, G.diff, true, true)}<div><b>🃏 New card!</b><p>You won the <b>${TIER[G.diff][0].toLowerCase()}</b> card of ${escH(game.title)} (${DIFF[G.diff].label}). You can play this level again whenever you want to practise, but it won't give you more GOYUX. ${G.diff !== 'hard' ? 'Try a harder level to win the next card!' : 'You completed the hardest level!'}</p></div>`; }
+  else if (had) rc.innerHTML = `${cardHtml(game, G.diff, true)}<div><b>Practice mode</b><p>You already have this card, so this game doesn't give GOYUX. Play another level or another mission to earn more.</p></div>`;
   const col = v => v >= 80 ? 'var(--green)' : v >= 55 ? 'var(--gold)' : 'var(--red)';
   $('#resMetrics').innerHTML = o.metrics.map(([k, v]) => `<div class="metric"><span>${k}</span><div class="bar"><i style="width:${v}%;background:${col(v)}"></i></div><span>${Math.round(v)}%</span></div>`).join('');
   $('#resGood').innerHTML = (o.good.length ? o.good : ['You finished the mission. Keep practising!']).map(x => `<li>${escH(x)}</li>`).join('');
@@ -1543,9 +1611,9 @@ function showResults(o) {
     };
     $('#resFob').textContent += ' · saving…';
     apiU('saveRun', run).then(r => {
-      const id = r.runId; delete r.runId;
+      const id = r.runId; delete r.runId; delete r.practice; delete r.newCard;
       Object.assign(profile, r); store.set('profile', profile);
-      $('#resFob').textContent = `+${r.earned} GOYUX · score ${overall}/100 · saved ✓` + (r.earned === 0 && overall > 0 ? ' (missions finished too quickly earn no GOYUX)' : '');
+      $('#resFob').textContent = r.practice ? `Practice: no GOYUX (you already have this card) · score ${overall}/100 · saved ✓` : `+${r.earned} GOYUX · score ${overall}/100 · saved ✓` + (r.earned === 0 && overall > 0 ? ' (missions finished too quickly earn no GOYUX)' : '');
       if (id) $('#resWho').innerHTML += ` · Mission code <b>${escH(id)}</b>`;
     }).catch(e => { $('#resFob').textContent = `Score ${overall}/100 · not saved: ${e.message}`; });
   }
@@ -2750,6 +2818,848 @@ function review(t) {
     title: listPts === 100 ? 'Ready for school!' : 'Mission complete',
     overall, metrics: [['Shopping list', listPts], ['Quality', quality], ['English', eng], ['Manners', G.manners], ['Savings', save]], good, bad
   }), 'See my results');
+}
+
+/* =====================================================================
+   Shared helpers for the newer missions (A&E, Hotel, London)
+   ===================================================================== */
+/* A room: four walls (one with a doorway), floor and an optional roof that hides when you are inside */
+function room(x, z, w, d, o = {}) {
+  const H = o.h || 5, col = o.wall || '#eceff1', t = 0.5, gap = o.gap || 4;
+  const seg = (sx, sz, sw, sd) => part(sx, 0, sz, sw, H, sd, col, { occlude: true });
+  const side = (s, horiz, cx, cz, len) => {
+    if (!(o.door || 's').includes(s)) return horiz ? seg(cx, cz, len, t) : seg(cx, cz, t, len);
+    const half = (len - gap) / 2;
+    if (horiz) { seg(cx - gap / 2 - half / 2, cz, half, t); seg(cx + gap / 2 + half / 2, cz, half, t); part(cx, H - 1, cz, gap, 1, t, col, { solid: false }); }
+    else { seg(cx, cz - gap / 2 - half / 2, t, half); seg(cx, cz + gap / 2 + half / 2, t, half); part(cx, H - 1, cz, t, 1, gap, col, { solid: false }); }
+  };
+  side('n', true, x, z - d / 2, w); side('s', true, x, z + d / 2, w); side('w', false, x - w / 2, z, d); side('e', false, x + w / 2, z, d);
+  if (o.floor) { const f = new THREE.Mesh(new THREE.PlaneGeometry(w, d), o.floorTex ? new THREE.MeshLambertMaterial({ map: o.floorTex }) : M(o.floor)); f.rotation.x = -Math.PI / 2; f.position.set(x, 0.03, z); f.receiveShadow = true; W.scene.add(f); }
+  if (o.roof) { const r = part(x, H, z, w + 0.6, 0.4, d + 0.6, o.roof, { solid: false }); W.hides.push({ mesh: r, minX: x - w / 2, maxX: x + w / 2, minZ: z - d / 2, maxZ: z + d / 2 }); }
+}
+function chair(x, z, yaw, col = '#1565c0') {
+  const g = new THREE.Group(); g.position.set(x, 0, z); g.rotation.y = yaw; W.scene.add(g);
+  const b = (px, py, pz, w, h, d) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), M(col)); m.position.set(px, py + h / 2, pz); m.castShadow = true; g.add(m); };
+  b(0, 0.45, 0, 1, 0.12, 0.9); b(0, 0.57, -0.42, 1, 0.9, 0.1); b(0, 0, 0, 0.1, 0.45, 0.1);
+}
+/* A member of staff called Nuria or Olaf (the naming rule of every mission) */
+function staff(role, g, extra, x, z, yaw, badge) {
+  const n = npc(`${NPC_NAME[g]} (${role})`, Object.assign({ sleeves: true, shoes: true }, pick1(STAFF_LOOKS[g]), extra), x, z, yaw, { color: '#ffd54f', voice: NPC_VOICE[g] });
+  n.badge = badge || '#37474f'; n.gender = g; return n;
+}
+function sitPlayer(x, z, yaw) { P.frozen = true; sitAv(P.av, x, z, yaw); P.yaw = yaw; }
+function standPlayer(x, z) { P.av.userData.seated = false; P.pos.set(x, 0, z); P.frozen = false; }
+/* A sheet of paper with multiple-choice questions (a form, a leaflet, a map…). done(right, total) */
+function paperQuiz(title, sub, html, qs, done, btn = 'Done') {
+  const box = el('div', 'pq');
+  box.innerHTML = (html ? `<div class="quiz-text">${html}</div>` : '') + qs.map((q, i) => `<fieldset class="pq-q"><legend>${escH(q[0])}</legend>${(q[3] === 'keep' ? [q[1]].concat(q[2]) : shuffle([q[1]].concat(q[2]))).map(o => `<label><input type="radio" name="pq${i}" value="${escH(o)}"> <span>${escH(o)}</span></label>`).join('')}</fieldset>`).join('');
+  panel(title, sub, box, [{ t: btn, cls: 'primary', fn: () => {
+    const ans = qs.map((q, i) => { const c = box.querySelector(`input[name=pq${i}]:checked`); return c ? c.value : null; });
+    if (ans.some(a => a == null)) { notify('✏️ Almost', 'Answer every question first.', 'warn'); return; }
+    closePanel(); done(qs.filter((q, i) => ans[i] === q[1]).length, qs.length, ans);
+  } }], { cls: 'paper' });
+}
+/* who is in a mission with you: a random gender for each role */
+const gPick = () => pick1(['f', 'm']);
+
+/* =====================================================================
+   SCENARIO 3 — A&E: EMERGENCY! (a hospital in Manchester, UK)
+   ===================================================================== */
+const INJ = {
+  ankle: { part: 'ankle', es2: 'el tobillo', bv: 'play football', pv: 'twist my ankle', ps: 'played football', how: 'playing football', past: 'twisted my ankle', what: 'twisted my ankle', sym: 'It\'s swollen and I can\'t walk on it.', es: 'me he torcido el tobillo', dx: 'a sprained ankle', xray: true, med: 'ibuprofen',
+    leaflet: 'SPRAINED ANKLE — what to do at home. Follow RICE for 2–3 days: <b>R</b>est: don\'t do sport for two weeks. <b>I</b>ce: put ice wrapped in a towel on your ankle for 20 minutes every 2–3 hours. Never put ice directly on your skin. <b>C</b>ompression: wear the bandage during the day, but take it off to sleep. <b>E</b>levation: keep your foot up on a pillow. Come back to A&E if you can\'t put any weight on your foot after 3 days.',
+    qs: [['How long should you keep the ice on your ankle?', '20 minutes', ['2–3 hours', 'All night']], ['When should you take the bandage off?', 'When you go to sleep', ['During the day', 'Never']], ['When can you play sport again?', 'In about two weeks', ['Tomorrow', 'After 3 days']]] },
+  wrist: { part: 'wrist', es2: 'la muñeca', bv: 'skateboard', pv: 'fall on my wrist', ps: 'skateboarded', how: 'skateboarding', past: 'fell on my wrist', what: 'hurt my wrist', sym: 'It hurts a lot when I move it.', es: 'me he hecho daño en la muñeca', dx: 'a small fracture in your wrist', xray: true, med: 'ibuprofen', cast: true,
+    leaflet: 'CAST CARE — your wrist is in a cast for 4–6 weeks. Keep the cast dry: cover it with a plastic bag in the shower. Don\'t put anything inside the cast, even if it itches. Keep your hand up on a pillow for the first 2 days to stop the swelling. Come back to A&E if your fingers become blue, cold or numb.',
+    qs: [['How long will you wear the cast?', '4–6 weeks', ['2 days', '6 months']], ['What should you do in the shower?', 'Cover the cast with a plastic bag', ['Take the cast off', 'Wash the cast with soap']], ['When must you come back to A&E?', 'If your fingers become blue, cold or numb', ['If the cast itches', 'If you want a new colour']]] },
+  hand: { part: 'hand', es2: 'la mano', bv: 'cook with my host family', pv: 'cut my hand with a knife', ps: 'cooked with my host family', how: 'cooking with my host family', past: 'cut my hand with a knife', what: 'cut my hand', sym: 'It\'s bleeding quite a lot.', es: 'me he cortado la mano', dx: 'a deep cut that needs four stitches', xray: false, med: 'paracetamol', stitches: true,
+    leaflet: 'STITCHES — keep the wound clean and dry for 48 hours. After that you can have a quick shower, but don\'t have a bath or go swimming. Your stitches must come out in 7–10 days: book an appointment with a nurse. Come back if the wound gets red, hot or smelly, because that can be an infection.',
+    qs: [['For how long must you keep the wound dry?', '48 hours', ['7–10 days', '2 hours']], ['What can\'t you do?', 'Go swimming', ['Have a quick shower after 48 hours', 'Go to school']], ['When do the stitches come out?', 'In 7–10 days', ['Tomorrow', 'They never come out']]] },
+  head: { part: 'head', es2: 'la cabeza', bv: 'play basketball', pv: 'hit my head on the floor', ps: 'played basketball', how: 'playing basketball', past: 'hit my head on the floor', what: 'hit my head', sym: 'I feel dizzy and I\'ve got a headache.', es: 'me he dado un golpe en la cabeza', dx: 'a mild concussion', xray: false, med: 'paracetamol', head: true,
+    leaflet: 'HEAD INJURY — for the next 24 hours an adult must stay with you. Rest and don\'t use screens (phones, games, TV) too much for 2 days. Don\'t do any sport for at least a week. Come back to A&E immediately if you vomit, if you feel very sleepy or confused, or if the headache gets worse.',
+    qs: [['Who must be with you for the next 24 hours?', 'An adult', ['Nobody', 'Your best friend from school']], ['What should you avoid for 2 days?', 'Using screens too much', ['Drinking water', 'Sleeping']], ['When must you come back immediately?', 'If you vomit or feel very sleepy', ['If you feel hungry', 'If you want to watch TV']]] }
+};
+const MEDS = ['ibuprofen', 'paracetamol', 'penicillin'];
+SCEN.er = {
+  title: 'A&E: Emergency!', cardTitle: 'Your patient card',
+  vocab: [['A&E (Accident and Emergency)', 'urgencias (en Reino Unido)'], ['I\'ve twisted my ankle / cut my hand', 'me he torcido el tobillo / cortado la mano'], ['It\'s swollen / bleeding', 'está hinchado / sangrando'], ['I feel dizzy', 'estoy mareado/a'], ['It hurts when I…', 'me duele cuando…'], ['I\'m allergic to…', 'soy alérgico/a a…'], ['about an hour ago', 'hace una hora'], ['I was playing… when I fell', 'estaba jugando… cuando me caí'], ['a sprain / a fracture / stitches / a cast', 'un esguince / una fractura / puntos / una escayola'], ['a prescription / a tablet', 'una receta / una pastilla'], ['date of birth', 'fecha de nacimiento'], ['triage', 'triaje (clasificar por gravedad)']],
+  board() { return [['Pain', G.s.pain + '/10'], ['English', engPct() + '%'], ['Manners', G.manners]]; },
+  card() {
+    const s = G.s, I = INJ[s.inj];
+    return `<div class="cs">You are <b>${escH(profile.name)}</b>, 14 years old, from Spain. You are on a school exchange in <b>Manchester</b> and you live with the Taylor family.</div>
+      <div class="cs">🤕 <b>What happened:</b> about an hour ago you were ${I.how} and you ${I.past}. ${I.sym} Your pain is <b>${s.pain} out of 10</b>.</div>
+      <div class="cs">📋 <b>Your details:</b> date of birth <b>${s.dob.text}</b> · address <b>${s.addr}</b> · host mum's phone <b>${s.phone}</b>.</div>
+      <div class="cs">⚠️ <b>Allergy:</b> you are allergic to the medicine <b>${s.allergy}</b>. Tell the nurse and the doctor!</div>
+      <div class="cs">🏥 In the UK, the emergency department is called <b>A&E</b>. It's free (NHS), but you may have to wait. Difficulty: <b>${DIFF[G.diff].label}</b>.</div>`;
+  },
+  build: buildER
+};
+
+function buildER() {
+  const inj = pick1(Object.keys(INJ)), I = INJ[inj];
+  const d = 1 + (Math.random() * 27 | 0), mo = 1 + (Math.random() * 12 | 0), y = new Date().getFullYear() - 14;
+  const MON = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  const p2 = n => String(n).padStart(2, '0');
+  const street = pick1(['Wilmslow Road', 'Oxford Road', 'Palatine Road', 'Burton Road', 'Princess Road']), num = 10 + (Math.random() * 80 | 0);
+  const s = G.s = {
+    inj, pain: 4 + (Math.random() * 5 | 0), phase: 'enter', ev: {},
+    dob: { text: `${d} ${MON[mo - 1]} ${y}`, uk: `${p2(d)}/${p2(mo)}/${y}`, us: `${p2(mo)}/${p2(d)}/${y}` },
+    addr: `${num} ${street}`, phone: '07700 9' + (10000 + Math.random() * 89999 | 0),
+    allergy: null, info: 0, infoN: 0, declared: false, gaveAllergen: false, leaflet: 0, leafletN: 3
+  };
+  if (s.dob.uk === s.dob.us) s.dob.us = `${p2(mo)}/${p2(d + 1)}/${y}`;   // so the two formats always look different
+  sample(['age', 'queue', 'old', 'phone', 'med'], { easy: 2, normal: 3, hard: 5 }[G.diff] || 3).forEach(k => s.ev[k] = true);
+  s.allergy = s.ev.med ? I.med : pick1(MEDS.filter(m => m !== I.med));
+  const wrongMed = MEDS.filter(m => m !== s.allergy && m !== I.med)[0] || 'paracetamol';
+  const fact = ok => { s.infoN++; if (ok) s.info++; };
+
+  /* ---- world: the ambulance bay outside, reception, waiting room, triage and a cubicle */
+  W.bounds = { minX: -30, maxX: 30, minZ: -16, maxZ: 34 };
+  ground('#6b8f5e');
+  part(0, 0, 24, 60, 0.05, 20, '#5f6368', { solid: false });
+  for (let x = -24; x <= 24; x += 6) part(x, 0.06, 20, 0.3, 0.02, 4, '#fafafa', { solid: false, shadow: false });
+  // ambulance
+  part(10, 0.5, 22, 4, 3, 7.5, '#fdd835'); part(10, 0.5, 22, 4.05, 0.7, 7.55, '#43a047', { solid: false });
+  part(10, 3.5, 21, 1.6, 0.35, 0.6, '#1e88e5', { solid: false }); part(10, 0.5, 26.2, 3.6, 2.2, 1.2, '#fdd835');
+  [[8.2, 19.5], [11.8, 19.5], [8.2, 25], [11.8, 25]].forEach(([x, z]) => part(x, 0, z, 0.5, 1, 1, '#212121', { solid: false }));
+  sign('AMBULANCE', 10, 2.4, 25.77, 3, 0.6, 0, { bg: '#fdd835', fg: '#1b5e20' });
+  room(0, 0, 40, 24, { wall: '#e3eaf2', floor: '#dfe6ec', roof: '#90a4ae', door: 's', gap: 5, h: 5.5 });
+  sign('ACCIDENT & EMERGENCY', 0, 6.4, 12.3, 12, 1.6, 0, { bg: '#005eb8', fg: '#ffffff' });
+  sign('NHS', 8.5, 6.4, 12.3, 2.6, 1.3, 0, { bg: '#ffffff', fg: '#005eb8' });
+  // reception
+  part(-9, 0, 6, 7, 1.2, 1.2, '#cfd8dc'); part(-9, 1.2, 6, 7.2, 0.1, 1.4, '#eceff1', { solid: false });
+  sign('RECEPTION', -9, 3.2, 3.6, 4, 0.8, 0, { bg: '#005eb8', fg: '#fff' });
+  part(-9, 0, 3.4, 7, 3, 0.2, '#e3eaf2', { solid: false });
+  // waiting room
+  const SEATS = [];
+  for (let r = 0; r < 3; r++) for (let c = 0; c < 6; c++) { const x = 3 + c * 1.6, z = 1 + r * 2.6; chair(x, z, Math.PI); SEATS.push([x, z]); }
+  const screen = canvasTex(512, 256, g => { g.fillStyle = '#0d1b2a'; g.fillRect(0, 0, 512, 256); g.fillStyle = '#ffd54f'; g.font = '900 34px Montserrat, Arial'; g.textAlign = 'center'; g.fillText('WAITING TIME', 256, 60); g.fillStyle = '#fff'; g.font = '900 64px Montserrat, Arial'; g.fillText('2 HOURS', 256, 140); g.font = '700 22px Montserrat, Arial'; g.fillText('The most urgent patients are seen first.', 256, 200); });
+  plane(7, 3.6, -1.9, 4.4, 2.2, 0, screen);
+  part(7, 0, -2.2, 11, 2.4, 0.3, '#e3eaf2', { occlude: true });
+  // triage room (west) and cubicle (east)
+  room(-12, -6, 9, 8.5, { wall: '#cfe3f5', door: 'e', gap: 2.6, h: 5.5 });
+  sign('TRIAGE', -7.35, 3.2, -6, 2, 0.6, Math.PI / 2, { bg: '#005eb8', fg: '#fff' });
+  part(-14, 0, -8.5, 2.4, 0.9, 1.2, '#eceff1'); part(-12, 0, -4.5, 1.4, 1, 0.8, '#90a4ae');
+  room(11, -7, 10, 8.5, { wall: '#d7ecdf', door: 'w', gap: 2.6, h: 5.5 });
+  sign('CUBICLE 3', 5.85, 3.2, -7, 2.4, 0.6, -Math.PI / 2, { bg: '#005eb8', fg: '#fff' });
+  part(13, 0, -8.5, 2, 1, 4, '#eceff1'); part(13, 1, -10, 2, 0.35, 0.9, '#fafafa', { solid: false });
+  [[15.4, -5], [15.4, -9]].forEach(([x, z]) => part(x, 0, z, 0.1, 3, 3, '#64b5f6', { solid: false }));
+  [[-18, 10], [18, 10], [18, -10.5]].forEach(([x, z]) => { part(x, 0, z, 0.9, 0.8, 0.9, '#795548'); part(x, 0.8, z, 1.1, 1.3, 1.1, '#43a047', { solid: false }); });
+
+  /* ---- people */
+  const rg = gPick(), ng = gPick(), dg = gPick();
+  const recep = staff('Receptionist', rg, { shirt: '#5c6bc0' }, -9, 4.4, 0, '#3949ab');
+  const nurse = staff('Nurse', ng, { shirt: '#1a237e', pants: '#1a237e' }, -12, -6.2, Math.PI / 2, '#1a237e');
+  const doc = staff('Doctor', dg, { shirt: '#fafafa', pants: '#455a64' }, 11, -8.5, -Math.PI / 2, '#00897b');
+  const man = npc('Olaf (Patient)', { skin: '#f1c27d', shirt: '#6d4c41', pants: '#37474f', hair: '#9e9e9e', sleeves: true }, 0, 0, 0, { color: '#bcaaa4', voice: NPC_VOICE.m }); man.badge = '#6d4c41'; man.gender = 'm';
+  const lady = npc('Nuria (Patient)', { skin: '#ffdbac', shirt: '#ab47bc', pants: '#455a64', hair: '#eeeeee', long: true, sleeves: true }, 0, 0, 0, { color: '#ce93d8', voice: NPC_VOICE.f }); lady.badge = '#8e24aa'; lady.gender = 'f';
+  const kidP = npc('Mum', { skin: '#8d5524', shirt: '#26a69a', pants: '#263238', hair: '#1b1b1b', long: true, sleeves: true }, 0, 0, 0, { color: '#80cbc4' });
+  const kid = npc('Child', { skin: '#8d5524', shirt: '#ffb74d', pants: '#1565c0', hair: '#1b1b1b' }, 0, 0, 0, { scale: 0.72, color: '#ffcc80' });
+  sitAv(man.av, ...SEATS[12], Math.PI); sitAv(lady.av, ...SEATS[2], Math.PI); sitAv(kidP.av, ...SEATS[9], Math.PI); sitAv(kid.av, ...SEATS[10], Math.PI);
+  const myChair = SEATS[7];
+
+  spawnPlayer(0, 20, Math.PI, 0);
+  G.obj = [{ id: 'reg', text: 'Tell the receptionist what happened and fill in the form' }, { id: 'triage', text: 'See the triage nurse' }];
+  if (s.ev.queue || s.ev.old || s.ev.phone) G.obj.push({ id: 'wait', secret: true, text: 'Deal with what happens in the waiting room' });
+  G.obj.push({ id: 'doctor', text: 'Explain to the doctor how it happened' }, { id: 'leaflet', text: 'Read the instructions for home' }, { id: 'bye', text: 'Thank the receptionist and go home' });
+  setMarker(-9, 3.2, 7.6);
+  let manT = 9;
+  W.update = dt => {
+    manT -= dt;
+    if (manT < 0) { manT = 13 + Math.random() * 8; if (s.phase !== 'enter' && Math.hypot(P.pos.x - 6, P.pos.z - 4) < 14) say(man, pick1(['Ouch… my back.', 'How long is this going to take?', 'Two hours! Unbelievable.', 'At least it\'s free…'])); }
+  };
+
+  inter({ obj: recep.name, label: 'Talk', at: () => ({ x: -9, y: 0, z: 7.4 }), r: 3.2, when: () => s.phase === 'enter', act: register });
+  inter({ obj: 'Your chair', label: 'Sit down and wait', at: () => ({ x: myChair[0], y: 0, z: myChair[1] }), r: 2.4, h: 2.4, when: () => s.phase === 'sit1' || s.phase === 'sit2', act: sitWait });
+  inter({ obj: nurse.name, label: 'Go in', at: () => ({ x: -9, y: 0, z: -6 }), r: 3, when: () => s.phase === 'triage', act: triage });
+  inter({ obj: doc.name, label: 'Go in', at: () => ({ x: 8, y: 0, z: -7 }), r: 3, when: () => s.phase === 'doctor', act: doctor });
+  inter({ obj: recep.name, label: 'Say thank you and goodbye', at: () => ({ x: -9, y: 0, z: 7.4 }), r: 3.2, when: () => s.phase === 'leave', act: goodbye });
+  inter({ obj: 'Olaf (Patient)', label: 'Talk', at: () => man.pos, r: 3, when: () => s.phase === 'queueTalk', act: queueTalk });
+  inter({ obj: 'Nuria (Patient)', label: 'Talk', at: () => lady.pos, r: 3, when: () => s.phase === 'oldTalk', act: oldTalk });
+
+  /* ---- 1. reception and the form */
+  function register() {
+    hideMarker();
+    const g = pick1([['Hello. What\'s brought you in today?', 'Hola. ¿Qué te trae por aquí hoy?'], ['Hi there. How can I help you?', 'Hola. ¿En qué puedo ayudarte?']]);
+    ask(recep, g[0], g[1], phr([`Hello. I've ${I.what}. ${I.sym}`, `Hi. I think I've ${I.what}. ${I.sym}`], [
+      { t: `Hello. I have hurt me the ${I.part}.`, kind: 'grammar', tip: `English doesn't say "me" here: "I've hurt my ${I.part}." Use my, not the, with parts of the body.` },
+      { t: `Hello. Me duele ${I.es2}.`, kind: 'grammar', tip: `Speak English! "My ${I.part} hurts." or "I've hurt my ${I.part}."` },
+      { t: `Hello. I am hurted in the ${I.part}.`, kind: 'grammar', tip: `"Hurt" is irregular: hurt – hurt – hurt. Say "I've hurt my ${I.part}."` },
+      { t: 'Just call a doctor. Quick.', kind: 'rude', tip: 'Even in an emergency, be polite: "Could I see a doctor, please? I\'ve hurt…"' },
+      { t: `Hello. I have broken the ${I.part}, I think.`, kind: 'grammar', tip: `With parts of the body use my: "I think I've broken my ${I.part}."` }
+    ]), () => line(recep, 'Oh dear, I\'m sorry to hear that. I just need a few details. Can you fill in this form, please?', 'Vaya, lo siento. Solo necesito algunos datos. ¿Puedes rellenar este formulario, por favor?', regForm, 'Fill in the form'));
+  }
+  function regForm() {
+    const addrs = shuffle([s.addr, `${s.addr.replace(/^\d+/, n => +n + 3)}`, `${s.addr.split(' ')[0]} ${pick1(['Wilmslow Road', 'Oxford Road', 'Palatine Road', 'Burton Road', 'Princess Road'].filter(x => !s.addr.includes(x)))}`]);
+    const parts = { ankle: 'Ankle / foot', wrist: 'Wrist / arm', hand: 'Hand', head: 'Head' };
+    paperQuiz('NHS — PATIENT REGISTRATION', 'Use the information on your patient card (📄 Character card). In the UK, dates are written day / month / year.', `Name: <b>${escH(profile.name)}</b> · Age: <b>14</b> · Nationality: <b>Spanish</b>`, [
+      ['Date of birth (DD/MM/YYYY)', s.dob.uk, [s.dob.us, `${y}/${p2(mo)}/${p2(d)}`]],
+      ['Address in the UK', s.addr, addrs.filter(a => a !== s.addr)],
+      ['Emergency contact (phone)', s.phone, [s.phone.slice(0, -2) + String((+s.phone.slice(-2) + 17) % 100).padStart(2, '0'), '999']],
+      ['Part of the body', parts[inj], Object.values(parts).filter(v => v !== parts[inj]).slice(0, 2)],
+      ['When did it happen?', 'About an hour ago', ['Yesterday', 'Last week']]
+    ], (right, n) => {
+      for (let k = 0; k < n; k++) fact(k < right);
+      if (right < n) notify('📋 Check your form', `${n - right} answer${n - right > 1 ? 's were' : ' was'} wrong. Look at your patient card. In the UK, 04/03 means the 4th of March!`, 'warn');
+      line(recep, 'Thank you. Please take a seat in the waiting room. The triage nurse will call you soon.', 'Gracias. Siéntate en la sala de espera, por favor. La enfermera de triaje te llamará pronto.', () => { complete('reg'); s.phase = 'sit1'; setMarker(myChair[0], 2.4, myChair[1]); });
+    }, 'Give the form back');
+  }
+  function sitWait() {
+    hideMarker(); sitPlayer(myChair[0], myChair[1], Math.PI); cam.pitch = 0.5; cam.dist = 10;
+    if (s.phase === 'sit1') { s.phase = 'waiting'; later(3, () => callName(nurse, 'triage', -9, -6, 'Triage')); }
+    else { s.phase = 'waiting'; later(2, waitEvents); }
+  }
+  function callName(n, next, mx, mz, where) {
+    say(n, `${profile.name}? ${profile.name}, please!`); chat(n.name, `${profile.name}? ${profile.name}, please! Come to ${where}.`, '#ffd54f'); speak(`${profile.name}? ${profile.name}, please!`, n);
+    standPlayer(myChair[0], myChair[1] + 1.2); s.phase = next; setMarker(mx, 3, mz);
+  }
+
+  /* ---- 2. triage */
+  function triage() {
+    hideMarker(); s.phase = 'triaging';
+    const age = () => s.ev.age
+      ? ask(nurse, `Right, let's see… You're forty, is that right?`, 'Veamos… Tienes cuarenta años, ¿verdad?', phr(['Sorry, no. I\'m fourteen: one, four.', 'Actually, I\'m fourteen, not forty.'], [
+          { t: 'Yes, that\'s right.', kind: 'grammar', tip: 'Listen carefully! FOURteen (14) and FORty (40) sound similar. Correct it: "Sorry, I\'m fourteen."' },
+          { t: 'No! Are you blind? I\'m a kid!', kind: 'rude', tip: 'Correct people politely: "Sorry, I\'m actually fourteen."' },
+          { t: 'No, I have fourteen years.', kind: 'grammar', tip: 'In English you ARE 14: "I\'m fourteen (years old)."' }
+        ]), () => { s.ageOk = true; say(nurse, 'Fourteen! Sorry, my mistake.'); later(1.5, pain); })
+      : pain();
+    const pain = () => {
+      const opts = [{ t: `It's about a ${s.pain}.`, kind: 'ok', fn: () => { fact(true); allergyQ(); } }, { t: `I'd say ${s.pain} out of ten.`, kind: 'ok', fn: () => { fact(true); allergyQ(); } }];
+      ask(nurse, 'On a scale of one to ten, how bad is the pain?', 'En una escala del uno al diez, ¿cuánto te duele?', [pick1(opts),
+        { t: `It's a ${s.pain > 6 ? 2 : 10}.`, kind: 'fact', fn: () => { fact(false); notify('📋 Not true', `Your card says your pain is ${s.pain}/10. Give doctors the right information!`, 'warn'); allergyQ(); } },
+        { t: `It hurts me ${s.pain}.`, kind: 'grammar', tip: `Say "It's about a ${s.pain}" or "${s.pain} out of ten".` },
+        { t: `Very, very, very much.`, kind: 'grammar', tip: 'The nurse asked for a number: "It\'s about a ' + s.pain + '."' }
+      ].slice(0, 2 + (DIFF[G.diff] ? DIFF[G.diff].bad : 2)));
+    };
+    const allergyQ = () => ask(nurse, 'Are you allergic to any medicines?', '¿Eres alérgico/a a algún medicamento?', phr([
+      { t: `Yes, I'm allergic to ${s.allergy}.`, fn: () => { s.declared = true; fact(true); whenQ(); } },
+      { t: `Yes. I can't take ${s.allergy}. I'm allergic to it.`, fn: () => { s.declared = true; fact(true); whenQ(); } }
+    ], [
+      { t: `Yes, I'm allergic of ${s.allergy}.`, kind: 'grammar', tip: 'Allergic TO something.' },
+      { t: `Yes, I have allergy to the ${s.allergy}.`, kind: 'grammar', tip: `Say "I'm allergic to ${s.allergy}" (no "the").` }
+    ]).concat([{ t: 'No, I don\'t think so.', kind: 'fact', fn: () => { fact(false); whenQ(); } }]));
+    const whenQ = () => ask(nurse, 'And when did it happen?', '¿Y cuándo pasó?', phr([`About an hour ago, while I was ${I.how}.`, `An hour ago. I was ${I.how}.`], [
+      { t: 'Since one hour.', kind: 'grammar', tip: '"Hace una hora" = an hour ago. "Since" needs a point in time: since 4 o\'clock.' },
+      { t: 'Before one hour.', kind: 'grammar', tip: '"Hace una hora" = an hour ago.' },
+      { t: 'There is one hour.', kind: 'grammar', tip: '"Hace una hora" = an hour ago.' },
+      { t: 'Why do you care? Just fix it.', kind: 'rude', tip: 'The nurse needs to know. Answer politely.' }
+    ]), () => line(nurse, 'Thank you. Here\'s your wristband. Please wait in the waiting room: the doctor will see you as soon as possible. We see the most urgent patients first.', 'Gracias. Aquí tienes tu pulsera. Espera en la sala de espera: el médico te verá lo antes posible. Atendemos primero a los pacientes más urgentes.', () => {
+      complete('triage'); s.phase = 'sit2'; setMarker(myChair[0], 2.4, myChair[1]);
+      G.inv = [{ emoji: '🏷', label: 'Hospital wristband', info: () => `${profile.name} · DOB ${s.dob.uk}${s.declared ? ' · ALLERGY: ' + s.allergy.toUpperCase() : ''}` }]; renderHotbar();
+    }));
+    age();
+  }
+
+  /* ---- 3. the waiting room */
+  const waitList = ['phone', 'old', 'queue'].filter(k => s.ev[k]);
+  function waitEvents() {
+    const k = waitList.shift();
+    if (!k) { later(2.5, () => callName(doc, 'doctor', 8, -7, 'Cubicle 3')); return; }
+    reveal('wait');
+    if (k === 'phone') phoneCall();
+    else if (k === 'old') { s.phase = 'oldTalk'; standPlayer(myChair[0], myChair[1] + 1.2); say(lady, 'Excuse me, dear… could you help me?'); notify('👵 Someone needs help', 'The old lady in the front row is calling you.', 'warn'); }
+    else { s.phase = 'queueTalk'; standPlayer(myChair[0], myChair[1] + 1.2); walkTo(kidP, [[-2, -1], [-7, -6]], () => { kidP.av.visible = false; }); walkTo(kid, [[-1, -1.5], [-7, -6.5]], () => { kid.av.visible = false; }); setFace(kid.av, 'sad'); say(man, 'Hey! That woman and her kid just arrived and they\'re going in first!'); notify('😠 Trouble', 'The man in the back row is angry. Talk to him.', 'warn'); }
+  }
+  function next() { complete('wait'); s.phase = 'sit2'; setMarker(myChair[0], 2.4, myChair[1]); }
+  function phoneCall() {
+    const host = { name: 'Nuria (Host mum)', badge: '#ef6c00', gender: 'f', av: P.av };
+    notify('📱 Your phone is ringing', 'It\'s your host mum, Mrs Taylor.', 'warn');
+    ask(host, `Hi love, it's me! Where are you? Are you OK?`, '¡Hola, cariño! Soy yo. ¿Dónde estás? ¿Estás bien?', phr([`Hi! I'm at A&E at the hospital. I've ${I.what}, but I'm OK.`, `Don't worry, I'm OK. I'm in A&E because I've ${I.what}.`], [
+      { t: 'I am in the urgencies of the hospital.', kind: 'grammar', tip: 'False friend! "Urgencias" = A&E (UK) or the ER (USA).' },
+      { t: `I'm in the hospital. I have had an accident with the ${I.part}.`, kind: 'grammar', tip: `More natural: "I've hurt my ${I.part}."` },
+      { t: 'I am being in the hospital.', kind: 'grammar', tip: '"Be" is not used in the continuous here: "I\'m at the hospital."' }
+    ]), () => ask(host, 'Oh no! Do you want me to come and pick you up?', '¡Oh, no! ¿Quieres que vaya a recogerte?', phr(['Yes, please. That would be great. Thank you!', 'That would be lovely, thanks. I\'m in Manchester Royal A&E.'], [
+      { t: 'Yes. Come now.', kind: 'rude', tip: 'Add please and thank you: "Yes, please. That would be great!"' },
+      { t: 'Yes, please, you can pick up me?', kind: 'grammar', tip: 'With a pronoun, it goes in the middle: "pick me up". And: "Could you pick me up?"' }
+    ]), () => { s.phoned = true; line(host, 'I\'ll be there in twenty minutes. See you soon, love!', 'Estaré allí en veinte minutos. ¡Hasta pronto, cariño!', () => { s.phase = 'waiting'; later(2, waitEvents); }); }));
+  }
+  function oldTalk() {
+    hideMarker();
+    ask(lady, 'I haven\'t got my glasses, dear. Could you read that screen for me?', 'No llevo las gafas, cielo. ¿Me puedes leer esa pantalla?', phr(['Of course! It says the waiting time is two hours. The most urgent patients go first.', 'Sure. It says two hours, and they see the most serious patients first.'], [
+      { t: 'Sorry, I\'m busy.', kind: 'rude', tip: 'She needs help! "Of course! It says…"' },
+      { t: 'It puts that the wait is two hours.', kind: 'grammar', tip: '"Pone que…" = It says that… ("It puts" is not English).' },
+      { t: 'Of course. It says two hours of wait.', kind: 'grammar', tip: 'Say "the waiting time is two hours" or "a two-hour wait".' }
+    ]), () => { s.helped = true; say(lady, 'Thank you, dear. You\'re very kind!'); next(); });
+  }
+  function queueTalk() {
+    hideMarker();
+    choice(man, 'Did you see that? They\'ve been here five minutes and they\'re going in first! Why?', '¿Has visto eso? Llevan cinco minutos y entran primero. ¿Por qué?', shuffle([
+      { t: 'I think the child is very ill. They see the most urgent patients first.', fn: () => { s.triageUnderstood = true; G.good++; pop('✔ You understood the nurse', 'good'); say(man, 'Hmm… I suppose you\'re right. Poor kid.'); next(); } },
+      { t: 'Because they paid more money.', fn: () => { G.mistakes.push({ said: 'Because they paid more money.', tip: 'A&E in the UK is free. They see the most URGENT patients first (triage).' }); notify('🏥 Not true', 'A&E is free for everybody. The nurse told you: the most urgent patients are seen first.', 'warn'); say(man, 'Paid? It\'s the NHS, it\'s free!'); next(); } },
+      { t: 'Because they arrived first.', fn: () => { G.mistakes.push({ said: 'Because they arrived first.', tip: 'They didn\'t arrive first. A&E sees the most urgent patients first.' }); notify('🏥 Not true', 'Listen again to the nurse: the most urgent patients are seen first.', 'warn'); say(man, 'No, they didn\'t! I was here before them.'); next(); } }
+    ]));
+  }
+
+  /* ---- 4. the doctor */
+  function doctor() {
+    hideMarker(); s.phase = 'withDoc'; P.pos.set(8.8, 0, -6.2); P.yaw = Math.PI / 2; P.frozen = true; cam.yaw = 0.35; cam.pitch = 0.45; cam.dist = 8;
+    doc.pos.set(11.6, 0, -6.2); faceTo(doc, 8.8, -6.2);
+    ask(doc, `Hello, ${profile.name}. I'm ${doc.name.split(' ')[0]}, one of the doctors. Can you tell me exactly what happened?`, `Hola, ${profile.name}. Soy ${doc.name.split(' ')[0]}, uno de los médicos. ¿Me puedes contar exactamente qué pasó?`, phr([`I was ${I.how} when I ${I.past}.`, `Well, I was ${I.how} and I ${I.past}.`], [
+      { t: `I was ${I.bv} when I ${I.pv}.`, kind: 'grammar', tip: `Past continuous (I was ${I.how}) + past simple (I ${I.past}).` },
+      { t: `When I was ${I.how}, I have ${I.what}.`, kind: 'grammar', tip: 'A finished moment in the past → past simple, not the present perfect.' },
+      { t: `While I ${I.ps}, I ${I.past}.`, kind: 'grammar', tip: `The long background action goes in the past continuous: "While I was ${I.how}…"` }
+    ]), examine);
+  }
+  function examine() {
+    ask(doc, `OK. Let me have a look… Does it hurt when I press here?`, 'Vale. Déjame ver… ¿Te duele si aprieto aquí?', phr(['Ouch! Yes, it hurts there.', 'Yes! That really hurts.'], [
+      { t: 'Yes, it makes me pain.', kind: 'grammar', tip: '"It hurts" or "That hurts" is enough.' },
+      { t: 'Yes, it hurts to me.', kind: 'grammar', tip: 'No "to me": "It hurts."' },
+      { t: 'Ay! Stop it!', kind: 'rude', tip: 'Tell the doctor calmly: "Ouch! Yes, that hurts."' }
+    ]), () => {
+      const xr = I.xray ? 'We did an X-ray and ' : '';
+      line(doc, `${xr}it's ${I.dx}. ${I.cast ? 'We\'ll put your wrist in a cast.' : I.stitches ? 'I\'ll put the stitches in now. It won\'t hurt much.' : I.head ? 'It isn\'t serious, but you need to rest.' : 'Nothing is broken. You need to rest it.'}`, `${I.xray ? 'Te hemos hecho una radiografía y ' : ''}es ${I.dx}.`, medicine);
+    });
+  }
+  function medicine() {
+    const med = s.ev.med ? s.allergy : (I.med === s.allergy ? wrongMed : I.med);
+    if (s.ev.med) {
+      choice(doc, `I'll give you some ${med} for the pain. Take one tablet every six hours.`, `Te daré ${med} para el dolor. Toma una pastilla cada seis horas.`, shuffle([
+        { t: `Sorry, I'm allergic to ${med}. Is there anything else I can take?`, fn: () => { s.medSaved = true; G.good++; pop('✔ That was important!', 'good'); line(doc, `Oh! Thank you for telling me. I'll give you something different, then: ${wrongMed}.`, `¡Oh! Gracias por decírmelo. Entonces te daré otra cosa.`, leaflet); } },
+        { t: 'OK, thank you very much.', fn: () => { s.gaveAllergen = true; G.mistakes.push({ said: 'OK, thank you very much.', tip: `You are allergic to ${med}! Always say it: "Sorry, I'm allergic to ${med}."` }); notify('⚠️ Danger!', `You are allergic to ${med}! You must always tell the doctor.`, 'bad'); later(1, leaflet); } },
+        { t: `I am allergic of the ${med}, doctor.`, fn: () => { s.medSaved = true; G.bad++; G.mistakes.push({ said: `I am allergic of the ${med}, doctor.`, tip: `Allergic TO, without "the": "I'm allergic to ${med}."` }); line(doc, `Allergic to ${med}? Good thing you said so. I'll give you ${wrongMed} instead.`, 'Menos mal que lo has dicho.', leaflet); } }
+      ]));
+    } else line(doc, `And I'll give you some ${med} for the pain. Take one tablet every six hours, with food.`, `Y te daré ${med} para el dolor. Una pastilla cada seis horas, con comida.`, leaflet);
+  }
+  function leaflet() {
+    paperQuiz('INSTRUCTIONS FOR HOME', 'Read the leaflet from the doctor and check that you understand it.', I.leaflet, I.qs, (right, n) => {
+      s.leaflet = right;
+      if (right < n) notify('📄 Read again', 'Some answers were wrong. At home, read medical instructions very carefully.', 'warn');
+      complete('doctor'); complete('leaflet');
+      line(doc, `Great. You can go home now. Take care of that ${I.part}!`, 'Genial. Ya puedes irte a casa. ¡Cuídate!', () => { P.frozen = false; s.phase = 'leave'; setMarker(-9, 3.2, 7.6); });
+    }, 'I understand');
+  }
+
+  /* ---- 5. going home */
+  function goodbye() {
+    hideMarker();
+    choice(recep, 'All done? Is your family coming to get you?', '¿Ya está? ¿Viene tu familia a buscarte?', [
+      { t: 'Yes. Do I need to pay anything?', fn: () => line(recep, 'No, not at all. A&E is free here: it\'s paid for by taxes. In the USA it can be very expensive!', 'No, nada. Urgencias es gratis aquí: se paga con los impuestos. ¡En Estados Unidos puede ser muy caro!', bye) },
+      { t: 'Yes, they are. Thanks!', fn: bye }
+    ]);
+    function bye() {
+      ask(recep, 'Get well soon!', '¡Que te mejores!', phr(['Thank you very much for your help. Goodbye!', 'Thanks for everything. Bye!'], [
+        { t: 'Thanks for all. Bye!', kind: 'grammar', tip: '"Gracias por todo" = Thanks for everything.' },
+        { t: 'Thank you for attend me.', kind: 'grammar', tip: '"Atender" here = help / see: "Thank you for helping me."' }
+      ]), () => { complete('bye'); s.phase = 'done'; recep.av.userData.wave = true; later(1.2, finish); });
+    }
+  }
+  function finish() {
+    const info = s.infoN ? Math.round(100 * s.info / s.infoN) : 100;
+    let safety = 40 + (s.declared ? 30 : 0) + Math.round(30 * s.leaflet / s.leafletN);
+    if (s.gaveAllergen) safety = Math.min(safety, 20);
+    const eng = engPct();
+    const overall = 0.3 * safety + 0.2 * info + 0.3 * eng + 0.2 * G.manners;
+    const good = [], bad = [];
+    if (s.declared) good.push(`You told the nurse about your ${s.allergy} allergy.`); else bad.push(`You didn't tell the nurse about your allergy. Say "I'm allergic to ${s.allergy}."`);
+    if (s.ev.med) { if (s.medSaved) good.push('The doctor was going to give you a medicine you are allergic to, and you stopped it!'); else bad.push(`You accepted ${s.allergy}, but you are allergic to it. That's dangerous!`); }
+    if (info >= 90) good.push('You gave the hospital the right information about you.'); else bad.push('Some of your information was wrong. Check your details: in the UK, dates are day/month/year.');
+    if (s.leaflet === s.leafletN) good.push('You understood the instructions for home perfectly.'); else bad.push('Read the instructions from the doctor more carefully.');
+    if (s.ev.age) { if (s.ageOk) good.push('You corrected the nurse: fourteen, not forty!'); }
+    if (s.ev.old && s.helped) good.push('You helped an old lady read the screen.');
+    if (s.ev.queue) { if (s.triageUnderstood) good.push('You understood triage: the most urgent patients go first.'); else bad.push('In A&E, the most urgent patients are seen first (triage), and it\'s free for everybody.'); }
+    if (s.ev.phone && s.phoned) good.push('You explained to your host mum what happened.');
+    if (G.manners === 100) good.push('Perfect manners, even with pain!');
+    showResults({ title: s.gaveAllergen ? 'Home… with an allergic reaction!' : 'Get well soon!', overall, metrics: [['Safety', safety], ['Information', info], ['English', eng], ['Manners', G.manners]], good, bad });
+  }
+}
+
+/* =====================================================================
+   SCENARIO 4 — HOTEL TROUBLE (The Thistle & Stag, Edinburgh, Scotland)
+   ===================================================================== */
+const ROOM_PROBLEMS = {
+  shower: { text: 'the shower isn\'t working', es: 'la ducha no funciona', ok: 'I\'m afraid the shower isn\'t working.', bad: [['The shower doesn\'t function.', '"Funcionar" (a machine) = work: "The shower isn\'t working."'], ['The shower is broken. Come now.', 'Too bossy. "I\'m afraid the shower isn\'t working. Could you send someone, please?"']], fix: 'I\'ll send someone from maintenance right away.' },
+  towels: { text: 'there are no towels', es: 'no hay toallas', ok: 'I\'m afraid there aren\'t any towels in the bathroom.', bad: [['There are not towels in the bath.', 'Use any: "There aren\'t any towels." And "bath" is the bañera: the room is the bathroom.'], ['Is not towels.', 'There + be: "There aren\'t any towels."']], fix: 'I\'m so sorry! Housekeeping will bring some up in five minutes.' },
+  heating: { text: 'the heating isn\'t working and the room is freezing', es: 'la calefacción no funciona', ok: 'I\'m afraid the heating isn\'t working. The room is really cold.', bad: [['The calefaction doesn\'t go.', '"Calefacción" = heating. "Doesn\'t go" → isn\'t working.'], ['Hello, I am very cold in the room, it\'s broke.', 'Say what is broken: "The heating isn\'t working."']], fix: 'Sorry about that! I\'ll send someone up to fix it now.' },
+  noise: { text: 'there is loud building work next to your room', es: 'hay obras muy ruidosas', ok: 'I\'m afraid it\'s very noisy. Is it possible to change rooms?', bad: [['There is many noise. Change my room.', 'Noise is uncountable: "a lot of noise". And ask: "Is it possible to change rooms?"'], ['There is very much noise in my habitation.', 'False friend! Habitación = room.']], fix: 'I do apologise. I\'ll move you to a quiet room on the same floor. Same key card!' }
+};
+const MINIBAR = [['Bottle of water', 3], ['Shortbread biscuits', 4], ['Crisps', 3.5], ['Irn-Bru (soft drink)', 3], ['Chocolate bar', 3.5]];
+SCEN.hotel = {
+  title: 'Hotel Trouble', cardTitle: 'Your booking',
+  vocab: [['I have a reservation under the name…', 'Tengo una reserva a nombre de…'], ['a twin room / a double room', 'una habitación con dos camas / con cama de matrimonio'], ['key card', 'tarjeta de la habitación'], ['lift (UK) / elevator (USA)', 'ascensor'], ['I\'m afraid… isn\'t working.', 'Me temo que… no funciona.'], ['Could you send someone up?', '¿Podría mandar a alguien?'], ['check-in / check-out', 'registro de entrada / salida'], ['Could I leave my bags here?', '¿Puedo dejar aquí mis maletas?'], ['Is breakfast included?', '¿El desayuno está incluido?'], ['I think there\'s a mistake on the bill.', 'Creo que hay un error en la factura.'], ['minibar / room service', 'minibar / servicio de habitaciones'], ['G, A, R, C, I, A (gee, ay, ar, see, eye, ay)', 'el alfabeto en inglés']],
+  board() { return [['Cash', money(G.money)], ['English', engPct() + '%'], ['Manners', G.manners]]; },
+  card() {
+    const s = G.s, b = s.book;
+    return `<div class="cs">You are <b>${escH(profile.name)} García</b>, 14. You're on holiday in <b>Edinburgh</b> with your family. Your parents are parking the car, so <b>you</b> have to check in.</div>
+      <div class="cs">🏨 <b>Your booking</b> at The Thistle & Stag: reference <b>${b.ref}</b> · a <b>twin room</b> (two single beds) for you and your sister · <b>${b.nights} nights</b>, Friday to ${b.nights === 2 ? 'Sunday' : 'Monday'} · breakfast <b>${b.breakfast ? 'included' : 'NOT included'}</b> · already paid online.</div>
+      <div class="cs">💵 <b>Money for extras:</b> ${money(s.budget)}. At check-out you pay only for extras (minibar, breakfast if it isn't included…).</div>
+      <div class="cs">🔤 Your surname is spelt <b>G-A-R-C-I-A</b>. In English the letters sound: gee – ay – ar – see – eye – ay.</div>
+      <div class="cs">🎲 Hotels are full of surprises. Difficulty: <b>${DIFF[G.diff].label}</b>.</div>`;
+  },
+  build: buildHotel
+};
+
+function buildHotel() {
+  const b = { ref: 'TS-' + (1000 + Math.random() * 8999 | 0), nights: pick1([2, 3]), breakfast: Math.random() < 0.5, type: 'twin' };
+  const s = G.s = {
+    book: b, budget: pick1({ easy: [25, 30], normal: [20, 25], hard: [18, 20] }[G.diff] || [25]), phase: 'enter', ev: {},
+    room: 200 + pick1([4, 6, 8, 12, 14, 16]), solved: 0, issues: 0, taken: [], ateBreakfast: false, roomFixed: false
+  };
+  sample(['wrong', 'notready', 'key', 'room', 'bill'], { easy: 2, normal: 3, hard: 5 }[G.diff] || 3).forEach(k => s.ev[k] = true);
+  if (s.ev.wrong) s.ev.wrong = pick1(['type', 'nights', 'breakfast']);
+  if (s.ev.room) s.ev.room = pick1(Object.keys(ROOM_PROBLEMS));
+  G.money = s.budget;
+  const issue = ok => { s.issues++; if (ok) s.solved++; };
+  const roomWords = n => String(n).split('').map(c => ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'][c]).join('-');
+
+  /* ---- world: lobby (with the breakfast room), first-floor corridor and your room */
+  W.bounds = { minX: -20, maxX: 125, minZ: -20, maxZ: 26 };
+  ground('#55734a');
+  part(0, 0, 20, 40, 0.05, 10, '#8d8d8d', { solid: false });
+  room(0, 0, 32, 22, { wall: '#f3e5c8', floor: '#7b2d26', roof: '#3e2723', door: 's', gap: 4, h: 6 });
+  sign('THE THISTLE & STAG', 0, 7.2, 11.3, 9, 1.4, 0, { bg: '#1b3a2b', fg: '#e6c068' });
+  const fl = new THREE.Mesh(new THREE.PlaneGeometry(14, 9), M('#a33a2f')); fl.rotation.x = -Math.PI / 2; fl.position.set(4, 0.05, 2); W.scene.add(fl);
+  part(-8, 0, -6, 8, 1.2, 1.4, '#5d4037'); part(-8, 1.2, -6, 8.2, 0.12, 1.6, '#3e2723', { solid: false });
+  sign('RECEPTION', -8, 3.4, -10.7, 4, 0.8, 0, { bg: '#1b3a2b', fg: '#e6c068' });
+  part(12, 0, 2, 1.4, 1.2, 4, '#5d4037'); sign('CONCIERGE', 12, 3.2, -0.2, 3, 0.6, 0, { bg: '#1b3a2b', fg: '#e6c068' });
+  [[3.6, 7.5], [4.6, 7.5]].forEach(([x]) => part(x, 0, -10.7, 0.95, 4, 0.2, '#b0bec5', { solid: false }));
+  sign('LIFT', 4.1, 4.4, -10.6, 1.6, 0.5, 0, { bg: '#263238', fg: '#fff' });
+  [[2, 3], [6, 3]].forEach(([x, z]) => { part(x, 0, z, 3, 0.8, 1.2, '#2e5d4b'); part(x, 0.8, z - 0.5, 3, 0.8, 0.3, '#2e5d4b', { solid: false }); });
+  part(4, 0, 1, 1.6, 0.6, 1, '#4e342e');
+  const chand = new THREE.Mesh(new THREE.SphereGeometry(0.9, 12, 8), new THREE.MeshBasicMaterial({ color: '#fff3c4' })); chand.position.set(4, 5, 2); W.scene.add(chand);
+  // breakfast room (west side of the lobby)
+  sign('GARDEN ROOM · BREAKFAST 7–10', -10.5, 4.2, 0.8, 7, 0.7, 0, { bg: '#fff8e1', fg: '#1b3a2b' });
+  [[-13, 4], [-9, 4], [-13, 8], [-9, 8]].forEach(([x, z]) => { part(x, 0.9, z, 2, 0.15, 1.6, '#fafafa'); part(x, 0, z, 0.3, 0.9, 0.3, '#5d4037', { solid: false }); chair(x, z + 1.3, Math.PI, '#6d4c41'); });
+  part(-13, 0, -1.5, 4, 1.1, 1, '#8d6e63');
+  // first floor corridor (x = 70)
+  const CX = 70;
+  room(CX, 0, 6, 30, { wall: '#efe3cf', floor: '#4a2b5a', door: 'x', h: 5 });
+  part(CX, 0, -14, 2, 4, 0.3, '#b0bec5', { solid: false }); sign('LIFT', CX, 4.3, -14.6 + 0.9, 1.6, 0.5, 0, { bg: '#263238', fg: '#fff' });
+  const DOORS = [];
+  for (let k = 0; k < 6; k++) [[-1, 2 * k + 3], [1, 2 * k + 4]].forEach(([sd, n]) => {
+    const num = 200 + n, z = -9 + k * 4, x = CX + sd * 2.75;
+    part(x, 0, z, 0.15, 3, 1.6, '#6d4c41', { solid: false });
+    sign(String(num), x - sd * 0.1, 3.3, z, 0.9, 0.45, sd < 0 ? Math.PI / 2 : -Math.PI / 2, { bg: '#e6c068', fg: '#1b1b1b' });
+    DOORS.push({ num, x: x - sd * 0.9, z });
+  });
+  // your room (x = 110)
+  const RX = 110;
+  room(RX, 0, 12, 10, { wall: '#e8eef2', floor: '#b0a089', door: 's', gap: 1.8, h: 5 });
+  [[-2.5], [0.5]].forEach(([dx]) => { part(RX + dx, 0, -2.5, 1.8, 0.7, 4, '#eceff1'); part(RX + dx, 0.7, -4.2, 1.8, 0.35, 0.7, '#fafafa', { solid: false }); });
+  part(RX + 4, 0, -3.5, 3.2, 0.1, 2.8, '#b3e5fc', { solid: false }); part(RX + 2.5, 0, -2.2, 0.15, 3.5, 3.6, '#e8eef2', { occlude: true });
+  sign('BATHROOM', RX + 2.5, 3.8, -0.4, 1.8, 0.4, 0, { bg: '#e8eef2', fg: '#37474f' });
+  part(RX - 4.5, 0, 2, 2.4, 1, 1, '#8d6e63'); part(RX - 4.5, 1, 2, 0.5, 0.3, 0.4, '#212121', { solid: false });
+  part(RX - 2, 0, 3.6, 1, 1, 1, '#37474f');
+  plane(RX, 2.6, -4.7, 3.5, 2, 0, canvasTex(256, 160, g => { const gr = g.createLinearGradient(0, 0, 0, 160); gr.addColorStop(0, '#90caf9'); gr.addColorStop(1, '#e3f2fd'); g.fillStyle = gr; g.fillRect(0, 0, 256, 160); g.fillStyle = '#5d6b70'; g.beginPath(); g.moveTo(0, 160); g.lineTo(60, 80); g.lineTo(110, 95); g.lineTo(150, 50); g.lineTo(200, 90); g.lineTo(256, 70); g.lineTo(256, 160); g.fill(); g.strokeStyle = '#fff'; g.lineWidth = 8; g.strokeRect(0, 0, 256, 160); g.beginPath(); g.moveTo(128, 0); g.lineTo(128, 160); g.stroke(); }));
+  W.walk = (x, z) => (x > -16 && x < 16 && z > -11 && z < 24) || (x > CX - 3 && x < CX + 3 && z > -15 && z < 15) || (x > RX - 6 && x < RX + 6 && z > -5 && z < 6);
+
+  /* ---- people */
+  const rg = gPick(), cg = rg === 'f' ? 'm' : 'f';
+  const recep = staff('Receptionist', rg, { shirt: '#1b3a2b', tie: rg === 'm' ? '#e6c068' : undefined }, -8, -7.6, 0, '#1b3a2b');
+  const conc = staff('Concierge', cg, { shirt: '#263238', cap: '#263238' }, 13.6, 2, -Math.PI / 2, '#455a64');
+  const waiter = staff('Waiter', cg, { shirt: '#fafafa', pants: '#212121', apron: '#212121' }, -13, -0.4, 0, '#00838f');
+  const guest = npc('Olaf (Guest)', { skin: '#f1c27d', shirt: '#c62828', pants: '#37474f', hair: '#d4a017', sleeves: true }, 8, 6, Math.PI, { color: '#ef9a9a' }); guest.gender = 'm';
+  sitAv(guest.av, 6, 3.3, 0);
+
+  spawnPlayer(0, 18, Math.PI, 0);
+  G.obj = [{ id: 'checkin', text: 'Check in at reception' }];
+  if (s.ev.wrong) G.obj.push({ id: 'wrong', secret: true, text: 'Correct the mistake in your booking' });
+  if (s.ev.notready) G.obj.push({ id: 'bags', secret: true, text: 'Your room isn\'t ready: ask to leave your bags' });
+  G.obj.push({ id: 'room', text: `Find your room on the first floor` });
+  if (s.ev.key) G.obj.push({ id: 'key', secret: true, text: 'Get your key card fixed' });
+  if (s.ev.room) G.obj.push({ id: 'problem', secret: true, text: 'Call reception about the problem in your room' });
+  G.obj.push({ id: 'breakfast', text: 'Have breakfast the next morning' }, { id: 'checkout', text: 'Check out and pay for your extras' });
+  setMarker(-8, 3.2, -4.2);
+
+  inter({ obj: recep.name, label: 'Talk', at: () => ({ x: -8, y: 0, z: -4.6 }), r: 3.2, when: () => ['enter', 'keyBroken', 'checkout'].includes(s.phase), act: () => s.phase === 'enter' ? checkIn() : s.phase === 'keyBroken' ? keyFix() : checkOut() });
+  inter({ obj: 'Lift', label: 'Go up to the first floor', at: () => ({ x: 4.1, y: 0, z: -9.6 }), r: 2.6, when: () => s.phase === 'toRoom', act: () => { hideMarker(); P.pos.set(CX, 0, -12); cam.yaw = Math.PI; notify('🛗 First floor', `Find room ${s.room}. Even numbers are on the right, odd numbers on the left.`); } });
+  inter({ obj: 'Lift', label: 'Go down to the lobby', at: () => ({ x: CX, y: 0, z: -13 }), r: 2.6, when: () => s.phase === 'toRoom' || s.phase === 'keyBroken', act: () => { P.pos.set(4.1, 0, -8.6); cam.yaw = 0; if (s.phase === 'keyBroken') setMarker(-8, 3.2, -4.2); } });
+  DOORS.forEach(dr => inter({ obj: `Room ${dr.num}`, label: 'Open with the key card', at: () => ({ x: dr.x, y: 0, z: dr.z }), r: 1.6, when: () => s.phase === 'toRoom', act: () => openDoor(dr.num) }));
+  inter({ obj: 'Phone', label: 'Call reception ☎', at: () => ({ x: RX - 4.5, y: 0, z: 1.2 }), r: 2.2, h: 2.2, when: () => s.phase === 'inRoom' && s.ev.room && !s.roomFixed, act: phoneReception });
+  inter({ obj: 'Minibar', label: 'Open', at: () => ({ x: RX - 2, y: 0, z: 2.8 }), r: 2, h: 2, when: () => s.phase === 'inRoom', act: minibar });
+  inter({ obj: 'Bed', label: 'Go to sleep 😴', at: () => ({ x: RX - 1, y: 0, z: 0 }), r: 2.6, h: 2, when: () => s.phase === 'inRoom' && (!s.ev.room || s.roomFixed), act: sleep });
+  inter({ obj: waiter.name, label: 'Talk', at: () => ({ x: -13, y: 0, z: 0.6 }), r: 3, when: () => s.phase === 'morning', act: breakfast });
+  inter({ obj: 'Olaf (Guest)', label: 'Say hello', at: () => guest.pos, r: 3, act: () => choice(guest, 'Morning! Lovely hotel, isn\'t it? First time in Edinburgh?', '¡Buenos días! Bonito hotel, ¿verdad? ¿Primera vez en Edimburgo?', [{ t: 'Yes, it is! Have you visited the castle?', fn: () => say(guest, 'Yes! Go at one o\'clock to hear the One O\'Clock Gun!') }, { t: 'Yes, it\'s my first time. It\'s beautiful!', fn: () => say(guest, 'It is! Don\'t forget your umbrella, though.') }]) });
+
+  /* ---- 1. check-in */
+  function checkIn() {
+    hideMarker();
+    const g = pick1([['Good afternoon, welcome to the Thistle and Stag! How can I help you?', '¡Buenas tardes, bienvenido/a al Thistle and Stag! ¿En qué puedo ayudarte?'], ['Hello there! Are you checking in?', '¡Hola! ¿Vienes a registrarte?']]);
+    ask(recep, g[0], g[1], phr(['Hi! I have a reservation under the name García.', 'Hello. We\'ve got a booking under García.', 'Good afternoon. I\'d like to check in, please. The name\'s García.'], [
+      { t: 'Hello, I have a reserve at name of García.', kind: 'grammar', tip: '"Reserva" = reservation or booking. "A nombre de" = under the name.' },
+      { t: 'I want my room. García.', kind: 'rude', tip: 'Too direct. "Hi! I have a reservation under the name García."' },
+      { t: 'Hello, I booked a habitation.', kind: 'grammar', tip: 'False friend! Habitación = room.' }
+    ]), spell);
+  }
+  function spell() {
+    ask(recep, 'Lovely. Could you spell your surname for me, please?', 'Estupendo. ¿Me puedes deletrear tu apellido, por favor?', phr(['Sure. G – A – R – C – I – A. (gee, ay, ar, see, eye, ay)'], [
+      { t: 'Sure. G – A – R – C – I – A. (je, a, erre, ce, i, a)', kind: 'grammar', tip: 'English letter names are different! G = gee, A = ay, R = ar, C = see, I = eye.' },
+      { t: 'Sure. G – A – R – C – I – A. (gee, ee, ar, see, ay, ee)', kind: 'grammar', tip: 'Careful with vowels! A = ay (like "day"), I = eye, E = ee.' },
+      { t: 'It\'s García. Like it sounds.', kind: 'rude', tip: 'Spell it politely, letter by letter: gee, ay, ar, see, eye, ay.' }
+    ], DIFF[G.diff] ? Math.min(3, DIFF[G.diff].bad) : 2), details);
+  }
+  function details() {
+    const w = s.ev.wrong;
+    const said = { type: w === 'type' ? 'double' : 'twin', nights: w === 'nights' ? b.nights + 1 : b.nights, breakfast: w === 'breakfast' ? !b.breakfast : b.breakfast };
+    const txt = `Here you are: a ${said.type} room for ${said.nights} nights, ${said.breakfast ? 'with breakfast included' : 'room only, without breakfast'}. Is that right?`;
+    const corr = { type: 'Sorry, I think there\'s a mistake. We booked a twin room, with two single beds.', nights: `Sorry, I think there's a mistake. We booked ${b.nights} nights, not ${said.nights}.`, breakfast: b.breakfast ? 'Sorry, I think there\'s a mistake. Our booking includes breakfast.' : 'Sorry, I think there\'s a mistake. We didn\'t book breakfast.' };
+    const okAll = { t: 'Yes, that\'s right. Thank you!', fn: () => { if (w) { issue(false); G.mistakes.push({ said: 'Yes, that\'s right.', tip: `It wasn't right! Your booking: twin room, ${b.nights} nights, breakfast ${b.breakfast ? 'included' : 'not included'}.` }); notify('📄 Check your booking', 'Something the receptionist said was different from your booking.', 'bad'); } keys(); } };
+    const fix = k => ({ t: corr[k], fn: () => {
+      if (k === w) { issue(true); complete('wrong'); G.good++; pop('✔ Well spotted!', 'good'); line(recep, 'Oh, you\'re absolutely right. I\'m so sorry! Let me change that for you.', '¡Oh, tienes toda la razón! Lo siento mucho. Te lo cambio.', keys); }
+      else { G.bad++; G.mistakes.push({ said: corr[k], tip: 'That part of the booking was correct. Read your booking card carefully.' }); notify('📄 Hmm…', 'That detail was correct. Check your booking card again (📄).', 'warn'); line(recep, 'Hmm, I\'ve got that right here on the screen…', 'Mmm, aquí en la pantalla lo tengo bien…', details); }
+    } });
+    if (w) reveal('wrong');
+    choice(recep, txt, `Aquí está: habitación ${said.type === 'twin' ? 'con dos camas' : 'doble'} para ${said.nights} noches, ${said.breakfast ? 'con desayuno' : 'sin desayuno'}. ¿Es correcto?`, shuffle([okAll, fix('type'), fix('nights'), fix('breakfast')].filter((o, i) => i === 0 || o.t !== corr[w] || true)).slice(0, 4));
+  }
+  function keys() {
+    if (s.ev.notready) {
+      reveal('bags');
+      ask(recep, 'I\'m afraid your room isn\'t ready yet. Check-in is from three o\'clock, and it\'s only one.', 'Me temo que tu habitación aún no está lista. La entrada es a partir de las tres, y es solo la una.', phr(['No problem. Could we leave our bags here, please?', 'That\'s OK. Is it possible to leave our luggage here until then?'], [
+        { t: 'Can I leave my baggages here?', kind: 'grammar', tip: 'Luggage and baggage are uncountable: no -s. "Could I leave my bags / my luggage here?"' },
+        { t: 'What? Then what do I do now?!', kind: 'rude', tip: 'Stay calm: "No problem. Could we leave our bags here?"' },
+        { t: 'Can you keep me the suitcases?', kind: 'grammar', tip: '"Guardarme" isn\'t "keep me". Say "Could you keep our suitcases for us?"' }
+      ]), () => { issue(true); complete('bags'); s.bagsKept = true; line(recep, 'Of course. I\'ll put them in the luggage room. Have a walk around the Old Town and come back after three!', 'Claro. Las pondré en la consigna. Date un paseo por el casco antiguo y vuelve después de las tres.', () => { notify('🕒 Two hours later…', 'You walked up the Royal Mile. Now your room is ready!'); giveKey(); }); });
+    } else giveKey();
+  }
+  function giveKey() {
+    G.inv = [{ emoji: '💳', label: `Key card · room ${s.room}`, info: () => `Room ${s.room}, first floor. Breakfast 7–10 in the Garden Room. Check-out by 11.` }]; renderHotbar();
+    line(recep, `Here's your key card. You're in room ${roomWords(s.room)}, ${s.room}, on the first floor. The lift is behind you. Breakfast is from seven to ten in the Garden Room, and check-out is at eleven.`, `Aquí tienes tu tarjeta. Estás en la habitación ${s.room}, en la primera planta. El ascensor está detrás de ti. El desayuno es de siete a diez en el Garden Room y la salida es a las once.`, () => { complete('checkin'); s.phase = 'toRoom'; setMarker(4.1, 3.2, -9); });
+  }
+
+  /* ---- 2. the room */
+  function openDoor(num) {
+    if (num !== s.room) { notify('🚪 Beep!', `The light goes red. This is room ${num}, not your room (${s.room}).`, 'warn'); G.bad++; updateBoard(); return; }
+    if (s.ev.key && !s.keyFixed) { s.phase = 'keyBroken'; reveal('key'); notify('🔴 Beep! Beep!', 'Your key card doesn\'t work. Go back down to reception.', 'bad'); return; }
+    complete('room'); enterRoom();
+  }
+  function keyFix() {
+    hideMarker();
+    ask(recep, 'Hello again! Is everything OK?', '¡Hola otra vez! ¿Va todo bien?', phr(['Not really. My key card isn\'t working. Could you check it, please?', 'Sorry to bother you, but my key card doesn\'t open the door.'], [
+      { t: 'My card of the room no works.', kind: 'grammar', tip: '"Key card" (tarjeta de la habitación) and "isn\'t working / doesn\'t work".' },
+      { t: 'Your stupid card is broken.', kind: 'rude', tip: 'Be polite even when you\'re tired: "My key card isn\'t working."' },
+      { t: 'The key card is not functioning.', kind: 'grammar', tip: 'Machines and cards "work": "My key card isn\'t working."' }
+    ]), () => { issue(true); s.keyFixed = true; complete('key'); s.phase = 'toRoom'; line(recep, 'Sorry about that! It sometimes happens if you keep it next to your phone. Here you are, it works now.', '¡Perdona! A veces pasa si la guardas junto al móvil. Toma, ya funciona.', () => setMarker(4.1, 3.2, -9)); });
+  }
+  function enterRoom() {
+    s.phase = 'inRoom'; P.pos.set(RX, 0, 4); cam.yaw = 0; cam.dist = 9;
+    if (s.ev.room) {
+      const pr = ROOM_PROBLEMS[s.ev.room]; reveal('problem');
+      notify('😟 Oh no…', `You go into your room and… ${pr.text}! Use the phone to call reception.`, 'warn');
+    } else notify('🛏 Your room', 'Twin beds, a view of the hills… lovely! Have a look around, then go to sleep.');
+  }
+  function phoneReception() {
+    const pr = ROOM_PROBLEMS[s.ev.room], hl = { name: recep.name + ' ☎', badge: recep.badge, gender: recep.gender, av: recep.av };
+    ask(hl, 'Reception, good evening. How can I help?', 'Recepción, buenas noches. ¿En qué puedo ayudarle?', phr([`Hi, this is room ${s.room}. ${pr.ok} Could you send someone, please?`, `Hello, I'm calling from room ${s.room}. ${pr.ok}`], pr.bad.map(([t, tip]) => ({ t: `Hello, room ${s.room}. ${t}`, kind: /bossy|Too|calm/.test(tip) ? 'rude' : 'grammar', tip })).concat([
+      { t: `Hello. ${pr.ok}`, kind: 'grammar', tip: `Reception doesn't know who you are! Start with your room number: "Hi, this is room ${s.room}."` }
+    ])), () => { issue(true); s.roomFixed = true; complete('problem'); line(hl, pr.fix, 'Lo arreglamos enseguida.', () => notify('🛠 Fixed!', 'Problem solved. Now you can rest.', 'good')); });
+  }
+  function minibar() {
+    const box = el('div', 'quiz');
+    box.innerHTML = `<p class="panel-p">Everything you take from the minibar is added to your bill at check-out. You have ${money(G.money)}.</p>` + MINIBAR.map(([n, p], i) => `<label class="opt"><input type="checkbox" data-i="${i}" ${s.taken.includes(i) ? 'checked' : ''}> <span>${escH(n)} · <b>${money(p)}</b></span></label>`).join('');
+    panel('MINIBAR', 'Hotel prices! Take something only if you really want it.', box, [{ t: 'Close the minibar', cls: 'primary', fn: () => { s.taken = [...box.querySelectorAll('input:checked')].map(x => +x.dataset.i); closePanel(); } }], { cls: 'paper' });
+  }
+  function sleep() {
+    s.phase = 'night'; notify('🌙 Good night!', 'Zzz… The next morning you go down to breakfast.');
+    later(1.5, () => { P.pos.set(-11, 0, 1.6); cam.yaw = -0.3; s.phase = 'morning'; setMarker(-13, 3.2, 0.6); });
+  }
+
+  /* ---- 3. breakfast (Scottish!) */
+  function breakfast() {
+    hideMarker(); s.phase = 'eating';
+    ask(waiter, 'Good morning! Could I have your room number, please?', '¡Buenos días! ¿Me dice su número de habitación, por favor?', phr([`Sure, it's ${roomWords(s.room)}.`, `Yes, it's room ${s.room}.`], [
+      { t: `My number of room is ${s.room}.`, kind: 'grammar', tip: `Say "It's room ${s.room}" or "My room number is ${s.room}".` },
+      { t: `Is the ${s.room}.`, kind: 'grammar', tip: 'English needs a subject: "IT is…"' }
+    ]), () => {
+      const pay = !b.breakfast;
+      const intro = pay ? 'I\'m afraid breakfast isn\'t included in your booking. It\'s 12 GOYUX. Would you still like it?' : 'Lovely, breakfast is included. What would you like?';
+      choice(waiter, intro, pay ? 'Me temo que el desayuno no está incluido en tu reserva. Son 12 GOYUX. ¿Lo quieres de todos modos?' : 'Estupendo, el desayuno está incluido. ¿Qué te apetece?', shuffle([
+        { t: 'I\'d like the full Scottish breakfast, please. What\'s in it?', fn: () => eat('full') },
+        { t: 'Could I have a bowl of porridge, please?', fn: () => eat('porridge') }
+      ]).concat(pay ? [{ t: 'No, thanks. I\'ll have breakfast in a café.', fn: () => eat(null) }] : []));
+    });
+  }
+  function eat(kind) {
+    if (kind && !b.breakfast) s.breakfastCost = 12;
+    s.ateBreakfast = !!kind;
+    const done = () => { complete('breakfast'); s.phase = 'checkout'; setMarker(-8, 3.2, -4.2); notify('🧳 Time to go', 'It\'s ten to eleven. Go to reception to check out.'); };
+    if (kind === 'full') line(waiter, 'Great choice! Eggs, bacon, sausage, beans, a tattie scone, black pudding and a wee bit of haggis. Enjoy!', '¡Buena elección! Huevos, bacon, salchicha, alubias, una "tattie scone" (torta de patata), morcilla y un poquito de haggis. ¡Que aproveche!', done);
+    else if (kind) line(waiter, 'Porridge it is! In Scotland some people eat it with salt, not sugar. Enjoy!', '¡Marchando unas gachas! En Escocia algunos las comen con sal, no con azúcar. ¡Que aproveche!', done);
+    else line(waiter, 'No problem. Have a lovely day!', 'Sin problema. ¡Que tengas un buen día!', done);
+  }
+
+  /* ---- 4. check-out and the bill */
+  function checkOut() {
+    hideMarker(); s.phase = 'paying';
+    ask(recep, 'Good morning! Are you checking out?', '¡Buenos días! ¿Dejáis la habitación?', phr(['Yes, please. Here\'s the key card.', 'Yes, we are. Here you are, room ' + s.room + '.'], [
+      { t: 'Yes, I go out of the hotel.', kind: 'grammar', tip: '"Hacer el check-out" = check out: "Yes, I\'m checking out."' },
+      { t: 'Yes. Bill. Quick.', kind: 'rude', tip: '"Yes, please. Could I have the bill?"' }
+    ]), bill);
+  }
+  function bill() {
+    const lines = [{ t: `Room ${s.room} · ${b.nights} nights (paid online)`, p: 0, real: true }];
+    if (s.breakfastCost) lines.push({ t: 'Breakfast × 1', p: 12, real: true });
+    s.taken.forEach(i => lines.push({ t: 'Minibar: ' + MINIBAR[i][0], p: MINIBAR[i][1], real: true }));
+    if (s.ev.bill) { const fake = pick1([['Room service: club sandwich', 9], ['Minibar: ' + MINIBAR.filter((m, i) => !s.taken.includes(i))[0][0], 4], ['Laundry service', 8]]); lines.push({ t: fake[0], p: fake[1], real: false }); }
+    const box = el('div', 'quiz');
+    box.innerHTML = `<p class="panel-p">Tick anything you did NOT have. You have ${money(G.money)}.</p>` + shuffle(lines.slice()).map(l => `<label class="opt"><input type="checkbox" data-t="${escH(l.t)}"> <span>${escH(l.t)} · <b>${money(l.p)}</b></span></label>`).join('');
+    panel('THE THISTLE & STAG — YOUR BILL', 'Read it carefully before you pay.', box, [{ t: 'Pay the bill', cls: 'primary', fn: () => {
+      const q = new Set([...box.querySelectorAll('input:checked')].map(x => x.dataset.t));
+      closePanel();
+      const fake = lines.find(l => !l.real), wrongQ = lines.filter(l => l.real && q.has(l.t));
+      let total = lines.reduce((a, l) => a + l.p, 0);
+      if (fake) { if (q.has(fake.t)) { total -= fake.p; issue(true); s.billCaught = true; } else { issue(false); s.overpaid = fake.p; } }
+      if (wrongQ.length) s.falseClaim = true;
+      const after = () => { G.money = Math.max(0, G.money - total); updateBoard(); complete('checkout'); farewell(); };
+      if (fake && q.has(fake.t)) ask(recep, 'Is everything OK with the bill?', '¿Está todo bien en la factura?', phr([`I think there's a mistake. We didn't have the ${fake.t.split(': ').pop().toLowerCase()}.`, `Sorry, but I don't think the ${fake.t.split(': ').pop().toLowerCase()} is ours.`], [
+        { t: `You are robbing me with the ${fake.t.split(': ').pop().toLowerCase()}!`, kind: 'rude', tip: 'Complain politely: "I think there\'s a mistake on the bill."' },
+        { t: `There is an error in the invoice: the ${fake.t.split(': ').pop().toLowerCase()} is not of us.`, kind: 'grammar', tip: '"Not ours". And in a hotel we say "the bill".' }
+      ]), () => line(recep, 'Let me check… You\'re right, that was another room. I\'ve taken it off. Sorry!', 'Déjame ver… Tienes razón, era de otra habitación. Lo he quitado. ¡Perdona!', after));
+      else after();
+    } }], { cls: 'paper' });
+  }
+  function farewell() {
+    ask(recep, 'How was your stay?', '¿Qué tal la estancia?', phr(['It was lovely, thank you! The breakfast was great.', 'Really nice, thanks. We loved Edinburgh!'], [
+      { t: 'It was very well, thanks.', kind: 'grammar', tip: 'After "was" use an adjective: "It was very good / lovely".' },
+      { t: 'Bad. Very bad hotel.', kind: 'rude', tip: 'Even if there were problems, be polite: "It was nice, thanks, but…"' }
+    ]), () => { recep.av.userData.wave = true; later(1, finish); });
+  }
+  function finish() {
+    const solving = s.issues ? Math.round(100 * s.solved / s.issues) : 100;
+    const spent = s.budget - G.money, moneyScore = clamp(100 - (s.overpaid || 0) * 8 - (s.falseClaim ? 20 : 0) - Math.max(0, spent - 12) * 3, 0, 100);
+    const eng = engPct(), overall = 0.3 * solving + 0.3 * eng + 0.2 * G.manners + 0.2 * moneyScore;
+    const good = [], bad = [];
+    if (s.ev.wrong) { if (obj('wrong').done) good.push('You noticed the mistake in your booking and corrected it politely.'); else bad.push('The receptionist made a mistake in your booking and you didn\'t correct it.'); }
+    if (s.ev.notready && s.bagsKept) good.push('Your room wasn\'t ready, so you asked to leave your bags. Smart!');
+    if (s.ev.key && s.keyFixed) good.push('You got your key card fixed at reception.');
+    if (s.ev.room) { if (s.roomFixed) good.push('You called reception with your room number and explained the problem clearly.'); }
+    if (s.ev.bill) { if (s.billCaught) good.push('You found a mistake on the bill before paying.'); else bad.push(`You paid ${money(s.overpaid)} for something you didn't have. Always read the bill!`); }
+    if (s.falseClaim) bad.push('You said something on the bill was wrong, but you really had it.');
+    if (s.taken.length) bad.push(`You spent ${money(s.taken.reduce((a, i) => a + MINIBAR[i][1], 0))} in the minibar. Hotel minibars are expensive!`); else good.push('You didn\'t waste money in the minibar.');
+    if (b.breakfast && s.ateBreakfast) good.push('You enjoyed the breakfast included in your booking.');
+    if (G.manners === 100) good.push('Perfect manners during your whole stay.');
+    showResults({ title: 'Check-out complete!', overall, metrics: [['Problems solved', solving], ['English', eng], ['Manners', G.manners], ['Money', moneyScore]], good, bad });
+  }
+}
+
+/* =====================================================================
+   SCENARIO 5 — LOST IN LONDON (Camden Town → the Northern line → a landmark)
+   ===================================================================== */
+/* Real stations: from Camden Town the Northern line splits into two southbound branches */
+const LDN_DEST = {
+  museum: { place: 'the British Museum', station: 'Tottenham Court Road', branch: 'Charing Cross', exit: 'Exit 3 · Great Russell Street · British Museum', other: ['Exit 1 · Oxford Street (west)', 'Exit 2 · Charing Cross Road'], fact: 'The British Museum is free, and it has the Rosetta Stone!' },
+  trafalgar: { place: 'Trafalgar Square', station: 'Charing Cross', branch: 'Charing Cross', exit: 'Exit 1 · Trafalgar Square · National Gallery', other: ['Exit 2 · The Strand', 'Exit 3 · Embankment and the river'], fact: 'Nelson\'s Column is 52 metres tall, and four huge bronze lions guard it.' },
+  eye: { place: 'the London Eye', station: 'Waterloo', branch: 'Charing Cross', exit: 'Exit 2 · South Bank · London Eye', other: ['Exit 1 · Waterloo Road', 'Exit 3 · National Rail trains'], fact: 'The London Eye is 135 metres tall. One turn takes about 30 minutes.' },
+  borough: { place: 'Borough Market', station: 'London Bridge', branch: 'Bank', exit: 'Exit 1 · Borough High Street · Borough Market', other: ['Exit 2 · Tooley Street', 'Exit 3 · The Shard'], fact: 'Borough Market has sold food for about 1,000 years.' }
+};
+const NORTHERN = { 'Charing Cross': ['Camden Town', 'Mornington Crescent', 'Euston', 'Warren Street', 'Goodge Street', 'Tottenham Court Road', 'Leicester Square', 'Charing Cross', 'Embankment', 'Waterloo'], Bank: ['Camden Town', 'Euston', 'King\'s Cross St. Pancras', 'Angel', 'Old Street', 'Moorgate', 'Bank', 'London Bridge'] };
+SCEN.london = {
+  title: 'Lost in London', cardTitle: 'Your situation',
+  vocab: [['Excuse me, how do I get to…?', 'Perdone, ¿cómo llego a…?'], ['Go straight on / turn left / take the second right', 'sigue recto / gira a la izquierda / coge la segunda a la derecha'], ['It\'s on your left, next to…', 'está a tu izquierda, al lado de…'], ['the tube / the Underground', 'el metro de Londres'], ['a single (ticket) / a return', 'un billete de ida / de ida y vuelta'], ['platform / southbound / northbound', 'andén / dirección sur / dirección norte'], ['Mind the gap!', '¡Cuidado con el hueco (entre el tren y el andén)!'], ['Stand on the right', 'quédate a la derecha (en las escaleras mecánicas)'], ['I think you dropped this.', 'Creo que se te ha caído esto.'], ['I got lost', 'me perdí'], ['the way out / the exit', 'la salida']],
+  board() { return [['Cash', money(G.money)], ['English', engPct() + '%'], ['Manners', G.manners]]; },
+  card() {
+    const s = G.s, D = LDN_DEST[s.dest];
+    return `<div class="cs">You are <b>${escH(profile.name)}</b>, 14, on a school trip to London. At Camden Market you stopped to look at some trainers and… your group disappeared! Your phone battery is dead.</div>
+      <div class="cs">🎯 <b>Meeting point:</b> your teacher said: "If anyone gets lost, meet us at <b>${D.place}</b> at 3 o'clock."</div>
+      <div class="cs">🚇 Take the <b>tube</b> (the London Underground) from <b>Camden Town</b> station. You have ${money(s.budget)} on your contactless card.</div>
+      <div class="cs">🇬🇧 Remember: in London cars drive on the <b>left</b>, and on escalators you <b>stand on the right</b>. Difficulty: <b>${DIFF[G.diff].label}</b>.</div>`;
+  },
+  build: buildLondon
+};
+
+function buildLondon() {
+  const s = G.s = { dest: pick1(Object.keys(LDN_DEST)), budget: pick1({ easy: [10, 12], normal: [8, 10], hard: [7, 8] }[G.diff] || [10]), phase: 'start', ev: {}, nav: 0, navN: 0 };
+  sample(['tourist', 'wallet', 'escalator', 'gap'], { easy: 1, normal: 2, hard: 4 }[G.diff] || 2).forEach(k => s.ev[k] = true);
+  G.money = s.budget;
+  const D = LDN_DEST[s.dest];
+  const navOk = ok => { s.navN++; if (ok) s.nav++; else { G.bad++; updateBoard(); } };
+
+  /* ---- world: a Camden street, the station, the platform (x = 100) and the destination (x = 200) */
+  W.bounds = { minX: -40, maxX: 240, minZ: -30, maxZ: 30 };
+  ground('#4f6b45');
+  part(0, 0, 0, 80, 0.04, 8, '#3c3f44', { solid: false });
+  for (let x = -36; x < 40; x += 6) part(x, 0.05, 0, 3, 0.02, 0.3, '#fafafa', { solid: false, shadow: false });
+  [-6, 6].forEach(z => part(0, 0, z, 80, 0.2, 4, '#bdbdbd', { solid: false }));
+  const ST = { x: 26, z: 11 };
+  const SHOPS = [['#c62828', 'TRAINERS'], ['#1565c0', 'CAFÉ'], ['#6a1b9a', 'BOOKS'], ['#2e7d32', 'BANK'], ['#ef6c00', 'PHARMACY'], ['#37474f', 'MARKET'], ['#ad1457', 'RECORDS'], ['#00838f', 'SANDWICHES']];
+  const facade = (x, z, w, col, label, face) => { addWindows(part(x, 0, z, w, 9, 6, col, { occlude: true }), col); sign(label, x, 3.4, z + face * 3.05, w * 0.7, 0.8, face > 0 ? 0 : Math.PI, { bg: '#fffde7', fg: col }); };
+  SHOPS.forEach(([c, l], i) => { const x = -32 + (i % 4) * 9 + (i > 3 ? 36 : 0), z = i % 2 ? -11 : 11; if (z > 0 && Math.abs(x - ST.x) < 9) return; facade(x, z, 8, c, l, i % 2 ? 1 : -1); });
+  facade(15, 11, 8, '#37474f', 'MARKET', -1);
+  // a red phone box, a black cab and a red double-decker bus
+  part(-4, 0.2, 8.4, 1.2, 2.8, 1.2, '#c62828'); sign('TELEPHONE', -4, 2.6, 9.02, 1, 0.25, 0, { bg: '#212121', fg: '#fff' });
+  part(10, 0, -2, 4.4, 1.6, 2, '#1b1b1b'); part(10, 1.6, -2, 2.6, 0.8, 1.8, '#1b1b1b', { solid: false }); part(10, 2.4, -2, 0.8, 0.25, 0.4, '#ffca28', { solid: false });
+  part(-18, 0, 2, 10, 2.4, 2.6, '#d32f2f'); part(-18, 2.4, 2, 10, 2.2, 2.6, '#d32f2f', { solid: false }); part(-18, 1.6, 3.35, 9, 0.7, 0.05, '#bbdefb', { solid: false }); part(-18, 3.6, 3.35, 9, 0.7, 0.05, '#bbdefb', { solid: false });
+  sign('24 · CAMDEN TOWN', -18, 4.7, 3.35, 4, 0.5, 0, { bg: '#212121', fg: '#ffca28' });
+  const roundel = (x, y, z, rot, txt) => {
+    const t = canvasTex(256, 256, g => { g.strokeStyle = '#dc241f'; g.lineWidth = 44; g.beginPath(); g.arc(128, 128, 90, 0, 7); g.stroke(); g.fillStyle = '#0019a8'; g.fillRect(8, 104, 240, 48); g.fillStyle = '#fff'; g.font = '900 24px Montserrat, Arial'; g.textAlign = 'center'; g.fillText(txt, 128, 136); });
+    const m = plane(x, y, z, 2.6, 2.6, rot, t, { transparent: true }); m.material.side = THREE.DoubleSide;
+  };
+  // the station (A on the map)
+  addWindows(part(ST.x, 0, ST.z, 9, 6, 6, '#8e2b23', { occlude: true }), '#8e2b23');
+  sign('CAMDEN TOWN', ST.x, 4.6, ST.z - 3.05, 6, 0.9, Math.PI, { bg: '#8e2b23', fg: '#fff' }); roundel(ST.x - 3, 6.8, ST.z - 3.1, Math.PI, 'UNDERGROUND');
+  part(ST.x, 0, ST.z - 3.1, 3, 3, 0.1, '#212121', { solid: false });
+  // platform (x = 100)
+  const PX = 100;
+  part(PX, 0, -3, 40, 1, 6, '#9e9e9e'); part(PX, 1, -0.3, 40, 0.05, 0.5, '#fdd835', { solid: false, shadow: false });
+  part(PX, 0, 3, 40, 0.3, 6, '#3e2723', { solid: false });
+  // the station tunnel: cream tiles, a dark ceiling and posters
+  part(PX, 0, -6.3, 40, 7.5, 0.4, '#efe6cf', { occlude: true }); part(PX, 0, 6.2, 40, 7.5, 0.4, '#3a3a3a', { occlude: true });
+  part(PX, 7.5, 0, 40, 0.4, 13, '#2b2b2b', { solid: false }); part(PX - 20, 0, 0, 0.4, 7.5, 13, '#2b2b2b', { solid: false }); part(PX + 20, 0, 0, 0.4, 7.5, 13, '#2b2b2b', { solid: false });
+  [[-14, '#7b1fa2', 'MUSICALS'], [-2, '#00838f', 'MUSEUMS'], [10, '#ef6c00', 'THEATRE']].forEach(([dx, c, t]) => sign(t, PX + dx, 2.4, -6.05, 3, 2, 0, { bg: c, fg: '#fff' }));
+  sign('MIND THE GAP', PX - 6, 1.05, -0.5, 4, 0.5, 0, { bg: '#3c3f44', fg: '#fff' }); tunnelSigns();
+  function tunnelSigns() { sign('NORTHERN LINE · SOUTHBOUND', PX, 4.6, -5.9, 9, 0.8, 0, { bg: '#000000', fg: '#ffffff' }); }
+  const train = new THREE.Group(); train.position.set(PX + 70, 1, 3); W.scene.add(train);
+  for (let k = 0; k < 3; k++) { const c = new THREE.Mesh(new THREE.BoxGeometry(12, 3.2, 3), M('#f5f5f5')); c.position.x = k * 12.4; train.add(c); const st = new THREE.Mesh(new THREE.BoxGeometry(12.02, 0.5, 3.02), M('#dc241f')); st.position.set(k * 12.4, -1, 0); train.add(st); const wd = new THREE.Mesh(new THREE.BoxGeometry(10, 0.9, 3.04), M('#263238')); wd.position.set(k * 12.4, 0.5, 0); train.add(wd); }
+  // destination (x = 200)
+  const DX = 200;
+  part(DX, 0, 0, 60, 0.04, 8, '#3c3f44', { solid: false }); [-6, 6].forEach(z => part(DX, 0, z, 60, 0.2, 4, '#bdbdbd', { solid: false }));
+  const dg = new THREE.Group(); W.scene.add(dg);
+  if (s.dest === 'museum') drawBuilding('museum', DX + 4, -14, dg, {});
+  else if (s.dest === 'borough') drawBuilding('market', DX + 4, -14, dg, {});
+  else if (s.dest === 'eye') { const wh = new THREE.Mesh(new THREE.TorusGeometry(9, 0.35, 8, 40), M('#eceff1')); wh.position.set(DX + 4, 10, -16); W.scene.add(wh); for (let k = 0; k < 16; k++) { const a = k / 16 * Math.PI * 2, c = new THREE.Mesh(new THREE.SphereGeometry(0.7, 8, 6), M('#b3e5fc')); c.position.set(DX + 4 + Math.cos(a) * 9, 10 + Math.sin(a) * 9, -16); W.scene.add(c); } part(DX + 4, 0, -16, 1, 10, 1, '#cfd8dc'); }
+  else { part(DX + 4, 0, -14, 3, 2, 3, '#bcaaa4'); Mx(DX + 4, -14); }
+  function Mx(x, z) { const c = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 0.8, 16, 12), M('#d7ccc8')); c.position.set(x, 10, z); c.castShadow = true; W.scene.add(c); [[-3, -3], [3, -3], [-3, 3], [3, 3]].forEach(([dx, dz]) => part(x + dx, 0, z + dz, 1.4, 1.2, 2.6, '#4e342e')); }
+  sign(D.place.replace(/^the /, '').toUpperCase(), DX + 4, 0.6, -8.2, 8, 0.8, 0, { bg: '#fffde7', fg: '#263238' });
+  roundel(DX - 18, 4, 8.5, 0, D.station.toUpperCase().slice(0, 14));
+  W.walk = (x, z) => (x > -38 && x < 38 && z > -8.5 && z < 8.5) || Math.hypot(x - ST.x, z - (ST.z - 4)) < 3 || (x > PX - 19 && x < PX + 19 && z > -5.6 && z < -0.6) || (x > DX - 28 && x < DX + 28 && z > -16 && z < 8.5);
+
+  /* ---- people */
+  const pg = gPick();
+  const local = staff('Local', pg, { shirt: '#5d4037', pants: '#263238' }, -8, -5.5, 0, '#5d4037');
+  const tfl = staff('Station staff', gPick(), { shirt: '#0019a8', pants: '#0019a8' }, ST.x - 1, ST.z - 5, Math.PI, '#0019a8');
+  const teacher = npc('Nuria (Teacher)', { skin: '#e0ac69', shirt: '#2e7d32', pants: '#37474f', hair: '#3e2723', long: true, sleeves: true, shoes: true }, DX + 4, -6.5, 0, { color: '#a5d6a7', voice: NPC_VOICE.f }); teacher.gender = 'f'; teacher.badge = '#2e7d32';
+  [[DX + 1.5, -7], [DX + 6.5, -7.2], [DX + 3, -8.2]].forEach(([x, z], k) => npc(['Classmate', 'Classmate', 'Classmate'][k], { skin: pick1(SKINS), shirt: pick1(SHIRTS), pants: pick1(PANTS), hair: '#3e2723' }, x, z, 0, { scale: 0.92 }));
+  const tourist = npc('Olaf (Tourist)', { skin: '#ffdbac', shirt: '#fbc02d', pants: '#5d4037', hair: '#d4a017', cap: '#1565c0', sleeves: true }, 14, 5.5, Math.PI, { color: '#fff59d', voice: NPC_VOICE.m }); tourist.gender = 'm'; tourist.badge = '#f9a825';
+  const commuter = npc('Olaf (Commuter)', { skin: '#8d5524', shirt: '#37474f', pants: '#212121', tie: '#c62828', sleeves: true, shoes: true }, PX + 8, -3, -Math.PI / 2, { color: '#b0bec5', voice: NPC_VOICE.m }); commuter.gender = 'm'; commuter.badge = '#37474f';
+  tourist.av.visible = !!s.ev.tourist;
+
+  spawnPlayer(-26, 4.5, 0, 0);
+  G.obj = [{ id: 'ask', text: 'Ask someone the way to the tube station' }, { id: 'map', text: 'Find the station on the map' }];
+  if (s.ev.tourist) G.obj.push({ id: 'tourist', secret: true, text: 'Help someone who is also lost' });
+  G.obj.push({ id: 'ticket', text: 'Pay for your journey' }, { id: 'platform', text: 'Choose the right platform' });
+  if (s.ev.escalator) G.obj.push({ id: 'esc', secret: true, text: 'Learn the escalator rule' });
+  if (s.ev.wallet) G.obj.push({ id: 'wallet', secret: true, text: 'Return something that someone dropped' });
+  G.obj.push({ id: 'exit', text: `Get off at the right station and take the right exit` }, { id: 'meet', text: 'Find your teacher and explain what happened' });
+  setMarker(-8, 3.4, -5.5);
+
+  let trainState = null;
+  W.update = dt => {
+    if (trainState === 'in') { train.position.x = Math.max(PX - 13, train.position.x - dt * 30); if (train.position.x <= PX - 13) { trainState = 'stopped'; boardTrain(); } }
+    else if (trainState === 'out') train.position.x -= dt * 25;
+  };
+
+  inter({ obj: local.name, label: 'Ask for directions', at: () => local.pos, r: 3.2, when: () => s.phase === 'start', act: askWay });
+  inter({ obj: 'Olaf (Tourist)', label: 'Talk', at: () => tourist.pos, r: 3, when: () => s.phase === 'tourist', act: helpTourist });
+  inter({ obj: 'Camden Town station', label: 'Go in', at: () => ({ x: ST.x, y: 0, z: ST.z - 4.5 }), r: 3, when: () => s.phase === 'walk', act: station });
+  inter({ obj: tfl.name, label: 'Talk', at: () => tfl.pos, r: 3, when: () => s.phase === 'walk', act: station });
+  inter({ obj: 'Olaf (Commuter)', label: 'Talk', at: () => commuter.pos, r: 3, when: () => s.phase === 'wallet', act: returnWallet });
+  inter({ obj: teacher.name, label: 'Talk', at: () => teacher.pos, r: 3.4, when: () => s.phase === 'meet', act: meet });
+
+  /* ---- 1. directions in the street (the map) */
+  const ROUTES = [
+    { say: 'Go straight on along this street. The station is near the end, on your right, just after the market.', es: 'Sigue recto por esta calle. La estación está casi al final, a tu derecha, justo después del mercado.', key: 'A' },
+  ];
+  function askWay() {
+    hideMarker();
+    ask(local, 'Hiya! You look a bit lost. Can I help?', '¡Hola! Pareces un poco perdido/a. ¿Te puedo ayudar?', phr(['Yes, please! Excuse me, how do I get to Camden Town tube station?', 'Yes, thank you. Could you tell me the way to the tube station, please?'], [
+      { t: 'Where is the metro?', kind: 'grammar', tip: 'In London the metro is "the tube" or "the Underground". And add "Excuse me" and "please".' },
+      { t: 'Yes, I am lost. Where is the station? Tell me.', kind: 'rude', tip: '"Tell me" sounds bossy. Try "Could you tell me the way to…?"' },
+      { t: 'Yes! How can I arrive to the station?', kind: 'grammar', tip: '"Llegar a" = get to: "How do I get to the station?"' },
+      { t: 'Excuse me, where does the tube station is?', kind: 'grammar', tip: 'Questions with "be": "Where IS the tube station?" (no "does").' }
+    ]), () => line(local, ROUTES[0].say, ROUTES[0].es, mapQuiz, 'Look at the map'));
+  }
+  function mapQuiz() {
+    const c = document.createElement('canvas'); c.width = 520; c.height = 260; const g = c.getContext('2d');
+    g.fillStyle = '#e8e4d8'; g.fillRect(0, 0, 520, 260); g.fillStyle = '#9e9e9e'; g.fillRect(0, 110, 520, 40);
+    g.fillStyle = '#263238'; g.font = '800 14px Nunito Sans, Arial'; g.fillText('CAMDEN HIGH STREET  →', 170, 135);
+    [[70, 40, 'B'], [460, 190, 'A'], [460, 40, 'C'], [340, 190, '']].forEach(([x, y, l]) => { g.fillStyle = l ? '#8e2b23' : '#90a4ae'; g.fillRect(x - 35, y - 25, 70, 50); g.fillStyle = '#fff'; g.font = '900 26px Montserrat, Arial'; g.textAlign = 'center'; g.fillText(l, x, y + 9); });
+    g.fillStyle = '#263238'; g.font = '700 13px Nunito Sans, Arial'; g.textAlign = 'center'; g.fillText('market', 340, 196); g.fillText('bank', 460, 12); g.fillText('café', 70, 12);
+    g.fillStyle = '#d32f2f'; g.beginPath(); g.arc(30, 130, 10, 0, 7); g.fill(); g.fillStyle = '#263238'; g.fillText('YOU', 30, 165);
+    paperQuiz('STREET MAP', `"${ROUTES[0].say}" On the map, you are walking to the right (→).`, `<img alt="Street map: you, the High Street and buildings A, B and C" src="${c.toDataURL()}" style="width:100%;border-radius:8px">`, [['Which building is Camden Town station?', 'A', ['B', 'C'], 'keep']], right => {
+      navOk(right === 1); complete('map', right !== 1);
+      notify(right === 1 ? '✔ Well done' : '✘ Not quite', 'It\'s A: when you walk to the right on the map, "on your right" is the bottom side of the street, and A is just after the market.', right === 1 ? 'good' : 'warn');
+      complete('ask'); s.phase = s.ev.tourist ? 'tourist' : 'walk';
+      if (s.ev.tourist) { reveal('tourist'); say(tourist, 'Excuse me! Excuse me! Can you help me?'); setMarker(tourist.pos.x, 3.4, tourist.pos.z); }
+      else setMarker(ST.x, 3.4, ST.z - 4.5);
+    }, 'This one!');
+  }
+  function helpTourist() {
+    hideMarker();
+    ask(tourist, 'Sorry, do you speak English? I\'m looking for a pharmacy. Is there one near here?', 'Perdona, ¿hablas inglés? Busco una farmacia. ¿Hay alguna por aquí?', phr(['Yes, there\'s one just behind you, on the other side of the street.', 'Yes! It\'s over there, opposite the café.'], [
+      { t: 'Yes, there is one in front of you behind.', kind: 'grammar', tip: 'Choose one: "behind you" or "in front of you". Opposite = enfrente de.' },
+      { t: 'I don\'t know, I\'m not from here. Bye.', kind: 'rude', tip: 'You can see the pharmacy! Help him: "It\'s over there, opposite the café."' },
+      { t: 'Yes, the farmacy is there.', kind: 'grammar', tip: 'Spelling: pharmacy (with ph). In the UK people also say "chemist\'s".' }
+    ]), () => { complete('tourist'); s.helped = true; say(tourist, 'Thank you so much! Cheers!'); s.phase = 'walk'; setMarker(ST.x, 3.4, ST.z - 4.5); });
+  }
+
+  /* ---- 2. the station: paying, the escalator and the platform */
+  function station() {
+    hideMarker(); s.phase = 'inStation';
+    ask(tfl, 'Hello there. Where are you going?', 'Hola. ¿Adónde vas?', phr([`I need to get to ${D.station}. How much is it, please?`, `Hi. Could you tell me how to get to ${D.station}?`], [
+      { t: `I go to ${D.station}. How much costs it?`, kind: 'grammar', tip: '"How much IS it?" or "How much does it cost?"' },
+      { t: `Ticket for ${D.station}. Now.`, kind: 'rude', tip: 'Ask politely: "Could I have a ticket to…, please?"' }
+    ]), () => paperQuiz('HOW TO PAY', 'Read the sign next to the ticket machines.', 'You don\'t need a paper ticket! <b>Touch in</b> with a contactless card at the yellow reader when you go in, and <b>touch out</b> when you leave. A single journey in zones 1–2 costs about <b>3 GOYUX</b> with contactless. A paper single ticket costs <b>7 GOYUX</b>.', [
+      ['What is the cheapest way to pay?', 'Touch in and out with my contactless card', ['Buy a paper single ticket', 'Buy a return ticket to Brighton']],
+      ['When do you touch out?', 'When I leave the station at the end', ['Before I get on the train', 'Never']]
+    ], right => {
+      navOk(right === 2); const cost = right === 2 ? 3 : 7; G.money = Math.max(0, G.money - cost); s.paid = cost; updateBoard(); complete('ticket');
+      line(tfl, `Right. Take the Northern line southbound${D.branch === 'Bank' ? ', but make sure the train goes via Bank' : ', and check that the train goes via Charing Cross'}. Down the escalator.`, `Bien. Coge la Northern line dirección sur, ${D.branch === 'Bank' ? 'pero asegúrate de que pasa por Bank' : 'y comprueba que pasa por Charing Cross'}. Baja por las escaleras mecánicas.`, s.ev.escalator ? escalator : platform);
+    }, 'Touch in'));
+  }
+  function escalator() {
+    reveal('esc');
+    const ppl = { name: 'Olaf (Commuter)', badge: '#37474f', gender: 'm', av: commuter.av };
+    choice(ppl, 'Excuse me! Could you stand on the right, please? People walk on the left.', '¡Perdona! ¿Puedes quedarte a la derecha? La gente camina por la izquierda.', shuffle([
+      { t: 'Oh, sorry! I didn\'t know.', fn: () => { s.escOk = true; complete('esc'); G.good++; pop('✔ Stand on the right', 'good'); platform(); } },
+      { t: 'Why? I was here first.', fn: () => { G.manners = Math.max(0, G.manners - 15); G.mistakes.push({ said: 'Why? I was here first.', tip: 'On London escalators you stand on the right and walk on the left. Just say "Oh, sorry!"' }); notify('😬 London rule', 'On the escalators in London: stand on the right, walk on the left.', 'bad'); complete('esc', true); platform(); } },
+      { t: 'Sorry, I no understand the rule.', fn: () => { G.bad++; G.mistakes.push({ said: 'Sorry, I no understand the rule.', tip: '"I don\'t understand", not "I no understand".' }); s.escOk = true; complete('esc'); platform(); } }
+    ]));
+  }
+  function platform() {
+    P.pos.set(PX - 10, 1, -3); cam.yaw = -0.5; cam.pitch = 0.25; cam.dist = 7;
+    const both = shuffle([['Charing Cross', NORTHERN['Charing Cross']], ['Bank', NORTHERN.Bank]]);
+    const html = both.map(([b, st]) => `<b>Southbound via ${b}</b>: ${st.slice(1).join(' · ')}`).join('<br><br>') + '<br><br><b>Northbound</b>: Kentish Town · Archway · High Barnet / Edgware';
+    paperQuiz('NORTHERN LINE · CAMDEN TOWN', `You want to go to ${D.station}. Which train do you take?`, html, [[`Which train goes to ${D.station}?`, `Southbound via ${D.branch}`, [`Southbound via ${D.branch === 'Bank' ? 'Charing Cross' : 'Bank'}`, 'Northbound']]], right => {
+      navOk(right === 1); complete('platform', right !== 1);
+      if (right !== 1) notify('🚇 Wrong train!', `You got on the wrong train and had to come back. ${D.station} is on the branch via ${D.branch}.`, 'bad');
+      trainState = 'in'; notify('🔊 "Mind the gap!"', 'The train is arriving. Remember: mind the gap between the train and the platform!');
+    }, 'Get on the train');
+  }
+  function boardTrain() {
+    const stops = NORTHERN[D.branch], n = stops.indexOf(D.station);
+    notify('🚇 On the tube', `${n} stops: ${stops.slice(1, n + 1).join(' → ')}.`);
+    if (s.ev.wallet) { s.phase = 'wallet'; reveal('wallet'); notify('👛 Look!', 'The man next to you dropped his wallet when he got up. Give it back to him!', 'warn'); setMarker(commuter.pos.x, 3.4, commuter.pos.z); commuter.pos.set(PX + 2, 1, -3); return; }
+    later(2, arrive);
+  }
+  function returnWallet() {
+    hideMarker(); s.phase = 'onTrain';
+    ask(commuter, 'Hm? Yes?', '¿Eh? ¿Sí?', phr(['Excuse me, I think you dropped this.', 'Sorry! Is this your wallet? It fell on the floor.'], [
+      { t: 'Excuse me, you have fallen this.', kind: 'grammar', tip: '"Se te ha caído" = you dropped this.' },
+      { t: 'Hey! Your wallet. Take it.', kind: 'rude', tip: 'Be friendly: "Excuse me, I think you dropped this."' },
+      { t: 'Excuse me, is this your purse of money?', kind: 'grammar', tip: 'A wallet (cartera) or a purse (monedero). "Purse of money" isn\'t English.' }
+    ]), () => { s.walletOk = true; complete('wallet'); line(commuter, 'Oh my goodness, my wallet! Thank you so much. That\'s really kind of you!', '¡Madre mía, mi cartera! Muchísimas gracias. ¡Qué amable!', () => later(1, arrive)); });
+  }
+  function arrive() {
+    trainState = 'out';
+    paperQuiz(`${D.station.toUpperCase()} · WAY OUT`, 'You\'ve arrived! Which exit do you take?', 'Exits:<br>' + shuffle([D.exit].concat(D.other)).join('<br>'), [[`Which exit is best for ${D.place}?`, D.exit, D.other]], right => {
+      navOk(right === 1); complete('exit', right !== 1);
+      if (right !== 1) notify('🧭 Wrong exit', 'You came out in the wrong street and had to walk round. It took ten more minutes!', 'warn');
+      P.pos.set(DX - 18, 0, 4); cam.yaw = Math.PI / 4; cam.pitch = 0.42; cam.dist = 12;
+      s.phase = 'meet'; setMarker(teacher.pos.x, 3.4, teacher.pos.z); notify('📍 There they are!', `You can see your class at ${D.place}. Go and talk to your teacher.`);
+    }, 'Touch out and go up');
+  }
+
+  /* ---- 3. meeting the class */
+  function meet() {
+    hideMarker(); s.phase = 'done';
+    ask(teacher, `${profile.name}! There you are! We were so worried. What happened?`, `¡${profile.name}! ¡Por fin! Estábamos muy preocupados. ¿Qué pasó?`, phr(['I\'m so sorry! I stopped to look at some trainers and I lost the group. So I took the tube.', 'Sorry! I got lost at the market, so I asked for directions and took the tube.'], [
+      { t: 'Sorry! I have lost the group and I have taken the tube.', kind: 'grammar', tip: 'Finished story in the past → past simple: "I lost the group and I took the tube."' },
+      { t: 'It\'s your fault! You didn\'t wait for me.', kind: 'rude', tip: 'Apologise first: "I\'m so sorry! I got lost."' },
+      { t: 'Sorry! I losed the group and I taked the metro.', kind: 'grammar', tip: 'Irregular verbs: lose → lost, take → took. And in London: the tube.' }
+    ]), () => line(teacher, `Well done for getting here on your own! ${D.fact}`, `¡Bien hecho por llegar tú solo/a! ${D.fact}`, () => { teacher.av.userData.wave = true; complete('meet'); later(1, finish); }, 'Phew!'));
+  }
+  function finish() {
+    const nav = s.navN ? Math.round(100 * s.nav / s.navN) : 100, eng = engPct();
+    const moneyScore = s.paid === 3 ? 100 : 50;
+    const overall = 0.35 * nav + 0.3 * eng + 0.2 * G.manners + 0.15 * moneyScore;
+    const good = [], bad = [];
+    if (nav === 100) good.push('Perfect navigation: map, train and exit!'); else bad.push('You took a wrong turn somewhere. Read maps and signs carefully: northbound/southbound and the branch (via Bank or via Charing Cross).');
+    if (s.paid === 3) good.push('You paid the cheap way: contactless, touching in and out.'); else bad.push('A paper ticket costs much more. Use contactless and touch in and out.');
+    if (s.ev.tourist && s.helped) good.push('You helped a lost tourist. Kind!');
+    if (s.ev.escalator) { if (s.escOk) good.push('You learnt the London escalator rule: stand on the right.'); else bad.push('On London escalators: stand on the right, walk on the left.'); }
+    if (s.ev.wallet && s.walletOk) good.push('You returned a wallet that a man dropped on the tube.');
+    if (G.manners === 100) good.push('Perfect manners all day.');
+    showResults({ title: 'You made it!', overall, metrics: [['Navigation', nav], ['English', eng], ['Manners', G.manners], ['Money', moneyScore]], good, bad });
+  }
 }
 
 /* =====================================================================

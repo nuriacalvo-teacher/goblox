@@ -32,7 +32,7 @@ const CONFIG = {
 };
 // ========================================
 
-const GAMES = { diner: 'Healthy Bites Diner', mall: 'Back to School Rush' };
+const GAMES = { diner: 'Healthy Bites Diner', mall: 'Back to School Rush', er: 'A&E: Emergency!', hotel: 'Hotel Trouble', london: 'Lost in London' };
 const GAME_IDS = Object.keys(GAMES);
 const SHEETS = {
   students: 'Alumnos',
@@ -216,7 +216,7 @@ function getMe(guestCode) {
     const c = classMap_()[st.klass];
     return {
       email: u.email, isTeacher: u.isTeacher, isAdmin: !!u.isAdmin, guest: u.guest, lockName: !!CONFIG.LOCK_NAMES && !u.isTeacher, xpPerLevel: CONFIG.XP_PER_LEVEL, className: c ? c.name : '',
-      profile: Object.assign({ name: st.name, plays: st.plays, xp: st.xp, granted: st.granted, nationNet: st.nation, best: st.best, vocab: st.vocab }, cleanAvatar_(st.avatar)),
+      profile: Object.assign({ name: st.name, plays: st.plays, xp: st.xp, granted: st.granted, nationNet: st.nation, best: st.best, vocab: st.vocab, cards: cardsOf_(u.email) }, cleanAvatar_(st.avatar)),
       grants: grantsOf_(u.email, 8)
     };
   });
@@ -252,12 +252,15 @@ function saveRun(run, guestCode) {
   const stars = score >= 85 ? 3 : score >= 65 ? 2 : 1;
   const secs = clamp_(Math.round(Number(run.seconds) || 0), 0, 36000);
   const diff = CONFIG.DIFFICULTY[run.difficulty] ? run.difficulty : 'normal';
-  const earned = secs < CONFIG.MIN_SECONDS_FOR_GOYUX ? 0 : Math.round(score * CONFIG.DIFFICULTY[diff]);
+  const cardKey = run.game + ':' + diff;
+  let earned = secs < CONFIG.MIN_SECONDS_FOR_GOYUX ? 0 : Math.round(score * CONFIG.DIFFICULTY[diff]);
   const mistakes = Array.isArray(run.mistakes) ? run.mistakes.slice(0, 10).map(m => ({ said: String(m.said || '').slice(0, 200), tip: String(m.tip || '').slice(0, 300) })) : [];
   return withLock_(() => {
     if (needsClass_(u)) throw new Error('CLASS_REQUIRED');
     const { sh, r } = ensureStudent_(u.email, u.name, u.klass);
     const st = readStudent_(sh, r);
+    const had = cardsOf_(u.email).indexOf(cardKey) >= 0;
+    if (had) earned = 0;   // this level is already done: practice as much as you like, but no more GOYUX
     const runId = randomCode_(5);
     sheet_('runs').appendRow([
       new Date(), u.email, st.name, GAMES[run.game], score, stars, num_(run.budget), num_(run.moneyLeft),
@@ -277,8 +280,26 @@ function saveRun(run, guestCode) {
     sh.getRange(r, C.vocab + 1).setValue(JSON.stringify(vocab.slice(0, 400)));
     cache.put(key, '1', CONFIG.MIN_SECONDS_BETWEEN_RUNS);
     const after = readStudent_(sh, r);
-    return { xp: after.xp, granted: after.granted, plays: after.plays, best: after.best, vocab: after.vocab, earned, runId };
+    const cards = cardsOf_(u.email);
+    return { xp: after.xp, granted: after.granted, plays: after.plays, best: after.best, vocab: after.vocab, earned, runId, cards, practice: had, newCard: !had && cards.indexOf(cardKey) >= 0 };
   });
+}
+
+/* Cards: a mission finished with 2 or more stars (score ≥ 65) on a difficulty gives the card
+   "game:difficulty". Replaying a level you already have the card for gives no GOYUX. */
+const CARD_SCORE = 65;
+function cardsOf_(email) {
+  const sh = sheet_('runs'), n = sh.getLastRow() - 1;
+  if (n < 1) return [];
+  const byTitle = {}; GAME_IDS.forEach(id => byTitle[GAMES[id]] = id);
+  const who = sh.getRange(2, 2, n, 1).getValues(), gs = sh.getRange(2, 4, n, 2).getValues(), df = sh.getRange(2, 16, n, 1).getValues();
+  const out = {};
+  for (let i = 0; i < n; i++) {
+    if (String(who[i][0]).toLowerCase().trim() !== email) continue;
+    const id = byTitle[String(gs[i][0])];
+    if (id && Number(gs[i][1]) >= CARD_SCORE) out[id + ':' + (CONFIG.DIFFICULTY[df[i][0]] ? df[i][0] : 'normal')] = true;
+  }
+  return Object.keys(out);
 }
 
 function runsOf_(email, limit) {

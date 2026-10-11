@@ -2,7 +2,8 @@
 
 Un juego al estilo Roblox para practicar inglés con situaciones reales (*scenario-based learning*). Cada alumno entra con su cuenta de iesgoya.es, juega misiones, gana GOYUX y construye su propio país angloparlante.
 
-- **Misiones:** *Healthy Bites Diner* (restaurante) y *Back to School Rush* (tiendas). Hay tres dificultades y las sorpresas cambian en cada partida.
+- **Misiones:** *Healthy Bites Diner* (restaurante, EE. UU.), *Back to School Rush* (tiendas), *A&E: Emergency!* (urgencias en Manchester), *Hotel Trouble* (hotel en Edimburgo) y *Lost in London* (metro de Londres). Hay tres dificultades y las sorpresas cambian en cada partida. En la portada hay además 12 misiones marcadas como *Coming soon*.
+- **Cromos:** al terminar una misión con 65 puntos o más, el alumno gana su cromo de ese nivel (bronce = Easy, plata = Normal, oro = Hard). Puede repetir ese nivel siempre que quiera para practicar, pero ya no le da GOYUX. Los otros niveles sí dan GOYUX hasta conseguir su cromo.
 - **My Nation:** cada alumno funda su país en una isla 3D. Para construir cada edificio tiene que aprobar un test de inglés.
 - **Panel del profesor:** clases con código, GOYUX por buen comportamiento, historial de partidas, invitados y profesores del departamento.
 
