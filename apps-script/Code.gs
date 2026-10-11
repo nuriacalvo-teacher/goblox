@@ -253,14 +253,15 @@ function saveRun(run, guestCode) {
   const secs = clamp_(Math.round(Number(run.seconds) || 0), 0, 36000);
   const diff = CONFIG.DIFFICULTY[run.difficulty] ? run.difficulty : 'normal';
   const cardKey = run.game + ':' + diff;
-  let earned = secs < CONFIG.MIN_SECONDS_FOR_GOYUX ? 0 : Math.round(score * CONFIG.DIFFICULTY[diff]);
+  let earned = secs < CONFIG.MIN_SECONDS_FOR_GOYUX || score < CARD_SCORE ? 0 : Math.round(CARD_GOYUX[diff] * (score >= 85 ? 1.25 : 1));
   const mistakes = Array.isArray(run.mistakes) ? run.mistakes.slice(0, 10).map(m => ({ said: String(m.said || '').slice(0, 200), tip: String(m.tip || '').slice(0, 300) })) : [];
   return withLock_(() => {
     if (needsClass_(u)) throw new Error('CLASS_REQUIRED');
     const { sh, r } = ensureStudent_(u.email, u.name, u.klass);
     const st = readStudent_(sh, r);
-    const had = cardsOf_(u.email).indexOf(cardKey) >= 0;
+    const before = cardsOf_(u.email), had = before.indexOf(cardKey) >= 0;
     if (had) earned = 0;   // this level is already done: practice as much as you like, but no more GOYUX
+    if (!u.isTeacher && !unlocked_(before, run.game, diff)) throw new Error('Este nivel todavía está bloqueado.');
     const runId = randomCode_(5);
     sheet_('runs').appendRow([
       new Date(), u.email, st.name, GAMES[run.game], score, stars, num_(run.budget), num_(run.moneyLeft),
@@ -288,6 +289,16 @@ function saveRun(run, guestCode) {
 /* Cards: a mission finished with 2 or more stars (score ≥ 65) on a difficulty gives the card
    "game:difficulty". Replaying a level you already have the card for gives no GOYUX. */
 const CARD_SCORE = 65;
+// GOYUX for winning a card (each level pays only once; +25% with 3 stars). Must match CARD_GOYUX in index.html.
+const CARD_GOYUX = { easy: 20, normal: 30, hard: 40 };
+const LEVELS = ['easy', 'normal', 'hard'];
+/* Unlocking like a staircase: Easy of the first mission is open; a card opens the next level
+   of the same mission and the same level of the next mission. Teachers have everything open. */
+function unlocked_(cards, game, diff) {
+  const k = GAME_IDS.indexOf(game), i = LEVELS.indexOf(diff), has = (g, d) => cards.indexOf(g + ':' + d) >= 0;
+  if (k < 0 || i < 0) return false;
+  return (k === 0 && i === 0) || (i > 0 && has(game, LEVELS[i - 1])) || (k > 0 && has(GAME_IDS[k - 1], diff));
+}
 function cardsOf_(email) {
   const sh = sheet_('runs'), n = sh.getLastRow() - 1;
   if (n < 1) return [];
