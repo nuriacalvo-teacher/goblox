@@ -27,10 +27,10 @@ Sigue [`apps-script/LEEME.md`](apps-script/LEEME.md). En resumen:
 
 ## Enlace para los alumnos
 
-Da a los alumnos **https://nuriacalvo-teacher.github.io/goblox/**. Esa portada los lleva automáticamente al juego de Apps Script (`/exec`), donde entran con su cuenta y todo se guarda en tu hoja.
+Da a los alumnos **https://nuriacalvo-teacher.github.io/goblox/**. La portada tiene dos botones: **Students** lleva al juego de Apps Script (`/exec`), donde entran con su cuenta de iesgoya.es y todo se guarda en tu hoja; **Guests** es para quien entra con un código de invitado.
 
 - El enlace `/exec` está escrito en `index.html` (línea `GAME_URL`). Si algún día creas una implementación nueva con otra URL, cámbiala ahí.
-- **Invitados** (sin cuenta de iesgoya.es): dales **https://nuriacalvo-teacher.github.io/goblox/?stay** y que pulsen *I'm a guest with an invite code*. Ese botón lleva a la segunda implementación (`GUEST_URL` en `index.html`).
+- **Invitados** (sin cuenta de iesgoya.es): el mismo enlace, botón *Guests: play with an invite code*. Lleva a la segunda implementación (`GUEST_URL` en `index.html`).
 - La portada incluye una **demo sin conexión** (`apps-script/index.html`) para probar el juego sin cuenta. En la demo no se guarda nada.
 
 La URL del editor de Apps Script (`script.google.com/.../edit`) es solo para ti.

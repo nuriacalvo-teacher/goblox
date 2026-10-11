@@ -21,6 +21,8 @@ body{display:grid;place-items:center;padding:24px 16px}
 p{margin:0;color:var(--muted);line-height:1.5}
 .play{display:flex;align-items:center;justify-content:center;gap:10px;background:var(--green);color:#fff;text-decoration:none;font-family:var(--f-display);font-weight:900;font-size:22px;padding:16px;border-radius:12px}
 .play:hover{background:var(--green-hi)}
+.play.guest{background:transparent;border:2px solid var(--gold);color:var(--gold);font-size:18px;padding:12px}
+.play.guest:hover{background:rgba(255,194,61,.12)}
 .play:focus-visible,.alt a:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
 .play svg{width:26px;height:26px}
 .alt{display:flex;flex-direction:column;gap:6px;font-size:14px}
@@ -32,11 +34,12 @@ p{margin:0;color:var(--muted);line-height:1.5}
 <body>
 <main class="card">
   <div class="logo" aria-label="GOBLOX">G<span class="o"></span>BLOX</div>
-  <p>Practise real-life English in a blocky 3D world. Sign in with your <b>@iesgoya.es</b> Google account.</p>
-  <a class="play" id="play" href="#"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 4.5v15l13-7.5z"/></svg>Play GOBLOX</a>
-  <p class="small" id="auto">Opening the game…</p>
+  <p>Practise real-life English in a blocky 3D world.</p>
+  <a class="play" id="play" href="#"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 4.5v15l13-7.5z"/></svg>Students: Play GOBLOX</a>
+  <p class="small">Sign in with your <b>@iesgoya.es</b> Google account.</p>
+  <a class="play guest" id="guest" href="#" hidden>Guests: play with an invite code</a>
+  <p class="small" id="guestTxt" hidden>For players without an iesgoya.es account. Your teacher gives you the code.</p>
   <div class="alt">
-    <a id="guest" href="#" hidden>I'm a guest with an invite code</a>
     <a href="apps-script/index.html">Try the offline demo (nothing is saved)</a>
   </div>
 </main>
@@ -48,10 +51,7 @@ const GAME_URL = 'https://script.google.com/a/macros/iesgoya.es/s/AKfycbygePIkFC
 const GUEST_URL = 'https://script.google.com/macros/s/AKfycbwGco1jLkfwm7yZlliwDMNurGKlXvveMf4Jt1D-25szmC2rS4RhSP2S4AC253T-Kibo/exec';
 /* ======================= */
 document.getElementById('play').href = GAME_URL;
-if (GUEST_URL) { const g = document.getElementById('guest'); g.href = GUEST_URL; g.hidden = false; }
-/* students go straight to the game; ?stay keeps this page open (e.g. for guests) */
-if (!/[?&]stay\b/.test(location.search)) setTimeout(() => location.replace(GAME_URL), 1200);
-else document.getElementById('auto').hidden = true;
+if (GUEST_URL) { const g = document.getElementById('guest'); g.href = GUEST_URL; g.hidden = false; document.getElementById('guestTxt').hidden = false; }
 </script>
 </body>
 </html>
