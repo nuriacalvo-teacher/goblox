@@ -2,7 +2,7 @@
 
 GOBLOX funciona de dos formas:
 
-- **Sin conexión:** abres `goblox/index.html` en el navegador. Sirve para probarlo, pero el progreso se queda en ese navegador.
+- **Sin conexión:** la demo https://nuriacalvo-teacher.github.io/goblox/apps-script/index.html (o el archivo `apps-script/index.html` abierto en el navegador). Sirve para probarlo, pero el progreso se queda en ese navegador.
 - **Con cuentas de clase:** lo publicas con Google Apps Script. Cada alumno entra con su cuenta de Google de iesgoya.es y todo se guarda en una hoja de cálculo tuya: partidas, nivel, estrellas, dinero que le queda en cada misión, puntuación y GOYUX.
 
 No hace falta servidor ni pagar nada. Se tarda unos 10 minutos.
@@ -17,7 +17,7 @@ No hace falta servidor ni pagar nada. Se tarda unos 10 minutos.
    ```js
    TEACHERS: ['profe1@iesgoya.es', 'profe2@iesgoya.es'],
    ```
-6. Pulsa **+ → HTML**, llama al archivo exactamente `index` (sin `.html`) y pega dentro todo el contenido de [`../index.html`](../index.html).
+6. Pulsa **+ → HTML**, llama al archivo exactamente `index` (sin `.html`) y pega dentro todo el contenido de [`index.html`](index.html) (el de esta carpeta, `apps-script/`).
 7. Guarda (icono del disquete).
 
 ## 2. Publicarlo solo para iesgoya.es
