@@ -547,9 +547,14 @@ function nSheet_(which) {
   if (cur.join('|') !== head.join('|')) { sh.getRange(1, 1, 1, head.length).setValues([head]).setFontWeight('bold').setBackground('#1b5e20').setFontColor('#ffffff'); sh.setFrozenRows(1); }
   return sh;
 }
+/* Google Sheets turns text like 2026-10-12 into a date: read it back as yyyy-MM-dd */
+function dayText_(v) {
+  if (v && typeof v.getTime === 'function' && !isNaN(v.getTime())) return Utilities.formatDate(v, ss_().getSpreadsheetTimeZone() || 'Europe/Madrid', 'yyyy-MM-dd');
+  return String(v || '').replace(/^'/, '').trim();
+}
 function rowToNation_(v) {
   return { email: String(v[0]).toLowerCase(), leader: String(v[1] || ''), name: String(v[2] || ''), capital: String(v[3] || ''), motto: String(v[4] || ''),
-    flag: parse_(v[5], {}), plots: parse_(v[6], []), buildings: parse_(v[7], {}), spent: Number(v[8]) || 0, income: Number(v[9]) || 0, lastTax: String(v[10] || '') };
+    flag: parse_(v[5], {}), plots: parse_(v[6], []), buildings: parse_(v[7], {}), spent: Number(v[8]) || 0, income: Number(v[9]) || 0, lastTax: dayText_(v[10]) };
 }
 function allNations_() {
   const sh = nSheet_('n'); const n = sh.getLastRow() - 1;
@@ -568,7 +573,9 @@ function saveNation_(n) {
   const st = nStats_(n, treatiesOf_(n.email).accepted);
   const row = [n.email, n.leader, n.name, n.capital, n.motto, JSON.stringify(n.flag), JSON.stringify(n.plots), JSON.stringify(n.buildings), n.spent, n.income, n.lastTax,
     st.pop, st.happy, st.econ, st.secu, st.cult, st.env, st.score, new Date()];
-  if (r < 0) sh.appendRow(row); else sh.getRange(r, 1, 1, row.length).setValues([row]);
+  const rr = r < 0 ? sh.getLastRow() + 1 : r;
+  sh.getRange(rr, 1, 1, 11).setNumberFormat('@');   // keep names, codes and the tax date as plain text
+  sh.getRange(rr, 1, 1, row.length).setValues([row]);
   const s = ensureStudent_(n.email);
   s.sh.getRange(s.r, C.nation + 1).setValue(n.income - n.spent);
 }

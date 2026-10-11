@@ -211,6 +211,11 @@ a.btn{text-decoration:none;display:inline-block;color:var(--fg)}
 .quiz-end{text-align:center;padding:10px}
 .quiz-end b{font:900 44px var(--f-display)}
 .quiz-end p{color:var(--muted)}
+.mcards{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-top:12px}
+.mcard{border-radius:12px;padding:16px 12px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;border:2px solid transparent}
+.mcard:hover{border-color:#fff}
+.mcard b{font-family:var(--f-display);font-size:16px}
+.mcard small{color:var(--gold);letter-spacing:2px}
 .bgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
 .bcard{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:6px;min-width:0;text-align:left}
 .bcard.mon{border-color:rgba(255,194,61,.55);background:rgba(255,194,61,.08)}
@@ -695,7 +700,7 @@ a.btn{text-decoration:none;display:inline-block;color:var(--fg)}
         </div>
         <h3>Phrases you practised</h3>
         <div class="chips" id="resVocab"></div>
-        <div class="res-btns"><button class="btn primary" id="resAgain">Play again</button><button class="btn" id="resHome">Back to Home</button></div>
+        <div class="res-btns"><button class="btn primary" id="resAgain">Play again</button><button class="btn" id="resNation">🏝 My Nation</button><button class="btn" id="resHome">Back to Home</button></div>
       </div>
     </div>
   </div>
@@ -1485,6 +1490,7 @@ function showResults(o) {
 }
 $('#resAgain').onclick = () => { const id = G.id; $('#results').hidden = true; startScenario(id); };
 $('#resHome').onclick = () => { $('#results').hidden = true; goHome(); };
+$('#resNation').onclick = () => { $('#results').hidden = true; launchNation(); };
 
 /* launch */
 async function launch(id) {
@@ -1702,7 +1708,8 @@ function buildDiner() {
   };
 
   inter({ obj: `${HN} (Host)`, label: 'Talk', at: () => host.pos, r: 4, when: () => s.phase === 'enter', act: hostGreet });
-  inter({ obj: `${HN} (Host)`, label: 'Say goodbye', at: () => host.pos, r: 4, when: () => s.phase === 'leave', act: hostBye });
+  inter({ obj: `${HN} (Host)`, label: 'Say goodbye', at: () => host.pos, r: 5, when: () => s.phase === 'leave', act: hostBye });
+  inter({ obj: `${WN} (Waiter)`, label: 'Talk about my receipt 🧾', at: () => waiter.pos, r: 4, when: () => s.phase === 'leave' && s.extra && !s.extraRemoved, act: lateClaim });
   inter({ obj: 'Table 4', label: 'Sit down', at: () => ({ x: -7, y: 0, z: 4.4 }), r: 2.6, h: 2.6, when: () => s.phase === 'seat', act: sitDown });
   inter({ obj: 'Olaf (Dad)', label: 'Talk', at: () => dad.pos, r: 6, when: () => s.phase === 'noise', act: dadTalk });
   inter({ obj: 'Your meal', get label() { return s.drinkMissing && !s.drinkDone ? 'Call the waiter about your drink 🛎' : 'Eat'; }, at: () => ({ x: -7, y: 0, z: 3.4 }), r: 3, h: 2, when: () => s.phase === 'eat', act: () => s.drinkMissing && !s.drinkDone ? drinkTalk() : eat() });
@@ -2049,13 +2056,40 @@ function buildDiner() {
   }
   function pay(total, tip) {
     closePanel(); G.money = Math.max(0, G.money - total); s.tipPct = tip; updateBoard(); complete('bill');
-    if (s.extra && !s.extraRemoved) { s.overpaid = s.extra.price; complete('check', true); notify('🧾 Oops!', `You paid for a ${s.extra.name.toLowerCase()} you never ordered. Always check the bill!`, 'bad'); }
+    if (s.extra && !s.extraRemoved) { s.overpaid = s.extra.price; complete('check', true); notify('🧾 Oops!', `You paid for a ${s.extra.name.toLowerCase()} you never ordered. Look at your receipt: you can still ask ${WN} for your money back before you leave.`, 'bad'); }
     const thanks = s.paidShort ? ['Oh… that\'s not enough. Never mind, the manager says it\'s OK this time.', 'Oh… no es suficiente. Bueno, el encargado dice que por esta vez no pasa nada.'] : tip === 0 ? ['Oh… OK. Thanks, I guess.', 'Oh… vale. Gracias, supongo.'] : tip === 10 ? ['Thank you. Have a good evening.', 'Gracias. Que pases buena noche.'] : ['Thank you so much! Have a great night!', '¡Muchísimas gracias! ¡Que pases una noche estupenda!'];
     line(waiter, thanks[0], thanks[1], () => {
       if (tip === 0 && !s.paidShort) notify('💡 Culture note', 'In the USA, leaving no tip is considered very rude unless the service was terrible.', 'warn');
       P.av.userData.seated = false; P.pos.set(-5, 0, 5.6); P.frozen = false; s.phase = 'leave';
       wGo(toKitchen, () => faceTo(waiter, 0, 0));
       setMarker(0, 4.2, 7.2); notify('🚪 Almost done', `Say goodbye to ${HN} at the entrance.`);
+      byeHelp(s.extra && !s.extraRemoved ? 45 : 25);
+    });
+  }
+  /* if the player can't find the host, the host comes to say goodbye: the mission always ends */
+  function byeHelp(sec) {
+    later(sec, () => {
+      if (G.over || s.phase !== 'leave') return;
+      if (!$('#dlg').hidden || !$('#panelWrap').hidden || !$('#esc').hidden) { byeHelp(3); return; }
+      host.pos.set(P.pos.x + 1.6, 0, P.pos.z + 0.4); faceTo(host, P.pos.x, P.pos.z);
+      notify('👋 Time to go', `${HN} has come over to say goodbye.`);
+      hostBye();
+    });
+  }
+  /* late claim: the player noticed the wrong line on the receipt after paying */
+  function lateClaim() {
+    const n = s.extra.name.toLowerCase(), back = Math.round(s.extra.price * (1 + TAX) * 100) / 100;
+    faceTo(waiter, P.pos.x, P.pos.z);
+    ask(waiter, 'Is everything OK?', '¿Va todo bien?', phr([`Excuse me, I've just noticed a mistake on my receipt. I didn't order the ${n}.`, `Sorry, I think there's a mistake on my receipt. I didn't have the ${n}.`], [
+      { t: `Hey, I pay a ${n} that I not ordered.`, kind: 'grammar', tip: 'Past simple: "I paid", "I didn\'t order". Say "I\'ve just noticed a mistake on my receipt."' },
+      { t: 'You stole my money! Give it back!', kind: 'rude', tip: 'It was probably an honest mistake. Say "Excuse me, I think there\'s a mistake on my receipt."' },
+      { t: 'There is an equivocation in the ticket.', kind: 'grammar', tip: 'False friends! "Equivocación" = mistake and "ticket" (de compra) = receipt.' }
+    ]), () => {
+      s.extraRemoved = true; s.lateRefund = back; s.overpaid = 0;
+      G.money += back; updateBoard();
+      const o = obj('check'); if (o) { o.failed = false; renderObjectives(); }
+      notify('✅ Money back', `${WN} gave you ${money(back)} back.`, 'good');
+      line(waiter, `Oh, you're right! I'm so sorry. That ${n} was for another table. Here's your ${money(back)} back.`, 'Tienes razón, lo siento mucho. Eso era de otra mesa. Aquí tienes tu dinero.', closeDialog, 'Thank you');
     });
   }
   function hostBye() {
@@ -2065,7 +2099,7 @@ function buildDiner() {
       { t: 'Thanks, equally!', kind: 'grammar', tip: '"Igualmente" is not "equally" here. Say "You too!" or "Same to you!"' },
       { t: 'Good night! I go now.', kind: 'grammar', tip: 'For something happening now, use the present continuous: "I\'m leaving now."' },
       { t: 'Good night! Until the next!', kind: 'grammar', tip: '"Hasta la próxima" = "See you next time!"' }
-    ]), () => { host.av.userData.wave = true; complete('bye'); later(1.2, finishDiner); });
+    ]), () => { s.phase = 'done'; host.av.userData.wave = true; complete('bye'); later(1.2, finishDiner); });
   }
   function finishDiner() {
     const items = eaten();
@@ -2086,7 +2120,8 @@ function buildDiner() {
     if (s.ev.B) { if (!s.acceptedWrong) good.push('You noticed the wrong dish and complained politely. You even got 3 GOYUX off!'); else bad.push('You accepted a dish you didn\'t order and paid for it.'); }
     if (s.ev.E) { if (s.noDrink) bad.push('Your drink never arrived and you didn\'t ask for it, but it was still on the check.'); else good.push('You politely asked for the drink they forgot.'); }
     if (s.ev.C) { if (s.ateCold) bad.push('You ate your cold food without saying anything. It\'s OK to ask: "Could you heat it up, please?"'); else good.push('You sent back your cold food politely.'); }
-    if (s.ev.D) { if (s.extraRemoved) good.push(`You found the ${s.extra.name.toLowerCase()} on the check that you didn't order.`); else bad.push(`The check had a ${s.extra.name.toLowerCase()} you didn't order, and you paid for it.`); }
+    if (s.ev.D && s.lateRefund) good.push(`You noticed the ${s.extra.name.toLowerCase()} on your receipt after paying and got your money back. Next time check before you pay!`);
+    else if (s.ev.D) { if (s.extraRemoved) good.push(`You found the ${s.extra.name.toLowerCase()} on the check that you didn't order.`); else bad.push(`The check had a ${s.extra.name.toLowerCase()} you didn't order, and you paid for it.`); }
     if (s.falseClaim) bad.push('You complained about something on the check that you really ordered. Read carefully!');
     if (s.tipPct >= 15) good.push(`You left a fair ${s.tipPct}% tip, just like people do in the USA.`);
     else if (!s.paidShort) bad.push(`A ${s.tipPct}% tip is low in the USA. 15–20% is normal.`);
@@ -3132,6 +3167,7 @@ function nationHud() {
   ];
   renderObjectives(); updateBoard();
   G.inv = G.s.visit ? [{ emoji: '🏠', label: 'Back to my nation', act: () => launchNation() }] : G.s.moving ? [{ emoji: '✖', label: 'Cancel moving ' + BLD[G.s.moving.id][0], act: () => { G.s.moving = null; nationHud(); } }] : [
+    { emoji: '🎮', label: 'Play missions to earn GOYUX', act: missionsPanel },
     { emoji: '📜', label: 'Nation menu', act: nationMenu },
     { emoji: '💰', label: 'Collect taxes', act: collectTaxes, bad: () => !!st.taxReady },
     { emoji: '🌍', label: 'World ranking', act: worldPanel },
@@ -3166,6 +3202,16 @@ async function launchNation(visit) {
     adv.badge = '#8d6e63'; G.s.adv = adv;
     inter({ obj: adv.name, label: 'Talk', at: () => adv.pos, r: 3.5, act: advisorTalk });
   }
+  if (!visit) {
+    /* mission portal: the way from the nation back to the missions that earn GOYUX */
+    const PX = -6, PZ = 6.5;
+    part(PX - 1.6, 0, PZ, 0.6, 4.2, 0.6, '#5e35b1'); part(PX + 1.6, 0, PZ, 0.6, 4.2, 0.6, '#5e35b1'); part(PX, 4.2, PZ, 3.8, 0.6, 0.6, '#5e35b1', { solid: false });
+    const glow = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 4.2), new THREE.MeshBasicMaterial({ color: '#b388ff', transparent: true, opacity: 0.55, side: THREE.DoubleSide }));
+    glow.position.set(PX, 2.1, PZ); W.scene.add(glow);
+    sign('MISSIONS', PX, 5.4, PZ + 0.32, 3, 0.7, 0, { bg: '#311b92', fg: '#ffd54f' });
+    const baseUpd = W.update; W.update = dt => { baseUpd(dt); glow.material.opacity = 0.4 + Math.sin(W.t * 3) * 0.2; };
+    inter({ obj: '🎮 Mission Portal', label: 'Play missions · earn GOYUX', at: () => ({ x: PX, y: 0, z: PZ }), r: 3.2, act: missionsPanel });
+  }
   spawnPlayer(0, 8.5, Math.PI, 0); cam.pitch = 0.62; cam.dist = 16;
   $('#cardBtn').textContent = 'Nation menu';
   nationHud();
@@ -3187,12 +3233,25 @@ function advisorTalk() {
   if (s.happy < 45) tips.push(['People are not happy. A park, a stadium or a hospital would help.', 'La gente no está contenta.']);
   if (!blds.includes('embassy')) tips.push(['With an embassy we could write to other nations and sign treaties.', 'Con una embajada podrás firmar tratados.']);
   if (!blds.some(b => MONUMENTS.includes(b))) tips.push(['A famous monument would bring culture and tourists. Read about it, then build it!', 'Un monumento famoso traería cultura y turistas.']);
-  tips.push(['Every mission you play gives us more GOYUX for new land and buildings.', 'Cada misión te da más GOYUX.']);
+  if (!st.taxReady) tips.unshift(['Taxes are collected for today. To earn more GOYUX, go through the Mission Portal and play a mission!', 'Para ganar más GOYUX, entra en el portal y juega una misión.']);
+  tips.push(['Every mission you play gives us more GOYUX for new land and buildings. Use the Mission Portal!', 'Cada misión te da más GOYUX. Usa el portal de misiones.']);
   const t = tips[0];
   choice(a, `Good to see you, President ${profile.name}! ${t[0]}`, t[1], [
     { t: 'Open the nation menu, please.', fn: nationMenu },
     { t: 'Thanks for the advice!', fn: () => say(a, 'Always at your service!') }
   ]);
+}
+
+/* ---------- missions from the nation ---------- */
+function missionsPanel() {
+  const games = GAMES.filter(g => !g.soon);
+  const box = el('div', 'mgrid');
+  box.innerHTML = `<p class="panel-p">Missions are how your nation gets rich: every mission gives you GOYUX for land and buildings. Taxes only come once a day.</p>
+    <div class="diff" id="mDiff">${Object.entries(DIFF).map(([k, d]) => `<button data-d="${k}" aria-pressed="${k === difficulty}"><b>${d.label}</b><small>${d.cefr} · ×${d.mult}</small></button>`).join('')}</div>
+    <div class="mcards">${games.map(g => `<button class="mcard" data-g="${g.id}" style="background:${g.bg}"><span class="t-emo">${g.emoji}</span><b>${escH(g.title)}</b><small>${'★'.repeat(profile.best[g.id] || 0)}${'☆'.repeat(3 - (profile.best[g.id] || 0))}</small></button>`).join('')}</div>`;
+  panel('Play a mission', 'Choose a difficulty and a mission. When you finish, come back to your nation from the results screen.', box, [{ t: 'Stay in my nation', fn: closePanel }], { onClose: () => {} });
+  box.querySelectorAll('[data-d]').forEach(b => b.onclick = () => { difficulty = b.dataset.d; store.set('difficulty', difficulty); box.querySelectorAll('[data-d]').forEach(x => x.setAttribute('aria-pressed', x.dataset.d === difficulty)); });
+  box.querySelectorAll('[data-g]').forEach(b => b.onclick = () => { closePanel(); launch(b.dataset.g); });
 }
 
 /* ---------- founding ---------- */
@@ -3343,7 +3402,7 @@ function nationMenu() {
 function collectTaxes() {
   const st = G.s.state;
   if (!st.nation) return foundNation();
-  if (!st.taxReady) { notify('💰 Taxes', 'You have already collected taxes today. Come back tomorrow!'); return; }
+  if (!st.taxReady) { notify('💰 Taxes', 'You have already collected taxes today. Come back tomorrow! To earn more GOYUX now, play a mission (🎮).'); return; }
   runQuiz({ title: 'Collect today\'s taxes', topic: 'any', n: 1, onPass: async () => {
     try { applyNation(await NAPI.tax()); notify('💰 Taxes collected', `+${st.taxAmount} GOYUX for the treasury. A stronger economy means more taxes.`, 'good'); }
     catch (e) { notify('⚠️', e.message, 'bad'); }
