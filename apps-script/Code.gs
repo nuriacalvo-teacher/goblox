@@ -395,7 +395,7 @@ function teacherRename(email, name) {
 }
 function teacherCreateClass(name) {
   const u = teacher_();
-  name = String(name || '').replace(/[^\p{L}\p{N} .ºª'-]/gu, '').trim().slice(0, 30);
+  name = String(name || '').replace(/[^\p{L}\p{N} .ºª()'-]/gu, '').trim().slice(0, 30);
   if (!name) throw new Error('Escribe el nombre de la clase (por ejemplo, 3º ESO B).');
   withLock_(() => {
     const sh = sheet_('classes'), have = classMap_();
@@ -412,6 +412,46 @@ function teacherSetClass(code, active) {
     const sh = sheet_('classes'); const n = sh.getLastRow() - 1; if (n < 1) return;
     const vals = sh.getRange(2, 1, n, CLASS_HEAD.length).getValues();
     vals.forEach((v, i) => { if (String(v[0]).trim().toUpperCase() === code && String(v[2]).toLowerCase().trim() === u.email) sh.getRange(i + 2, 4).setValue(active ? 'SÍ' : 'NO'); });
+  });
+  return teacherList();
+}
+/* rename a class and/or change its code; students and guests of the class keep it */
+function teacherEditClass(code, newName, newCode) {
+  const u = teacher_();
+  code = String(code || '').trim().toUpperCase();
+  newName = String(newName || '').replace(/[^\p{L}\p{N} .ºª()'-]/gu, '').replace(/\s+/g, ' ').trim().slice(0, 30);
+  newCode = String(newCode || '').toUpperCase().replace(/[^A-Z0-9-]/g, '').slice(0, 20) || code;
+  if (!newName) throw new Error('Escribe el nombre de la clase.');
+  if (newCode.length < 4) throw new Error('El código debe tener al menos 4 letras o números.');
+  withLock_(() => {
+    const classes = classMap_(), c = classes[code];
+    if (!c || c.owner !== u.email) throw new Error('Esa clase no es tuya.');
+    if (newCode !== code && classes[newCode]) throw new Error('Ya existe una clase con el código ' + newCode + '. Elige otro.');
+    const sh = sheet_('classes'); const n = sh.getLastRow() - 1;
+    const vals = sh.getRange(2, 1, n, CLASS_HEAD.length).getValues();
+    vals.forEach((v, i) => { if (String(v[0]).trim().toUpperCase() === code) sh.getRange(i + 2, 1, 1, 2).setValues([[newCode, newName]]); });
+    if (newCode !== code) {
+      const st = sheet_('students'); const m = st.getLastRow() - 1;
+      if (m > 0) st.getRange(2, C.klass + 1, m, 1).getValues().forEach((v, i) => { if (String(v[0]).toUpperCase() === code) st.getRange(i + 2, C.klass + 1).setValue(newCode); });
+      const g = sheet_('guests'); const k = g.getLastRow() - 1;
+      if (k > 0) g.getRange(2, 6, k, 1).getValues().forEach((v, i) => { if (String(v[0]).toUpperCase() === code) g.getRange(i + 2, 6).setValue(newCode); });
+    }
+  });
+  return teacherList();
+}
+/* delete a class created by mistake (only when nobody has joined it) */
+function teacherDeleteClass(code) {
+  const u = teacher_();
+  code = String(code || '').trim().toUpperCase();
+  withLock_(() => {
+    const c = classMap_()[code];
+    if (!c || c.owner !== u.email) throw new Error('Esa clase no es tuya.');
+    if (Object.values(studentClasses_()).some(k => k === code)) throw new Error('No se puede borrar una clase con alumnos. Muévelos antes a otra clase.');
+    const sh = sheet_('classes'); const n = sh.getLastRow() - 1;
+    const vals = sh.getRange(2, 1, n, 1).getValues();
+    for (let i = n - 1; i >= 0; i--) if (String(vals[i][0]).trim().toUpperCase() === code) sh.deleteRow(i + 2);
+    const g = sheet_('guests'); const k = g.getLastRow() - 1;
+    if (k > 0) g.getRange(2, 6, k, 1).getValues().forEach((v, i) => { if (String(v[0]).toUpperCase() === code) g.getRange(i + 2, 6).setValue(''); });
   });
   return teacherList();
 }

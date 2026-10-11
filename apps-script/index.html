@@ -3501,8 +3501,23 @@ function applyTeacher(r) {
   const classOpts = T.classes.map(c => `<option value="${escH(c.code)}">${escH(c.name)}</option>`).join('');
   $('#tMove').innerHTML = classOpts + '<option value="">(sin clase)</option>';
   $('#gClass').innerHTML = classOpts + '<option value="">(sin clase)</option>';
-  $('#cTable').innerHTML = '<tr><th>Clase</th><th>Código para los alumnos</th><th class="num">Alumnos</th><th>Estado</th><th></th></tr>' + (T.classes.map(c => `<tr><td><b>${escH(c.name)}</b></td><td><span class="code">${escH(c.code)}</span></td><td class="num">${c.students}</td><td>${c.active ? 'Abierta' : 'Cerrada'}</td><td><button class="mini ${c.active ? 'neg' : 'pos'}" data-cc="${escH(c.code)}" data-on="${c.active ? 0 : 1}">${c.active ? 'Cerrar' : 'Abrir'}</button></td></tr>`).join('') || '<tr><td colspan="5">Todavía no has creado ninguna clase.</td></tr>');
+  $('#cTable').innerHTML = '<tr><th>Clase</th><th>Código para los alumnos</th><th class="num">Alumnos</th><th>Estado</th><th></th></tr>' + (T.classes.map(c => `<tr><td><b>${escH(c.name)}</b></td><td><span class="code">${escH(c.code)}</span></td><td class="num">${c.students}</td><td>${c.active ? 'Abierta' : 'Cerrada'}</td><td><div class="acts"><button class="mini" data-ce="${escH(c.code)}" title="Editar nombre y código">✎ Editar</button><button class="mini ${c.active ? 'neg' : 'pos'}" data-cc="${escH(c.code)}" data-on="${c.active ? 0 : 1}">${c.active ? 'Cerrar' : 'Abrir'}</button>${c.students ? '' : `<button class="mini neg" data-cd="${escH(c.code)}">Borrar</button>`}</div></td></tr>`).join('') || '<tr><td colspan="5">Todavía no has creado ninguna clase.</td></tr>');
   $('#cTable').querySelectorAll('[data-cc]').forEach(b => b.onclick = async () => { try { applyTeacher(await api('teacherSetClass', b.dataset.cc, b.dataset.on === '1')); } catch (e) { hToast(e.message, true); } });
+  $('#cTable').querySelectorAll('[data-cd]').forEach(b => b.onclick = async () => {
+    if (!b.dataset.sure) { b.dataset.sure = '1'; b.textContent = '¿Seguro? Borrar'; return; }
+    try { applyTeacher(await api('teacherDeleteClass', b.dataset.cd)); hToast('Clase borrada.'); } catch (e) { hToast(e.message, true); }
+  });
+  $('#cTable').querySelectorAll('[data-ce]').forEach(b => b.onclick = () => {
+    const c = T.classes.find(x => x.code === b.dataset.ce), tr = b.closest('tr');
+    tr.innerHTML = `<td><input class="rn-in" id="ceName" maxlength="30" value="${escH(c.name)}" aria-label="Nombre de la clase"></td><td><input class="rn-in" id="ceCode" maxlength="20" value="${escH(c.code)}" aria-label="Código de la clase"></td><td class="num">${c.students}</td><td colspan="2"><div class="acts"><button class="mini pos" id="ceSave">Guardar</button><button class="mini" id="ceCancel">Cancelar</button></div></td>`;
+    const save = async () => {
+      try { applyTeacher(await api('teacherEditClass', c.code, $('#ceName').value, $('#ceCode').value)); hToast(c.students && $('#ceCode').value.trim().toUpperCase() !== c.code ? 'Clase guardada. Da el código nuevo a quien aún no haya entrado; los que ya están siguen en la clase.' : 'Clase guardada.'); }
+      catch (e) { hToast(e.message, true); }
+    };
+    $('#ceSave').onclick = save; $('#ceCancel').onclick = () => applyTeacher({ students: T.list, classes: T.classes });
+    tr.querySelectorAll('input').forEach(i => i.onkeydown = e => { if (e.key === 'Enter') save(); if (e.key === 'Escape') applyTeacher({ students: T.list, classes: T.classes }); });
+    $('#ceName').focus();
+  });
   if (r.sheetUrl) { $('#tSheet').href = r.sheetUrl; $('#tSheet').hidden = false; }
   renderTeacher();
 }
