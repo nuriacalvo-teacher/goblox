@@ -32,7 +32,7 @@ const CONFIG = {
 };
 // ========================================
 
-const GAMES = { diner: 'Healthy Bites Diner', mall: 'Back to School Rush' };
+const GAMES = { diner: 'Healthy Bites Diner', mall: 'Back to School Rush', er: 'A&E: Emergency!', hotel: 'Hotel Trouble', london: 'Lost in London' };
 const GAME_IDS = Object.keys(GAMES);
 const SHEETS = {
   students: 'Alumnos',
@@ -216,7 +216,7 @@ function getMe(guestCode) {
     const c = classMap_()[st.klass];
     return {
       email: u.email, isTeacher: u.isTeacher, isAdmin: !!u.isAdmin, guest: u.guest, lockName: !!CONFIG.LOCK_NAMES && !u.isTeacher, xpPerLevel: CONFIG.XP_PER_LEVEL, className: c ? c.name : '',
-      profile: Object.assign({ name: st.name, plays: st.plays, xp: st.xp, granted: st.granted, nationNet: st.nation, best: st.best, vocab: st.vocab }, cleanAvatar_(st.avatar)),
+      profile: Object.assign({ name: st.name, plays: st.plays, xp: st.xp, granted: st.granted, nationNet: st.nation, best: st.best, vocab: st.vocab, cards: cardsOf_(u.email) }, cleanAvatar_(st.avatar)),
       grants: grantsOf_(u.email, 8)
     };
   });
@@ -252,12 +252,16 @@ function saveRun(run, guestCode) {
   const stars = score >= 85 ? 3 : score >= 65 ? 2 : 1;
   const secs = clamp_(Math.round(Number(run.seconds) || 0), 0, 36000);
   const diff = CONFIG.DIFFICULTY[run.difficulty] ? run.difficulty : 'normal';
-  const earned = secs < CONFIG.MIN_SECONDS_FOR_GOYUX ? 0 : Math.round(score * CONFIG.DIFFICULTY[diff]);
+  const cardKey = run.game + ':' + diff;
+  let earned = secs < CONFIG.MIN_SECONDS_FOR_GOYUX || score < CARD_SCORE ? 0 : Math.round(CARD_GOYUX[diff] * (score >= 85 ? 1.25 : 1));
   const mistakes = Array.isArray(run.mistakes) ? run.mistakes.slice(0, 10).map(m => ({ said: String(m.said || '').slice(0, 200), tip: String(m.tip || '').slice(0, 300) })) : [];
   return withLock_(() => {
     if (needsClass_(u)) throw new Error('CLASS_REQUIRED');
     const { sh, r } = ensureStudent_(u.email, u.name, u.klass);
     const st = readStudent_(sh, r);
+    const before = cardsOf_(u.email), had = before.indexOf(cardKey) >= 0;
+    if (had) earned = 0;   // this level is already done: practice as much as you like, but no more GOYUX
+    if (!u.isTeacher && !unlocked_(before, run.game, diff)) throw new Error('Este nivel todavía está bloqueado.');
     const runId = randomCode_(5);
     sheet_('runs').appendRow([
       new Date(), u.email, st.name, GAMES[run.game], score, stars, num_(run.budget), num_(run.moneyLeft),
@@ -277,8 +281,36 @@ function saveRun(run, guestCode) {
     sh.getRange(r, C.vocab + 1).setValue(JSON.stringify(vocab.slice(0, 400)));
     cache.put(key, '1', CONFIG.MIN_SECONDS_BETWEEN_RUNS);
     const after = readStudent_(sh, r);
-    return { xp: after.xp, granted: after.granted, plays: after.plays, best: after.best, vocab: after.vocab, earned, runId };
+    const cards = cardsOf_(u.email);
+    return { xp: after.xp, granted: after.granted, plays: after.plays, best: after.best, vocab: after.vocab, earned, runId, cards, practice: had, newCard: !had && cards.indexOf(cardKey) >= 0 };
   });
+}
+
+/* Cards: a mission finished with 2 or more stars (score ≥ 65) on a difficulty gives the card
+   "game:difficulty". Replaying a level you already have the card for gives no GOYUX. */
+const CARD_SCORE = 65;
+// GOYUX for winning a card (each level pays only once; +25% with 3 stars). Must match CARD_GOYUX in index.html.
+const CARD_GOYUX = { easy: 40, normal: 60, hard: 80 };
+const LEVELS = ['easy', 'normal', 'hard'];
+/* Unlocking like a staircase: Easy of the first mission is open; a card opens the next level
+   of the same mission and the same level of the next mission. Teachers have everything open. */
+function unlocked_(cards, game, diff) {
+  const k = GAME_IDS.indexOf(game), i = LEVELS.indexOf(diff), has = (g, d) => cards.indexOf(g + ':' + d) >= 0;
+  if (k < 0 || i < 0) return false;
+  return (k === 0 && i === 0) || (i > 0 && has(game, LEVELS[i - 1])) || (k > 0 && has(GAME_IDS[k - 1], diff));
+}
+function cardsOf_(email) {
+  const sh = sheet_('runs'), n = sh.getLastRow() - 1;
+  if (n < 1) return [];
+  const byTitle = {}; GAME_IDS.forEach(id => byTitle[GAMES[id]] = id);
+  const who = sh.getRange(2, 2, n, 1).getValues(), gs = sh.getRange(2, 4, n, 2).getValues(), df = sh.getRange(2, 16, n, 1).getValues();
+  const out = {};
+  for (let i = 0; i < n; i++) {
+    if (String(who[i][0]).toLowerCase().trim() !== email) continue;
+    const id = byTitle[String(gs[i][0])];
+    if (id && Number(gs[i][1]) >= CARD_SCORE) out[id + ':' + (CONFIG.DIFFICULTY[df[i][0]] ? df[i][0] : 'normal')] = true;
+  }
+  return Object.keys(out);
 }
 
 function runsOf_(email, limit) {
@@ -504,19 +536,37 @@ function teacherSetGuest(code, active) {
 
 /* =====================================================================
    MY NATION — every student founds and builds an English-speaking country.
-   The rules below must match NATION_RULES in index.html.
+   The rules below must match BLD, RIVER, COUNTRY, SITES, RURAL and fitsPlot in index.html.
    ===================================================================== */
 const N_SIZE = 9, N_CAPITAL = 40, N_START = [31, 39, 40, 41, 49];
 // id: [cost, population, happiness, economy, security, culture, environment]
 const BUILD = {
   cityhall: [0, 0, 5, 5, 5, 0, 0], houses: [40, 40, 2, 0, 0, 0, -2], farm: [45, 10, 2, 6, 0, 0, 2], park: [30, 0, 6, 0, 0, 0, 8],
-  market: [70, 5, 5, 9, 0, 0, 0], school: [70, 5, 4, 4, 0, 8, 0], police: [70, 0, 3, 0, 12, 0, 0], factory: [90, 0, -3, 16, 0, 0, -10],
+  forest: [25, 0, 3, 0, 0, 0, 10], lighthouse: [70, 0, 2, 4, 6, 6, 0], mine: [100, 5, -2, 18, 0, 0, -6],
+  market: [70, 5, 5, 9, 0, 0, 0], restaurant: [60, 5, 7, 6, 0, 2, 0], library: [80, 0, 4, 2, 0, 10, 0], school: [70, 5, 4, 4, 0, 8, 0], police: [70, 0, 3, 0, 12, 0, 0], factory: [90, 0, -3, 16, 0, 0, -10],
   windfarm: [90, 0, 0, 8, 0, 0, 6], museum: [90, 0, 4, 3, 0, 12, 0], press: [90, 0, 3, 2, 0, 8, 0], embassy: [90, 0, 2, 2, 2, 4, 0],
   hospital: [110, 25, 10, 0, 0, 0, 0], army: [110, 0, -2, 0, 18, 0, -2], parliament: [130, 0, 6, 4, 6, 4, 0], port: [130, 10, 0, 14, 0, 2, -4],
   stadium: [130, 0, 12, 4, 0, 4, -2], airport: [160, 15, 2, 12, 0, 4, -6],
-  bigben: [200, 0, 6, 6, 0, 20, 0], castle: [200, 0, 6, 4, 6, 16, 0], cntower: [200, 0, 4, 8, 0, 18, 0], liberty: [240, 0, 8, 6, 0, 22, 0], opera: [240, 0, 8, 6, 0, 22, 0]
+  bigben: [200, 0, 6, 6, 0, 20, 0], castle: [200, 0, 6, 4, 6, 16, 0], cntower: [200, 0, 4, 8, 0, 18, 0], liberty: [240, 0, 8, 6, 0, 22, 0], opera: [240, 0, 8, 6, 0, 22, 0],
+  stonehenge: [200, 0, 4, 2, 0, 20, 2], newgrange: [200, 0, 4, 2, 0, 20, 2], inukshuk: [160, 0, 4, 0, 2, 16, 4], towerbridge: [220, 0, 6, 8, 0, 16, 0],
+  hobbiton: [220, 0, 10, 6, 0, 16, 4], whitehouse: [240, 0, 6, 6, 8, 16, 0], goldengate: [240, 0, 6, 10, 0, 18, 0], harbourbridge: [240, 0, 6, 10, 0, 18, 0]
 };
-const UNIQUE = ['cityhall', 'parliament', 'embassy', 'port', 'stadium', 'airport', 'bigben', 'castle', 'cntower', 'liberty', 'opera'];
+const MONUMENTS = ['bigben', 'castle', 'stonehenge', 'newgrange', 'cntower', 'inukshuk', 'towerbridge', 'hobbiton', 'liberty', 'whitehouse', 'goldengate', 'opera', 'harbourbridge'];
+const UNIQUE = ['cityhall', 'parliament', 'embassy', 'port', 'stadium', 'airport', 'mine', 'lighthouse'].concat(MONUMENTS);
+/* The map:
+   - the city: the 9×9 grid (plots 0–80); new city land must touch land you already own.
+   - the river crosses the city through column 6: only bridges.
+   - the countryside (plots 100–113): fields, forests and rural buildings; can be bought at any time.
+   - special sites (plots 200–204): each one holds only one kind of building. */
+const RIVER = [6, 15, 24, 33, 42, 51, 60, 69, 78];
+const BRIDGES = ['towerbridge', 'goldengate', 'harbourbridge'];
+const COUNTRY = [100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113];
+const SITES = { 200: 'port', 201: 'airport', 202: 'mine', 203: 'lighthouse', 204: 'castle' };
+const SITE_ONLY = Object.keys(SITES).map(k => SITES[k]);
+const RURAL = ['houses', 'farm', 'forest', 'park', 'windfarm', 'factory', 'stonehenge', 'newgrange', 'inukshuk', 'hobbiton'];
+const isOuter_ = i => COUNTRY.indexOf(i) >= 0 || !!SITES[i];
+const fitsPlot_ = (id, i) => SITES[i] ? SITES[i] === id : SITE_ONLY.indexOf(id) >= 0 ? false : RIVER.indexOf(i) >= 0 ? BRIDGES.indexOf(id) >= 0
+  : COUNTRY.indexOf(i) >= 0 ? RURAL.indexOf(id) >= 0 : BRIDGES.indexOf(id) < 0;
 // treaty type: [population, happiness, economy, security, culture, environment] — max 3 of each type count
 const TREATY = { trade: [0, 0, 6, 0, 0, 0], culture: [0, 0, 0, 0, 6, 0], peace: [0, 4, 0, 4, 0, 0] };
 const N_KEYS = ['pop', 'happy', 'econ', 'secu', 'cult', 'env'];
@@ -530,6 +580,7 @@ function nStats_(n, treaties) {
   return s;
 }
 const plotPrice_ = owned => 30 + 4 * Math.max(0, owned - N_START.length);
+const landPrice_ = (i, owned) => plotPrice_(owned) + (SITES[i] ? 20 : 0);
 const moveCost_ = id => Math.max(10, Math.round(BUILD[id][0] / 2));
 const taxAmount_ = st => Math.min(30, 5 + Math.floor(Math.max(0, st.econ) / 10));
 function adjacent_(i, plots) {
@@ -657,9 +708,9 @@ function nationBuyPlot(i, guestCode) {
   i = Math.round(Number(i));
   return withLock_(() => {
     const n = getNation_(u.email); if (!n) throw new Error('Found your nation first.');
-    if (!(i >= 0 && i < N_SIZE * N_SIZE) || n.plots.includes(i)) throw new Error('You cannot buy that land.');
-    if (!adjacent_(i, n.plots)) throw new Error('You can only buy land next to your country.');
-    const price = plotPrice_(n.plots.length);
+    if (!((i >= 0 && i < N_SIZE * N_SIZE) || isOuter_(i)) || n.plots.includes(i)) throw new Error('You cannot buy that land.');
+    if (!isOuter_(i) && !adjacent_(i, n.plots)) throw new Error('You can only buy city land next to your country.');
+    const price = landPrice_(i, n.plots.length);
     if (available_(u.email, n) < price) throw new Error('You need ' + price + ' GOYUX to buy this land.');
     n.plots.push(i); n.spent += price; saveNation_(n);
     return nationState_(u.email);
@@ -674,6 +725,7 @@ function nationBuild(i, id, guestCode) {
     if (!b || id === 'cityhall') throw new Error('Unknown building.');
     if (!n.plots.includes(i) || n.buildings[i]) throw new Error('You cannot build there.');
     if (UNIQUE.includes(id) && Object.values(n.buildings).includes(id)) throw new Error('Your nation already has one.');
+    if (!fitsPlot_(id, i)) throw new Error('That building cannot be built on this plot.');
     if (available_(u.email, n) < b[0]) throw new Error('You need ' + b[0] + ' GOYUX for this building.');
     n.buildings[i] = id; n.spent += b[0]; saveNation_(n);
     return nationState_(u.email);
@@ -686,6 +738,7 @@ function nationMove(from, to, guestCode) {
     const n = getNation_(u.email); if (!n) throw new Error('Found your nation first.');
     const id = n.buildings[from];
     if (!id || id === 'cityhall' || !n.plots.includes(to) || n.buildings[to]) throw new Error('You cannot move that building there.');
+    if (!fitsPlot_(id, to)) throw new Error('That building cannot go on this plot.');
     const cost = moveCost_(id);
     if (available_(u.email, n) < cost) throw new Error('You need ' + cost + ' GOYUX to move it.');
     delete n.buildings[from]; n.buildings[to] = id; n.spent += cost; saveNation_(n);
