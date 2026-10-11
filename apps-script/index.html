@@ -73,6 +73,8 @@ h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0}
 .av-stage{background:radial-gradient(circle at 50% 30%,#4a4d52,#2b2d30);border-radius:14px;aspect-ratio:3/4;max-width:100%;display:grid;place-items:center}
 .field{display:flex;flex-direction:column;gap:8px;margin-bottom:20px}
 .field label{font-weight:800;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.name-hint{color:var(--muted);font-size:13px;line-height:1.4;max-width:320px}
+.field input:disabled{opacity:.75;cursor:not-allowed}
 .field input{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px;color:var(--fg);font:inherit;font-weight:700;max-width:320px}
 .swatches{display:flex;flex-wrap:wrap;gap:8px}
 .sw{width:36px;height:36px;border-radius:8px;border:3px solid transparent;box-shadow:inset 0 0 0 1px rgba(255,255,255,.15)}
@@ -127,6 +129,7 @@ a.btn{text-decoration:none;display:inline-block;color:var(--fg)}
 .tbl .acts{display:flex;gap:4px}
 .mini{padding:5px 9px;border-radius:7px;background:var(--card);font-weight:800;font-size:12px}
 .mini:hover{background:var(--line)}
+.rn-in{background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:4px 6px;color:var(--fg);font:inherit;font-weight:700;width:150px}
 .mini.pos{background:rgba(0,168,107,.25)}.mini.neg{background:rgba(239,77,85,.25)}
 .t-hint{margin:0;color:var(--muted);font-size:13px;line-height:1.5;max-width:70ch}
 .runs-body{padding:22px;display:flex;flex-direction:column;gap:12px}
@@ -519,7 +522,7 @@ a.btn{text-decoration:none;display:inline-block;color:var(--fg)}
       <div class="av-edit">
         <div class="av-stage" id="avStage"></div>
         <div>
-          <div class="field"><label for="nameIn">Display name</label><input id="nameIn" maxlength="16" autocomplete="off"></div>
+          <div class="field"><label for="nameIn">Display name</label><input id="nameIn" maxlength="16" autocomplete="off"><small class="name-hint" id="nameHint" hidden>Your name comes from your school account. If it is wrong, ask your teacher to change it.</small></div>
           <div class="field"><label>Skin</label><div class="swatches" id="swSkin"></div></div>
           <div class="field"><label>Shirt</label><div class="swatches" id="swShirt"></div></div>
           <div class="field"><label>Trousers</label><div class="swatches" id="swPants"></div></div>
@@ -747,7 +750,7 @@ async function boot() {
   $('#whoName').textContent = 'Connecting…';
   try {
     const me = await apiU('getMe');
-    account = { email: me.email, isTeacher: me.isTeacher, isAdmin: !!me.isAdmin, guest: me.guest, className: me.className || '' }; XP_PER_LEVEL = me.xpPerLevel || 200;
+    account = { email: me.email, isTeacher: me.isTeacher, isAdmin: !!me.isAdmin, guest: me.guest, lockName: !!me.lockName, className: me.className || '' }; XP_PER_LEVEL = me.xpPerLevel || 200;
     $('#guestBox').hidden = true; $('#classBox').hidden = true;
     const seen = store.get('seenGrants:' + me.email, 0);
     Object.assign(profile, me.profile, { grants: me.grants || [] });
@@ -856,6 +859,8 @@ function renderAvatarPage() {
   $('#avStage').innerHTML = av2d(profile);
   $('#avStage .av2d').style.transform = 'scale(1.5)';
   $('#nameIn').value = profile.name;
+  const locked = !!(account && account.lockName);
+  $('#nameIn').disabled = locked; $('#nameHint').hidden = !locked;
   const sw = (box, list, key) => {
     box.innerHTML = '';
     list.forEach(c => {
@@ -867,6 +872,7 @@ function renderAvatarPage() {
   sw($('#swSkin'), SKINS, 'skin'); sw($('#swShirt'), SHIRTS, 'shirt'); sw($('#swPants'), PANTS, 'pants');
 }
 $('#nameIn').addEventListener('input', e => {
+  if (account && account.lockName) return;
   const v = e.target.value.replace(/[^\w .-]/g, '').trim(); profile.name = v || 'Player'; saveProfile(); renderHome();
 });
 function renderNotebook() {
@@ -3508,7 +3514,7 @@ function renderTeacher() {
   const head = `<tr><th><input type="checkbox" id="tAll" aria-label="Seleccionar todos" ${allSel ? 'checked' : ''}></th><th>Alumno</th><th>Clase</th><th class="num">Nivel</th><th class="num">Partidas</th>${GAMES.filter(g => !g.soon).map(g => `<th>${escH(g.title)}</th>`).join('')}<th>País</th><th class="num">GOYUX juego</th><th class="num">GOYUX profe</th><th class="num">Total</th><th>Última partida</th><th>Dar GOYUX</th><th></th></tr>`;
   const body = rows.map(st => `<tr data-e="${escH(st.email)}">
       <td><input type="checkbox" class="tSel" aria-label="Seleccionar ${escH(st.name)}" ${T.sel.has(st.email) ? 'checked' : ''}></td>
-      <td><b>${escH(st.name)}</b><small>${escH(st.email)}</small></td><td>${escH(st.className || '—')}</td>
+      <td class="tname"><b>${escH(st.name)}</b> <button class="mini" data-rn="1" title="Cambiar el nombre" aria-label="Cambiar el nombre de ${escH(st.name)}">✎</button><small>${escH(st.email)}</small></td><td>${escH(st.className || '—')}</td>
       <td class="num">${st.level}</td><td class="num">${st.plays}</td>
       ${GAMES.filter(g => !g.soon).map(g => `<td class="stars">${starStr(st.best[g.id])}</td>`).join('')}
       <td>${st.nationName ? escH(st.nationName) + `<small>${st.nationScore} puntos</small>` : '—'}</td><td class="num">${st.xp}</td><td class="num">${st.granted}</td><td class="num"><b>${st.total}</b></td>
@@ -3520,6 +3526,13 @@ function renderTeacher() {
   $('#tTable').querySelectorAll('.tSel').forEach(c => c.onchange = () => { const em = c.closest('tr').dataset.e; c.checked ? T.sel.add(em) : T.sel.delete(em); });
   $('#tTable').querySelectorAll('[data-a]').forEach(b => b.onclick = () => give([b.closest('tr').dataset.e], +b.dataset.a));
   $('#tTable').querySelectorAll('[data-runs]').forEach(b => b.onclick = () => showRuns(b.closest('tr').dataset.e));
+  $('#tTable').querySelectorAll('[data-rn]').forEach(b => b.onclick = () => {
+    const tr = b.closest('tr'), em = tr.dataset.e, st = T.list.find(x => x.email === em), td = tr.querySelector('.tname');
+    td.innerHTML = `<input class="rn-in" maxlength="30" value="${escH(st.name)}" aria-label="Nuevo nombre"> <button class="mini pos">Guardar</button><small>${escH(em)}</small>`;
+    const inp = td.querySelector('input'); inp.focus(); inp.select();
+    const save = async () => { try { applyTeacher(await api('teacherRename', em, inp.value)); hToast('Nombre cambiado.'); } catch (e) { hToast(e.message, true); } };
+    td.querySelector('button').onclick = save; inp.onkeydown = e => { if (e.key === 'Enter') save(); if (e.key === 'Escape') renderTeacher(); };
+  });
 }
 async function give(emails, amount) {
   if (!emails.length) { hToast('Selecciona al menos un alumno.', true); return; }

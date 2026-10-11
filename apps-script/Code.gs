@@ -25,6 +25,8 @@ const CONFIG = {
   // true: cada alumno tiene que escribir el código de su clase la primera vez que entra.
   // Así solo juegan tus alumnos aunque el enlace llegue a otros alumnos del instituto.
   REQUIRE_CLASS_CODE: true,
+  // true: los alumnos no pueden cambiar su nombre; siempre se usa el de su cuenta (o el que ponga el profesor)
+  LOCK_NAMES: true,
   // GOYUX por dificultad (la puntuación se multiplica por este valor)
   DIFFICULTY: { easy: 1, normal: 1.25, hard: 1.5 }
 };
@@ -213,7 +215,7 @@ function getMe(guestCode) {
     const st = readStudent_(sh, r);
     const c = classMap_()[st.klass];
     return {
-      email: u.email, isTeacher: u.isTeacher, isAdmin: !!u.isAdmin, guest: u.guest, xpPerLevel: CONFIG.XP_PER_LEVEL, className: c ? c.name : '',
+      email: u.email, isTeacher: u.isTeacher, isAdmin: !!u.isAdmin, guest: u.guest, lockName: !!CONFIG.LOCK_NAMES && !u.isTeacher, xpPerLevel: CONFIG.XP_PER_LEVEL, className: c ? c.name : '',
       profile: Object.assign({ name: st.name, plays: st.plays, xp: st.xp, granted: st.granted, nationNet: st.nation, best: st.best, vocab: st.vocab }, cleanAvatar_(st.avatar)),
       grants: grantsOf_(u.email, 8)
     };
@@ -235,7 +237,7 @@ function saveProfile(p, guestCode) {
   const name = String((p && p.name) || '').replace(/[^\p{L}\p{N} .'-]/gu, '').trim().slice(0, 20);
   return withLock_(() => {
     const { sh, r } = ensureStudent_(u.email, u.name);
-    if (name) sh.getRange(r, C.name + 1).setValue(name);
+    if (name && (!CONFIG.LOCK_NAMES || u.isTeacher)) sh.getRange(r, C.name + 1).setValue(name);
     sh.getRange(r, C.avatar + 1).setValue(JSON.stringify(cleanAvatar_(p)));
     return true;
   });
@@ -377,6 +379,20 @@ function adminSetTeacher(email, active) {
   return adminTeachers();
 }
 
+/* the teacher fixes a student's display name (it also changes the president's name of their nation) */
+function teacherRename(email, name) {
+  const u = teacher_();
+  email = String(email || '').toLowerCase().trim();
+  name = String(name || '').replace(/[^\p{L}\p{N} .'-]/gu, '').replace(/\s+/g, ' ').trim().slice(0, 30);
+  if (name.length < 2) throw new Error('Escribe un nombre válido.');
+  if (!checkVisible_(u, [email]).length) throw new Error('Este alumno no está en tus clases.');
+  withLock_(() => {
+    const sh = sheet_('students'); const r = findStudentRow_(sh, email);
+    if (r > 0) sh.getRange(r, C.name + 1).setValue(name);
+    const nr = nationRow_(email); if (nr.r > 0) nr.sh.getRange(nr.r, 2).setValue(name);
+  });
+  return teacherList();
+}
 function teacherCreateClass(name) {
   const u = teacher_();
   name = String(name || '').replace(/[^\p{L}\p{N} .ºª'-]/gu, '').trim().slice(0, 30);

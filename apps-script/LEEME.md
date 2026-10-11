@@ -63,6 +63,10 @@ Sirve para que juegue alguien de fuera del instituto, por ejemplo tu hija. Se ha
 
 Sin un código válido no se puede jugar, aunque alguien consiga el enlace. Desde el mismo panel puedes **desactivar** un código cuando quieras. Los invitados aparecen en la lista de alumnos con un correo del tipo `invitado:lucia-7k3p` y puedes darles GOYUX igual que a un alumno.
 
+### Nombres de los alumnos
+
+El nombre de cada alumno sale de su cuenta de iesgoya.es (por ejemplo, `ana.garcia@iesgoya.es` aparece como "Ana Garcia"). Los alumnos **no pueden cambiarlo**. Así nadie juega con un nombre inventado, y el nombre y el correo aparecen en los resultados y en la tarjeta de progreso. Si un nombre sale raro (por ejemplo `Agarcia23`), corrígelo en el panel con el botón ✎ que hay junto al nombre. Si prefieres que los alumnos puedan elegir su nombre, pon `LOCK_NAMES: false` en `CONFIG`.
+
 ## 5. Uso diario
 
 - **Alumnos:** abren el enlace. Si no han iniciado sesión, Google les pide su cuenta del instituto. La primera vez aparecen solos en la hoja **Alumnos**.
