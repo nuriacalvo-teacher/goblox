@@ -885,9 +885,9 @@ const GAMES = [
 
 /* ---------------- difficulty ---------------- */
 const DIFF = {
-  easy: { label: 'Easy', cefr: 'A2', bad: 2, mult: 1, es: true, info: 'Three answers to choose from, Spanish translation with the ES button, a normal budget and some surprises. Bronze card: 20 GOYUX.' },
-  normal: { label: 'Normal', cefr: 'A2–B1', bad: 3, mult: 1.25, es: false, info: 'Four answers to choose from, no Spanish help, a tighter budget and more surprises. Silver card: 30 GOYUX.' },
-  hard: { label: 'Hard', cefr: 'B1+', bad: 3, mult: 1.5, es: false, info: 'Four answers to choose from, no Spanish help, just enough money and every surprise. Gold card: 40 GOYUX.' }
+  easy: { label: 'Easy', cefr: 'A2', bad: 2, mult: 1, es: true, info: 'Three answers to choose from, Spanish translation with the ES button, a normal budget and some surprises. Bronze card: 40 GOYUX.' },
+  normal: { label: 'Normal', cefr: 'A2–B1', bad: 3, mult: 1.25, es: false, info: 'Four answers to choose from, no Spanish help, a tighter budget and more surprises. Silver card: 60 GOYUX.' },
+  hard: { label: 'Hard', cefr: 'B1+', bad: 3, mult: 1.5, es: false, info: 'Four answers to choose from, no Spanish help, just enough money and every surprise. Gold card: 80 GOYUX.' }
 };
 let difficulty = DIFF[store.get('difficulty', 'normal')] ? store.get('difficulty', 'normal') : 'normal';
 
@@ -938,7 +938,7 @@ const TIER = { easy: ['Bronze', '#cd7f32'], normal: ['Silver', '#c0c7cf'], hard:
 const hasCard = (id, d) => (profile.cards || []).includes(id + ':' + d);
 /* GOYUX: a level pays only once, when you win its card (+25% with 3 stars). Must match CARD_GOYUX in Code.gs. */
 const LEVELS = ['easy', 'normal', 'hard'];
-const CARD_GOYUX = { easy: 20, normal: 30, hard: 40 };
+const CARD_GOYUX = { easy: 40, normal: 60, hard: 80 };
 const cardReward = (d, score) => score >= CARD_SCORE ? Math.round(CARD_GOYUX[d] * (score >= 85 ? 1.25 : 1)) : 0;
 /* Unlocking, like a staircase: at the start only Easy of the first mission is open.
    Winning a card opens the next level of that mission and the same level of the next mission. */

@@ -290,7 +290,7 @@ function saveRun(run, guestCode) {
    "game:difficulty". Replaying a level you already have the card for gives no GOYUX. */
 const CARD_SCORE = 65;
 // GOYUX for winning a card (each level pays only once; +25% with 3 stars). Must match CARD_GOYUX in index.html.
-const CARD_GOYUX = { easy: 20, normal: 30, hard: 40 };
+const CARD_GOYUX = { easy: 40, normal: 60, hard: 80 };
 const LEVELS = ['easy', 'normal', 'hard'];
 /* Unlocking like a staircase: Easy of the first mission is open; a card opens the next level
    of the same mission and the same level of the next mission. Teachers have everything open. */
