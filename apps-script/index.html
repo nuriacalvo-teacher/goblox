@@ -207,6 +207,8 @@ a.btn{text-decoration:none;display:inline-block;color:var(--fg)}
 .opt.wrong{background:rgba(239,77,85,.3);border-color:var(--red)}
 .opt:disabled{cursor:default}
 .quiz-fb{border-radius:9px;padding:10px 12px;font-weight:800;line-height:1.4}
+.q-cult{color:var(--gold)}
+.q-search{align-self:flex-start;color:var(--gold);font-weight:800;font-size:14px}
 .quiz-fb.good{background:rgba(0,168,107,.2)}.quiz-fb.bad{background:rgba(239,77,85,.18)}
 .quiz-end{text-align:center;padding:10px}
 .quiz-end b{font:900 44px var(--f-display)}
@@ -260,6 +262,16 @@ a.btn{text-decoration:none;display:inline-block;color:var(--fg)}
 .empty{color:var(--muted);background:var(--surface);border:1px dashed var(--line);border-radius:10px;padding:20px}
 
 /* ---------- overlays ---------- */
+.hello-btns{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.vset{width:min(500px,100%);padding:20px;display:flex;flex-direction:column;gap:12px}
+.vset h2{font-size:22px;padding-right:40px}
+#vsBody{display:flex;flex-direction:column;gap:14px}
+.vs-row{display:flex;gap:8px;align-items:flex-end}
+.vs-row label{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px;font-weight:800;font-size:14px}
+.vset select{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px;color:var(--fg);font:inherit;font-weight:700}
+.vset input[type=range]{width:100%;accent-color:var(--green)}
+.vs-tip{margin:0;font-size:13px;color:var(--muted);line-height:1.5}
+.vs-tip b{color:var(--fg)}
 .overlay{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.6);display:grid;place-items:center;padding:16px;overflow:auto}
 .modal{background:var(--surface);border:1px solid var(--line);border-radius:14px;width:min(860px,100%);max-height:calc(100% - 8px);overflow:auto;position:relative}
 .x{position:absolute;top:10px;right:10px;width:36px;height:36px;border-radius:50%;background:rgba(0,0,0,.45);font-size:18px;font-weight:800;z-index:2}
@@ -494,7 +506,7 @@ a.btn{text-decoration:none;display:inline-block;color:var(--fg)}
       <div class="hello">
         <div class="headshot" id="headshot"></div>
         <div class="hello-txt"><h1 id="hello">Hello!</h1><p>Pick an experience and use your English to survive real life.</p></div>
-        <button class="btn" id="progOpen">My progress card</button>
+        <div class="hello-btns"><button class="btn" id="voiceOpen">🔊 Voices</button><button class="btn" id="progOpen">My progress card</button></div>
       </div>
       <form class="guest" id="classBox" hidden>
         <h2>Join your class</h2>
@@ -617,6 +629,14 @@ a.btn{text-decoration:none;display:inline-block;color:var(--fg)}
   </div>
 </div>
 
+<div class="overlay" id="voiceModal" hidden>
+  <div class="modal vset" role="dialog" aria-labelledby="vsTitle">
+    <button class="x" id="voiceX" aria-label="Close">✕</button>
+    <h2 id="vsTitle">🔊 Voices and accents</h2>
+    <div id="vsBody"></div>
+  </div>
+</div>
+
 <div id="loading" hidden>
   <div class="load-box">
     <div class="load-thumb" id="lThumb"></div>
@@ -680,7 +700,7 @@ a.btn{text-decoration:none;display:inline-block;color:var(--fg)}
         <button class="btn primary" id="escResume">Resume game <span>Esc</span></button>
         <button class="btn" id="escCard">Character card <span>📄</span></button>
         <button class="btn" id="escHelp">How to play <span>❔</span></button>
-        <button class="btn" id="escVoice">Voices <span id="escVoiceV">On</span></button>
+        <button class="btn" id="escVoice">Voices and accents <span id="escVoiceV">On</span></button>
         <button class="btn" id="escReset">Reset character <span>R</span></button>
         <button class="btn danger" id="escLeave">Leave game <span>L</span></button>
       </div>
@@ -795,7 +815,7 @@ $('#guestBox').addEventListener('submit', e => {
   if (!v) { $('#guestErr').textContent = 'Type your invite code.'; $('#guestErr').hidden = false; return; }
   $('#guestErr').hidden = true; guestCode = v; store.set('guestCode', v); boot();
 });
-let settings = Object.assign({ voice: true }, store.get('settings', {}));
+let settings = Object.assign({ voice: true, voiceF: '', voiceM: '', rate: 1 }, store.get('settings', {}));
 
 /* ---------------- games catalogue ---------------- */
 const GAMES = [
@@ -1109,7 +1129,7 @@ function spawnPlayer(x, z, yaw, camYaw) {
   W.scene.add(P.av); P.pos = P.av.position; P.pos.set(x, 0, z); P.yaw = yaw; P.vy = 0; P.frozen = false; P.spawn = [x, z, yaw, camYaw];
   cam.yaw = camYaw; cam.pitch = 0.42; cam.dist = 11;
 }
-function blocked() { return !$('#dlg').hidden || !$('#panelWrap').hidden || !$('#esc').hidden || !$('#results').hidden || document.activeElement === $('#chatIn'); }
+function blocked() { return !$('#voiceModal').hidden || !$('#dlg').hidden || !$('#panelWrap').hidden || !$('#esc').hidden || !$('#results').hidden || document.activeElement === $('#chatIn'); }
 function collide() {
   const r = 0.55, feet = P.pos.y; let gY = 0;
   for (const c of W.colliders) {
@@ -1161,6 +1181,7 @@ function resetPlayer() { if (P.frozen) return; const [x, z, yaw, cy] = P.spawn; 
 /* ---------------- input ---------------- */
 function setupInput() {
   addEventListener('keydown', e => {
+    if (!$('#voiceModal').hidden) { if (e.key === 'Escape') closeVoices(); return; }
     if ($('#game').hidden) return;
     if (e.target === $('#chatIn')) { if (e.key === 'Enter') sendChat(); if (e.key === 'Escape') $('#chatIn').blur(); return; }
     if (e.target && e.target.tagName === 'INPUT') return;
@@ -1293,8 +1314,8 @@ function pop(text, kind) { const p = $('#pop'); p.textContent = text; p.classNam
    female for women (Nuria…) and male for men (Olaf…). "Natural"/"Neural"/"Online" voices
    (Edge, Chromebooks, Android, iOS) sound almost human; others fall back to pitch changes. */
 let voices = [];
-const VOICE_F = /(female|woman|girl|samantha|victoria|karen|moira|tessa|fiona|serena|susan|zira|aria|jenny|libby|sonia|emma|ava|allison|joanna|kendra|salli|natasha|clara|hazel|heera|michelle|nancy|amber|ashley|elizabeth|sara\b|catherine|kate|veena|maisie|ruth|google us english|google uk english female)/i;
-const VOICE_M = /(\bmale|\bman\b|daniel|\balex\b|fred|guy|ryan|david|mark|george|james|thomas|christopher|eric|brian|matthew|justin|joey|liam|william|arthur|oliver|aaron|rishi|roger|steffan|google uk english male)/i;
+const VOICE_F = /(female|woman|girl|samantha|victoria|karen|moira|tessa|fiona|serena|susan|zira|aria|jenny|libby|sonia|emma|ava|allison|joanna|kendra|salli|natasha|clara|hazel|heera|michelle|nancy|amber|ashley|elizabeth|sara\b|catherine|kate|veena|maisie|ruth|emily|molly|leah|neerja|abbi|bella|hollie|olivia|ana\b|jane|isla|google us english|google uk english female)/i;
+const VOICE_M = /(\bmale|\bman\b|daniel|\balex\b|fred|guy|ryan|david|mark|george|james|thomas|christopher|eric|brian|matthew|justin|joey|liam|william|arthur|oliver|aaron|rishi|roger|steffan|connor|mitchell|andrew|davis|tony|jason|luke|prabhat|elliot|ethan|noah|alfie|lee\b|gordon|google uk english male)/i;
 const voiceGender = v => VOICE_F.test(v.name) ? 'f' : VOICE_M.test(v.name) ? 'm' : '';
 const bestVoice = {};
 function loadVoices() {
@@ -1307,23 +1328,64 @@ function loadVoices() {
 }
 if ('speechSynthesis' in window) { loadVoices(); speechSynthesis.onvoiceschanged = loadVoices; }
 const npcGender = n => n.gender || (/^(Nuria|Timmy)/.test(n.name) ? (n.name.startsWith('Nuria') ? 'f' : 'm') : /^(Olaf|Marco)/.test(n.name) ? 'm' : 'f');
-function speak(text, who) {
-  if (!settings.voice || !('speechSynthesis' in window)) return;
+/* the voice the player picked in 🔊 Voices, if this device still has it */
+const chosenVoice = g => { const n = settings[g === 'm' ? 'voiceM' : 'voiceF']; return n ? voices.find(v => v.name === n) || null : null; };
+function speak(text, who, force) {
+  if ((!settings.voice && !force) || !('speechSynthesis' in window)) return;
   try {
     speechSynthesis.cancel();
     const clean = text.replace(/(\d+)\.(\d{2}) GOYUX/g, (m, a, c) => `${a} GOYUX ${c}`).replace(/[^\p{L}\p{N}\s.,!?'’%:-]/gu, '');
     const u = new SpeechSynthesisUtterance(clean);
-    const g = who ? npcGender(who) : 'f', v = bestVoice[g];
+    const g = who ? npcGender(who) : 'f', picked = chosenVoice(g), v = picked || bestVoice[g];
     u.lang = 'en-US';
     if (v) { u.voice = v; u.lang = v.lang; }
-    const matched = v && voiceGender(v) === g;
+    const matched = v && (!!picked || voiceGender(v) === g);
     const child = who && who.av && who.av.scale.x < 0.9;
     // with a real male/female voice keep the pitch natural; without one, imitate it
     u.pitch = child ? 1.45 : matched ? clamp((who && who.voice && who.voice.pitch) || 1, 0.9, 1.12) : (g === 'f' ? 1.25 : 0.75);
-    u.rate = (G && G.diff === 'easy' ? 0.85 : G && G.diff === 'hard' ? 1 : 0.94) * (child ? 1.08 : 1);
+    u.rate = (G && G.diff === 'easy' ? 0.85 : G && G.diff === 'hard' ? 1 : 0.94) * (child ? 1.08 : 1) * (settings.rate || 1);
     speechSynthesis.speak(u);
   } catch (e) {}
 }
+
+/* 🔊 Voices: pick a woman's and a man's voice (with its accent) and the speed */
+const ACCENT = { GB: 'UK', US: 'USA', IE: 'Ireland', AU: 'Australia', NZ: 'New Zealand', CA: 'Canada', ZA: 'South Africa', IN: 'India', SG: 'Singapore', HK: 'Hong Kong', PH: 'Philippines', KE: 'Kenya', NG: 'Nigeria', TZ: 'Tanzania', SCOTLAND: 'Scotland' };
+const accentOf = v => { const r = String(v.lang).split(/[-_]/).slice(1).join('-').toUpperCase(); return /scot/i.test(v.name) ? 'Scotland' : ACCENT[r] || r || 'English'; };
+const voiceLabel = v => v.name.replace(/^(Microsoft|Google|Apple)\s+/i, '').replace(/\s*-\s*English.*$/i, '').replace(/\s*\(.*?\)\s*/g, ' ').trim()
+  + (/natural|neural|online|enhanced|premium/i.test(v.name) ? ' ★' : '');
+function openVoices() {
+  if (!('speechSynthesis' in window)) { hToast('This browser cannot speak. Try Chrome, Edge or Safari.', true); return; }
+  loadVoices();
+  const box = $('#vsBody');
+  const opts = g => {
+    const groups = {};
+    voices.slice().sort((a, b) => (voiceGender(b) === g) - (voiceGender(a) === g) || accentOf(a).localeCompare(accentOf(b))).forEach(v => { (groups[accentOf(v)] = groups[accentOf(v)] || []).push(v); });
+    const cur = settings[g === 'm' ? 'voiceM' : 'voiceF'];
+    return `<option value="">Automatic (best ${g === 'm' ? 'male' : 'female'} voice)</option>` + Object.entries(groups).map(([acc, list]) => `<optgroup label="${escH(acc)}">${list.map(v => `<option value="${escH(v.name)}" ${v.name === cur ? 'selected' : ''}>${escH(voiceLabel(v))}${voiceGender(v) && voiceGender(v) !== g ? ` (${voiceGender(v) === 'm' ? 'man' : 'woman'})` : ''}</option>`).join('')}</optgroup>`).join('');
+  };
+  box.innerHTML = `
+    <div class="vs-row"><label>Characters speak<select id="vsOn"><option value="1" ${settings.voice ? 'selected' : ''}>Yes, read the lines aloud</option><option value="0" ${settings.voice ? '' : 'selected'}>No, silent</option></select></label></div>
+    <div class="vs-row"><label for="vsF">Women (Nuria, customers…)<select id="vsF">${opts('f')}</select></label><button class="btn" id="vsTestF">▶ Test</button></div>
+    <div class="vs-row"><label for="vsM">Men (Olaf, customers…)<select id="vsM">${opts('m')}</select></label><button class="btn" id="vsTestM">▶ Test</button></div>
+    <label class="vs-row" style="flex-direction:column;align-items:stretch;gap:6px;font-weight:800;font-size:14px"><span>Speed: <span id="vsRateV"></span></span><input type="range" id="vsRate" min="0.7" max="1.3" step="0.05" value="${settings.rate || 1}"></label>
+    <p class="vs-tip">${voices.length ? `This device has <b>${voices.length}</b> English voices. ★ = natural voice (sounds almost human).` : 'This device has no English voices yet. Wait a few seconds and open this window again.'}</p>
+    <p class="vs-tip">🎧 For the most natural voices: on a computer, open GOBLOX in <b>Microsoft Edge</b> (voices called <i>Online (Natural)</i>, with accents from the UK, Ireland, the USA, Canada, Australia and New Zealand). On an iPhone or iPad: <b>Settings → Accessibility → Spoken Content → Voices → English</b> and download an <i>Enhanced</i> or <i>Premium</i> voice. Your choice is saved on this device.</p>`;
+  const rateTxt = () => { $('#vsRateV').textContent = Math.round((settings.rate || 1) * 100) + '%'; };
+  rateTxt();
+  const save = () => store.set('settings', settings);
+  const test = g => speak(g === 'm' ? 'Hello! I\'m Olaf. Welcome to GOBLOX. What would you like to do today?' : 'Hi there! I\'m Nuria. Shall we practise some English together?', { name: g === 'm' ? 'Olaf' : 'Nuria', gender: g }, true);
+  $('#vsOn').onchange = e => { settings.voice = e.target.value === '1'; save(); if (!settings.voice) try { speechSynthesis.cancel(); } catch (x) {} if ($('#escVoiceV')) $('#escVoiceV').textContent = settings.voice ? 'On' : 'Off'; };
+  $('#vsF').onchange = e => { settings.voiceF = e.target.value; save(); test('f'); };
+  $('#vsM').onchange = e => { settings.voiceM = e.target.value; save(); test('m'); };
+  $('#vsRate').oninput = e => { settings.rate = +e.target.value; rateTxt(); };
+  $('#vsRate').onchange = () => { save(); test('f'); };
+  $('#vsTestF').onclick = () => test('f'); $('#vsTestM').onclick = () => test('m');
+  $('#voiceModal').hidden = false; $('#vsF').focus();
+}
+function closeVoices() { $('#voiceModal').hidden = true; if (!$('#game').hidden && R) R.canvas.focus(); }
+$('#voiceOpen').onclick = openVoices;
+$('#voiceX').onclick = closeVoices;
+$('#voiceModal').addEventListener('click', e => { if (e.target.id === 'voiceModal') closeVoices(); });
 
 /* dialog */
 let dlgSpeaker = null, dlgLine = '';
@@ -1439,7 +1501,7 @@ $('#escHelp').onclick = () => {
     <div class="cs"><b>Chat:</b> press <b>/</b> to type in English. Your words appear above your head.</div>
   </div>`, [{ t: 'Got it', cls: 'primary', fn: closePanel }], { onClose: () => {} });
 };
-$('#escVoice').onclick = () => { settings.voice = !settings.voice; store.set('settings', settings); $('#escVoiceV').textContent = settings.voice ? 'On' : 'Off'; if (!settings.voice) try { speechSynthesis.cancel(); } catch (e) {} };
+$('#escVoice').onclick = () => { toggleEsc(); openVoices(); };
 $('#escReset').onclick = () => { toggleEsc(); resetPlayer(); };
 $('#escLeave').onclick = () => {
   const b = $('#escLeave');
@@ -2696,18 +2758,21 @@ const NR = { size: 9, capital: 40, start: [31, 39, 40, 41, 49] };
 const N_KEYS = ['pop', 'happy', 'econ', 'secu', 'cult', 'env'];
 const N_LABEL = { pop: 'People', happy: 'Happiness', econ: 'Economy', secu: 'Security', cult: 'Culture', env: 'Environment' };
 const N_EMO = { pop: '👥', happy: '😊', econ: '💰', secu: '🛡', cult: '🎭', env: '🌳' };
-/* id: [name, emoji, cost, [pop, happy, econ, secu, cult, env], English test, description] */
+/* id: [name, emoji, cost, [pop, happy, econ, secu, cult, env], grammar topic (QB), description].
+   The test is 4 grammar questions + 1 culture question from CULT[id]. Costs and effects must match BUILD in Code.gs. */
 const BLD = {
   cityhall: ['City Hall', '🏛', 0, [0, 5, 5, 5, 0, 0], null, 'The heart of your capital. Your government works here.'],
   houses: ['Houses', '🏘', 40, [40, 2, 0, 0, 0, -2], 'houses', 'Homes for 40 new citizens.'],
   farm: ['Farm', '🌾', 45, [10, 2, 6, 0, 0, 2], 'farm', 'Fresh food for your people and for the market.'],
   park: ['Park', '🌳', 30, [0, 6, 0, 0, 0, 8], 'park', 'Trees, a pond and benches. People love it.'],
   market: ['Market', '🛒', 70, [5, 5, 9, 0, 0, 0], 'market', 'Shops and stalls where people buy and sell.'],
+  restaurant: ['Restaurant', '🍽', 60, [5, 7, 6, 0, 2, 0], 'food', 'Tasty food from all over the English-speaking world.'],
   school: ['School', '🏫', 70, [5, 4, 4, 0, 8, 0], 'school', 'Educated citizens make a stronger nation.'],
   police: ['Police Station', '🚓', 70, [0, 3, 0, 12, 0, 0], 'police', 'Keeps your streets safe.'],
   factory: ['Factory', '🏭', 90, [0, -3, 16, 0, 0, -10], 'factory', 'Lots of jobs and money, but it pollutes.'],
   windfarm: ['Wind Farm', '🌬', 90, [0, 0, 8, 0, 0, 6], 'windfarm', 'Clean electricity from the wind.'],
   museum: ['History Museum', '🏺', 90, [0, 4, 3, 0, 12, 0], 'museum', 'Tells the story of your nation.'],
+  library: ['Library', '📚', 80, [0, 4, 2, 0, 10, 0], 'relative', 'Free books and knowledge for everyone.'],
   press: ['TV & Newspaper', '📰', 90, [0, 3, 2, 0, 8, 0], 'press', 'News for your citizens.'],
   embassy: ['Embassy', '🕊', 90, [0, 2, 2, 2, 4, 0], 'embassy', 'Lets you write to other nations and sign treaties.'],
   hospital: ['Hospital', '🏥', 110, [25, 10, 0, 0, 0, 0], 'hospital', 'Healthy people live longer and happier lives.'],
@@ -2716,14 +2781,28 @@ const BLD = {
   port: ['Port', '⚓', 130, [10, 0, 14, 0, 2, -4], 'port', 'Ships bring goods from all over the world.'],
   stadium: ['Stadium', '🏟', 130, [0, 12, 4, 0, 4, -2], 'stadium', 'Football, concerts and big celebrations.'],
   airport: ['Airport', '✈', 160, [15, 2, 12, 0, 4, -6], 'airport', 'Tourists and business people fly in.'],
-  bigben: ['Big Ben (UK)', '🕰', 200, [0, 6, 6, 0, 20, 0], 'r:bigben', 'A famous monument from London.'],
-  castle: ['Edinburgh Castle (Scotland)', '🏰', 200, [0, 6, 4, 6, 16, 0], 'r:castle', 'A famous monument from Scotland.'],
-  cntower: ['CN Tower (Canada)', '🗼', 200, [0, 4, 8, 0, 18, 0], 'r:cntower', 'A famous monument from Toronto.'],
-  liberty: ['Statue of Liberty (USA)', '🗽', 240, [0, 8, 6, 0, 22, 0], 'r:liberty', 'A famous monument from New York.'],
-  opera: ['Sydney Opera House (Australia)', '🎭', 240, [0, 8, 6, 0, 22, 0], 'r:opera', 'A famous monument from Sydney.']
+  bigben: ['Big Ben (UK)', '🕰', 200, [0, 6, 6, 0, 20, 0], 'pastpassive', 'A famous monument from London.'],
+  castle: ['Edinburgh Castle (Scotland)', '🏰', 200, [0, 6, 4, 6, 16, 0], 'used', 'A famous monument from Scotland.'],
+  stonehenge: ['Stonehenge (England)', '🌅', 200, [0, 4, 2, 0, 20, 2], 'pastq', 'A mysterious stone circle, about 5,000 years old.'],
+  newgrange: ['Newgrange (Ireland)', '☘', 200, [0, 4, 2, 0, 20, 2], 'pastq', 'An ancient tomb lit by the winter sunrise.'],
+  cntower: ['CN Tower (Canada)', '🗼', 200, [0, 4, 8, 0, 18, 0], 'windfarm', 'A famous monument from Toronto.'],
+  inukshuk: ['Inukshuk (Canada)', '🧭', 160, [0, 4, 0, 2, 16, 4], 'airport', 'An Inuit stone figure that guides travellers.'],
+  towerbridge: ['Tower Bridge (UK)', '🌉', 220, [0, 6, 8, 0, 16, 0], 'used', 'London\'s bridge that opens for tall ships.'],
+  hobbiton: ['Hobbiton (New Zealand)', '🏡', 220, [0, 10, 6, 0, 16, 4], 'museum', 'The hobbit village from The Lord of the Rings.'],
+  liberty: ['Statue of Liberty (USA)', '🗽', 240, [0, 8, 6, 0, 22, 0], 'museum', 'A famous monument from New York.'],
+  whitehouse: ['The White House (USA)', '🦅', 240, [0, 6, 6, 8, 16, 0], 'pastpassive', 'Home and office of the US President.'],
+  goldengate: ['Golden Gate Bridge (USA)', '🌁', 240, [0, 6, 10, 0, 18, 0], 'windfarm', 'San Francisco\'s famous orange bridge.'],
+  opera: ['Sydney Opera House (Australia)', '🎭', 240, [0, 8, 6, 0, 22, 0], 'relative', 'A famous monument from Sydney.'],
+  harbourbridge: ['Sydney Harbour Bridge (Australia)', '🦘', 240, [0, 6, 10, 0, 18, 0], 'used', 'Sydney\'s giant steel arch, "the Coathanger".']
 };
-const UNIQUE_B = ['cityhall', 'parliament', 'embassy', 'port', 'stadium', 'airport', 'bigben', 'castle', 'cntower', 'liberty', 'opera'];
-const MONUMENTS = ['bigben', 'castle', 'cntower', 'liberty', 'opera'];
+/* The river crosses every island through plot column 6, from the mountains to the sea.
+   Bridges can only be built on it, and only bridges and ports fit on it. Must match RIVER in Code.gs. */
+const RIVER = [6, 15, 24, 33, 42, 51, 60, 69, 78];
+const BRIDGES = ['towerbridge', 'goldengate', 'harbourbridge'];
+const RIVER_OK = BRIDGES.concat(['port']);
+const fitsPlot = (id, i) => RIVER.includes(i) ? RIVER_OK.includes(id) : !BRIDGES.includes(id);
+const MONUMENTS = ['bigben', 'castle', 'stonehenge', 'newgrange', 'cntower', 'inukshuk', 'towerbridge', 'hobbiton', 'liberty', 'whitehouse', 'goldengate', 'opera', 'harbourbridge'];
+const UNIQUE_B = ['cityhall', 'parliament', 'embassy', 'port', 'stadium', 'airport'].concat(MONUMENTS);
 const TREATY_FX = { trade: [0, 0, 6, 0, 0, 0], culture: [0, 0, 0, 0, 6, 0], peace: [0, 4, 0, 4, 0, 0] };
 const TREATY_NAME = { trade: 'Trade Agreement', culture: 'Cultural Exchange', peace: 'Peace Treaty' };
 function nStats(n, treaties) {
@@ -2885,29 +2964,298 @@ const QB = {
     ['The flight is ___. It will leave two hours late.', 'delayed', ['retarded', 'late-ed'], 'False friend! Retrasado = delayed.'],
     ['Please ___ your seatbelt.', 'fasten', ['close', 'tie'], 'Abrocharse el cinturón = fasten your seatbelt.'],
     ['Where can I pick up my ___?', 'luggage', ['luggages', 'baggages'], 'Luggage is uncountable: no -s.']
+  ] },
+  food: { label: 'Ordering food: would like, some, any, too', qs: [
+    ['I\'d ___ the fish and chips, please.', 'like', ['likes', 'liking'], 'I\'d like = I would like (+ noun).'],
+    ['Would you like ___ more tea?', 'some', ['many', 'a few'], 'Offers use some. Tea is uncountable: not many / a few.'],
+    ['Can I ___ the bill, please?', 'have', ['make', 'take'], 'Can I have the bill, please? = ¿Me trae la cuenta?'],
+    ['Is service ___ in the price?', 'included', ['including', 'include'], 'Incluido = included.'],
+    ['We don\'t have ___ onions left, sorry.', 'any', ['some', 'much'], 'Negative sentences → any. Onions are countable: not much.'],
+    ['I\'m allergic ___ nuts.', 'to', ['of', 'with'], 'Alérgico a = allergic TO.'],
+    ['Are you ready ___ order?', 'to', ['for', 'of'], 'Ready + to + verb: ready to order.'],
+    ['The soup is ___ salty. I can\'t eat it.', 'too', ['enough', 'very much'], 'Demasiado = too + adjective.']
+  ] },
+  relative: { label: 'Relative clauses: who, which, where, whose', qs: [
+    ['Utzon is the architect ___ designed the Sydney Opera House.', 'who', ['which', 'where'], 'People → who.'],
+    ['This is the city ___ the president lives.', 'where', ['which', 'who'], 'Places (+ a subject and verb) → where.'],
+    ['It\'s a monument ___ was built in 1886.', 'which', ['who', 'where'], 'Things → which (or that).'],
+    ['Tolkien is the writer ___ books inspired Hobbiton.', 'whose', ['who', 'which'], 'Possession (his books) → whose.'],
+    ['The CN Tower, ___ is 553 metres tall, is in Toronto.', 'which', ['that', 'what'], 'With commas (extra information) use which, never that.'],
+    ['Do you know the woman ___ is guiding our tour?', 'who', ['which', 'whose'], 'People → who.'],
+    ['That\'s the room ___ the queen slept.', 'where', ['which', 'who'], 'A place + subject + verb → where.'],
+    ['The library has books ___ are 1,000 years old.', 'that', ['who', 'where'], 'Things → that or which.']
+  ] },
+  pastpassive: { label: 'The passive in the past: famous buildings', qs: [
+    ['The clock tower ___ in 1859.', 'was finished', ['is finished', 'were finished'], 'A past date → was + past participle.'],
+    ['The statue ___ by Frédéric Bartholdi.', 'was designed', ['designed', 'was design'], 'Passive: was + designed (past participle).'],
+    ['The White House ___ on fire in 1814.', 'was set', ['set', 'were set'], 'It (singular) → was set on fire.'],
+    ['These huge stones ___ from Wales.', 'were brought', ['was brought', 'brought'], 'Plural (stones) → were + brought.'],
+    ['When ___ the bridge opened?', 'was', ['did', 'were'], 'Passive question: When was it opened?'],
+    ['Penicillin ___ by Alexander Fleming in 1928.', 'was discovered', ['discovered', 'was discover'], 'Passive with "by" + the person.'],
+    ['The first houses ___ of wood.', 'were made', ['was made', 'made'], 'Plural (houses) → were made.'],
+    ['The tower ___ Elizabeth Tower in 2012.', 'was renamed', ['renamed', 'has renamed'], 'Somebody renamed it → it was renamed.']
+  ] },
+  pastq: { label: 'Past simple: questions and negatives', qs: [
+    ['When ___ they build Stonehenge?', 'did', ['were', 'do'], 'Past question: did + subject + base verb.'],
+    ['___ the Romans conquer Ireland?', 'Did', ['Were', 'Was'], 'Did + subject + base verb (conquer).'],
+    ['How did they ___ such big stones?', 'move', ['moved', 'moving'], 'After did → base verb (move).'],
+    ['Who ___ Newgrange?', 'built', ['did build', 'build'], 'Who is the subject → no did: Who built it?'],
+    ['Did you ___ the sunrise?', 'see', ['saw', 'seen'], 'After did → base verb (see).'],
+    ['They ___ use metal tools. They used stone and wood.', 'didn\'t', ['weren\'t', 'don\'t'], 'Past negative: didn\'t + base verb.'],
+    ['Where ___ you yesterday?', 'were', ['did', 'was'], 'With the verb be: Where were you?'],
+    ['People ___ write anything about it, so it\'s a mystery.', 'didn\'t', ['wasn\'t', 'not'], 'Past negative: didn\'t + write.']
+  ] },
+  used: { label: 'Used to: past habits', qs: [
+    ['People ___ live on Castle Rock in the Iron Age.', 'used to', ['use to', 'were used to'], 'Past habit or state → used to + verb.'],
+    ['___ you use to play in this park?', 'Did', ['Used', 'Were'], 'Question: Did you use to…? (no -d in use).'],
+    ['I didn\'t ___ like vegetables, but now I love them.', 'use to', ['used to', 'using to'], 'After didn\'t → use to (no -d).'],
+    ['Tall ships ___ sail under the bridge every day.', 'used to', ['use to', 'are used'], 'Past habit → used to + sail.'],
+    ['There ___ be a market here, but now it\'s a park.', 'used to', ['use to', 'was used to'], 'Something true in the past, not now → used to.'],
+    ['London ___ be much smaller than it is today.', 'used to', ['was used', 'use'], 'Past state → used to be.']
   ] }
 };
+/* Culture: one random question after the 4 grammar questions.
+   id: [[question, answer, [wrong answers], fact shown after answering, country], …] */
+const CULT = {
+  houses: [
+    ['In Britain, rows of houses joined together in a line are called…', 'terraced houses', ['detached houses', 'bungalows'], 'Terraced houses were built for workers in the 1800s. A detached house stands alone; a bungalow has only one floor.', 'UK'],
+    ['What do New Yorkers call the elegant old houses made of reddish-brown sandstone?', 'Brownstones', ['Redbricks', 'Sandhouses'], 'Brownstones are typical of Brooklyn and Harlem, and appear in lots of films and TV series.', 'USA'],
+    ['Traditional Irish country cottages often have a roof made of…', 'thatch (dried straw or reeds)', ['red clay tiles', 'sheets of glass'], 'Thatched cottages with whitewashed walls are a symbol of rural Ireland.', 'Ireland'],
+    ['What is a traditional Inuit igloo built from?', 'blocks of snow', ['wood and animal skins', 'stones and moss'], 'Snow is full of air, so it keeps the heat in. Inside an igloo it can be much warmer than outside.', 'Canada'],
+    ['In New Zealand, a small, simple holiday house is called a…', 'bach', ['ute', 'dairy'], 'Kiwis say bach (in the south, crib). A ute is a pick-up truck and a dairy is a corner shop!', 'New Zealand'],
+    ['A "Queenslander" is a typical Australian…', 'wooden house raised on stilts, with a veranda', ['stone castle by the sea', 'tall apartment block'], 'The stilts and verandas keep the house cool and safe from floods and insects.', 'Australia']
+  ],
+  farm: [
+    ['Roughly how many sheep are there for every person in New Zealand?', 'about 5', ['about 1', 'about 50'], 'New Zealand has around 5 million people and about 25 million sheep.', 'New Zealand'],
+    ['Which food did poor Irish families depend on before the Great Famine (1845–1852)?', 'potatoes', ['rice', 'carrots'], 'A disease destroyed the potato crops. About a million people died and a million more emigrated.', 'Ireland'],
+    ['What is the "Corn Belt" in the USA?', 'a region in the Midwest that grows lots of maize', ['a country music festival', 'a belt worn by cowboys'], 'States like Iowa and Illinois grow huge amounts of corn (maize).', 'USA'],
+    ['A huge cattle or sheep farm in the Australian outback is called a…', 'station', ['ranch', 'croft'], 'Some stations are bigger than small countries! A ranch is American and a croft is a small Scottish farm.', 'Australia'],
+    ['Canada produces most of the world\'s…', 'maple syrup', ['coffee', 'olive oil'], 'About 70% of the world\'s maple syrup comes from Canada, mostly from Quebec. There is a maple leaf on the flag!', 'Canada'],
+    ['In the Scottish Highlands, a small farm where a family rents the land is called a…', 'croft', ['station', 'ranch'], 'Crofters often have sheep and grow vegetables, and many also fish or weave.', 'Scotland']
+  ],
+  park: [
+    ['Which was the first national park in the world (1872)?', 'Yellowstone', ['Yosemite', 'Central Park'], 'Yellowstone, in the USA, is famous for its geysers like Old Faithful.', 'USA'],
+    ['Which corner of Hyde Park, London, is famous for public speeches about anything?', 'Speakers\' Corner', ['Poets\' Corner', 'Kings\' Corner'], 'Anyone can stand up and speak there. Poets\' Corner is in Westminster Abbey.', 'UK'],
+    ['Banff, Canada\'s oldest national park (1885), is in…', 'the Rocky Mountains', ['the Appalachian Mountains', 'the Andes'], 'Banff is in Alberta and is famous for its turquoise lakes.', 'Canada'],
+    ['Which New Zealand national park, full of volcanoes, appears as "Mordor" in The Lord of the Rings?', 'Tongariro', ['Fiordland', 'Abel Tasman'], 'Mount Ngauruhoe, in Tongariro, was "Mount Doom" in the films.', 'New Zealand'],
+    ['Uluru, the giant red rock in the middle of Australia, is sacred to…', 'the Anangu, its Aboriginal owners', ['the first British settlers', 'the Māori'], 'Since 2019 climbing Uluru is not allowed, out of respect for the Anangu.', 'Australia'],
+    ['Who designed New York\'s Central Park?', 'Frederick Law Olmsted and Calvert Vaux', ['Walt Disney', 'Thomas Jefferson'], 'Their design won a competition in 1858. Today the park gets more than 40 million visits a year.', 'USA']
+  ],
+  market: [
+    ['Which London food market says it is about 1,000 years old?', 'Borough Market', ['Camden Market', 'Covent Garden'], 'Borough Market, near London Bridge, has sold food for about a thousand years.', 'UK'],
+    ['Pike Place Market, where fishmongers throw fish to each other, is in…', 'Seattle', ['Boston', 'Chicago'], 'It opened in 1907. The first Starbucks is next to it!', 'USA'],
+    ['Which currency does the Republic of Ireland use today?', 'the euro', ['the pound sterling', 'the Irish punt'], 'Ireland changed the punt for the euro in 2002. Northern Ireland, part of the UK, uses the pound.', 'Ireland'],
+    ['Canada\'s one-dollar coin has a bird on it, so people call it a…', 'loonie', ['toonie', 'buck'], 'The bird is a loon. The two-dollar coin is the toonie!', 'Canada'],
+    ['Australian banknotes are made of…', 'plastic (polymer)', ['cotton paper', 'silk'], 'In 1988 Australia was the first country to use plastic notes. They last longer and are hard to copy.', 'Australia'],
+    ['At a Bunnings shop or a school fair in Australia, a "sausage sizzle" is…', 'a barbecue selling sausages in bread', ['a hot dance', 'a firework show'], 'Sausage sizzles often raise money for schools and charities.', 'Australia']
+  ],
+  school: [
+    ['Which is the oldest university in the English-speaking world?', 'Oxford', ['Cambridge', 'Harvard'], 'There was teaching in Oxford in 1096. Cambridge was founded in 1209 by scholars who left Oxford.', 'UK'],
+    ['Which is the oldest university in the USA (1636)?', 'Harvard', ['Yale', 'Princeton'], 'Harvard is near Boston, in Massachusetts.', 'USA'],
+    ['Which famous decorated book from around the year 800 can you see at Trinity College Dublin?', 'The Book of Kells', ['The Domesday Book', 'Magna Carta'], 'Monks wrote and painted the four Gospels by hand, with amazing colours.', 'Ireland'],
+    ['In England, the exams students usually take at 16 are called…', 'GCSEs', ['A levels', 'SATs'], 'A levels come at 18. In the USA, the SAT is an exam for university.', 'UK'],
+    ['In an American high school, a student in the last year (12th grade) is a…', 'senior', ['freshman', 'sophomore'], 'Freshman (9th), sophomore (10th), junior (11th) and senior (12th).', 'USA'],
+    ['How did children on remote Australian farms go to school for decades?', 'by radio, with the School of the Air', ['by boat every morning', 'they didn\'t study'], 'The School of the Air started in 1951. Today students use the internet.', 'Australia']
+  ],
+  police: [
+    ['What is the emergency phone number in Australia?', '000', ['999', '111'], 'Australia: 000. UK and Ireland: 999 (and 112). New Zealand: 111. USA and Canada: 911.', 'Australia'],
+    ['The Royal Canadian Mounted Police ("Mounties") are famous for their…', 'red jackets', ['blue kilts', 'yellow helmets'], 'The red uniform is called the "red serge". Today they use it at ceremonies.', 'Canada'],
+    ['Why are British police officers called "bobbies"?', 'after Sir Robert (Bobby) Peel, who created the London police', ['because their helmets bob up and down', 'after a famous police dog'], 'Robert Peel created the Metropolitan Police in 1829.', 'UK'],
+    ['What is "Scotland Yard"?', 'the headquarters of London\'s police', ['a police station in Edinburgh', 'a prison in Scotland'], 'It is in London, not Scotland! It appears in many Sherlock Holmes stories.', 'UK'],
+    ['What is the emergency phone number in New Zealand?', '111', ['999', '000'], 'New Zealand: 111. Australia: 000. UK and Ireland: 999. USA and Canada: 911.', 'New Zealand']
+  ],
+  factory: [
+    ['Henry Ford\'s moving assembly line (1913) made which car cheap enough for normal families?', 'the Model T', ['the Mustang', 'the Beetle'], 'A Model T was built in about 90 minutes instead of 12 hours.', 'USA'],
+    ['Which English city was nicknamed "Cottonopolis" because of its cotton mills?', 'Manchester', ['Liverpool', 'Bristol'], 'In the Industrial Revolution, Manchester had hundreds of cotton factories.', 'UK'],
+    ['Which famous ship was built in a shipyard in Belfast?', 'the Titanic', ['the Mayflower', 'the Endeavour'], 'Harland & Wolff built it between 1909 and 1911. Belfast has a Titanic museum today.', 'Northern Ireland (UK)'],
+    ['Which Scottish inventor improved the steam engine in the 1760s and 1770s?', 'James Watt', ['Isaac Newton', 'Alexander Graham Bell'], 'The unit of power, the watt, is named after him.', 'Scotland'],
+    ['Detroit, the home of the US car industry, is nicknamed…', 'Motor City', ['the Big Apple', 'the Windy City'], 'Ford, General Motors and Chrysler started there. Motown music comes from "Motor Town".', 'USA']
+  ],
+  windfarm: [
+    ['Most of New Zealand\'s electricity comes from…', 'hydroelectric power (water)', ['coal', 'nuclear power'], 'More than 80% of New Zealand\'s electricity is renewable. The country has no nuclear power.', 'New Zealand'],
+    ['The Hoover Dam, a giant hydroelectric dam, is on which river?', 'the Colorado River', ['the Mississippi', 'the Hudson'], 'It was finished in 1936, on the border of Nevada and Arizona.', 'USA'],
+    ['Irish families traditionally burned "turf" to heat their homes. What is it?', 'dried peat from bogs', ['grass from gardens', 'coal from mines'], 'Peat bogs cover a big part of Ireland. Today the country is moving to wind energy.', 'Ireland'],
+    ['What was Australia\'s famous 1981 "Slip, Slop, Slap" campaign about?', 'protecting your skin from the sun', ['recycling plastic', 'saving water'], 'Slip on a shirt, slop on sunscreen, slap on a hat!', 'Australia'],
+    ['Niagara Falls, on the Canada–USA border, is used to produce…', 'hydroelectric power', ['solar power', 'oil'], 'Big power stations on both sides use the water of the Niagara River.', 'Canada']
+  ],
+  museum: [
+    ['In which museum can you see the Rosetta Stone?', 'the British Museum, London', ['the Louvre, Paris', 'the Natural History Museum, London'], 'The Rosetta Stone helped experts read Egyptian hieroglyphs. Entry to the British Museum is free.', 'UK'],
+    ['The Smithsonian museums in Washington D.C. were started with money from…', 'a British scientist, James Smithson', ['President Lincoln', 'a gold miner from California'], 'Smithson never visited the USA, but he left his money "for the increase of knowledge".', 'USA'],
+    ['What does the name of New Zealand\'s national museum, Te Papa Tongarewa, mean?', 'container of treasures', ['house of the king', 'big white cloud'], 'It is a Māori name. Aotearoa, the Māori name for New Zealand, is often translated as "land of the long white cloud".', 'New Zealand'],
+    ['EPIC, a museum in Dublin, tells the story of…', 'the Irish people who emigrated around the world', ['the history of Irish dancing', 'Viking ships'], 'About 70 million people around the world have Irish ancestors.', 'Ireland'],
+    ['The national museum in Winnipeg, Canada, is dedicated to…', 'human rights', ['ice hockey', 'dinosaurs'], 'The Canadian Museum for Human Rights opened in 2014.', 'Canada']
+  ],
+  press: [
+    ['What does BBC stand for?', 'British Broadcasting Corporation', ['Big Britain Channel', 'British Business Corporation'], 'The BBC started in 1922 and is paid for by a TV licence, not adverts.', 'UK'],
+    ['Which newspaper\'s reports on the Watergate scandal led to President Nixon\'s resignation in 1974?', 'The Washington Post', ['The New York Times', 'USA Today'], 'Two reporters, Bob Woodward and Carl Bernstein, investigated the story.', 'USA'],
+    ['The Irish TV channel TG4 broadcasts mainly in…', 'Irish (Gaelic)', ['Welsh', 'French'], 'Irish is the first official language of Ireland. Wales has its own Welsh channel, S4C.', 'Ireland'],
+    ['Which British TV series, first shown in 1963, is about a time traveller in a blue police box?', 'Doctor Who', ['Sherlock', 'Mr Bean'], 'The time machine is called the TARDIS. It is bigger on the inside!', 'UK'],
+    ['In which year was Sesame Street first shown on American TV?', '1969', ['1989', '1999'], 'It was created to help young children learn to read and count.', 'USA']
+  ],
+  embassy: [
+    ['Which two countries share the longest border in the world?', 'Canada and the USA', ['Russia and China', 'Argentina and Chile'], 'It is almost 9,000 km long, including the border with Alaska.', 'Canada'],
+    ['What is the capital of Australia?', 'Canberra', ['Sydney', 'Melbourne'], 'Sydney and Melbourne both wanted to be the capital, so a new city, Canberra, was built between them.', 'Australia'],
+    ['What is the capital of Canada?', 'Ottawa', ['Toronto', 'Vancouver'], 'Queen Victoria chose Ottawa in 1857.', 'Canada'],
+    ['According to Ireland\'s constitution, what is the national (first official) language?', 'Irish', ['English', 'Scottish Gaelic'], 'English is the second official language, and the one most people speak every day.', 'Ireland'],
+    ['Who is the head of state of Canada, Australia and New Zealand?', 'King Charles III', ['the US President', 'their prime ministers'], 'They are independent countries but share the British monarch as king.', 'Commonwealth']
+  ],
+  hospital: [
+    ['Which British nurse, "the Lady with the Lamp", made hospitals cleaner during the Crimean War?', 'Florence Nightingale', ['Mary Seacole', 'Edith Cavell'], 'Mary Seacole, a Jamaican-British nurse, also helped soldiers in the Crimean War.', 'UK'],
+    ['Which Scottish scientist discovered penicillin in 1928?', 'Alexander Fleming', ['Joseph Lister', 'Edward Jenner'], 'Penicillin was the first antibiotic. It has saved millions of lives.', 'Scotland'],
+    ['When was the UK\'s National Health Service (NHS) created?', 'in 1948', ['in 1918', 'in 1978'], 'The NHS gives free healthcare to everyone, paid for by taxes.', 'UK'],
+    ['What does the Royal Flying Doctor Service do in Australia?', 'it flies doctors to people in remote areas', ['it trains airline pilots', 'it delivers the post'], 'It started in 1928. Some farms are hundreds of kilometres from a hospital.', 'Australia'],
+    ['Insulin, used to treat diabetes, was discovered in 1921 by scientists in…', 'Toronto, Canada', ['London, England', 'Boston, USA'], 'Frederick Banting and Charles Best did the research at the University of Toronto.', 'Canada']
+  ],
+  army: [
+    ['The guards outside Buckingham Palace wear tall black hats called…', 'bearskins', ['bowler hats', 'top hats'], 'A bearskin is about 45 cm tall!', 'UK'],
+    ['A Scottish soldier\'s kilt is made of a patterned cloth called…', 'tartan', ['tweed', 'denim'], 'Each Scottish clan (family) has its own tartan. Tweed is a rough wool cloth.', 'Scotland'],
+    ['What does ANZAC stand for?', 'Australian and New Zealand Army Corps', ['Allied Navy Zone Atlantic Command', 'Australian National Air Corps'], 'Anzac Day, on 25 April, remembers the soldiers who landed at Gallipoli in 1915.', 'Australia & NZ'],
+    ['Which old London fortress is guarded by "Beefeaters" and ravens?', 'the Tower of London', ['Windsor Castle', 'Buckingham Palace'], 'A legend says that if the ravens leave the Tower, the kingdom will fall!', 'UK'],
+    ['What is the Pentagon, near Washington D.C.?', 'the headquarters of the US military', ['a famous army song', 'the President\'s house'], 'It has five sides, and it is one of the biggest office buildings in the world.', 'USA']
+  ],
+  parliament: [
+    ['What are the two parts of the UK Parliament called?', 'the House of Commons and the House of Lords', ['the Senate and the House of Representatives', 'the Dáil and the Seanad'], 'The Senate and the House of Representatives are in the USA and Australia; the Dáil and the Seanad are in Ireland.', 'UK'],
+    ['Where does the US Congress meet?', 'the Capitol', ['the White House', 'the Pentagon'], 'The Capitol, with its big white dome, is in Washington D.C.', 'USA'],
+    ['What is the main house of the Irish parliament called?', 'Dáil Éireann', ['the House of Commons', 'the Senedd'], 'Its members are called TDs. The Senedd is the Welsh Parliament.', 'Ireland'],
+    ['New Zealand\'s government building in Wellington is called "the Beehive" because…', 'it is round, like an old beehive', ['bees live on the roof', 'it is yellow and black'], 'It was finished in 1981.', 'New Zealand'],
+    ['In 1893 New Zealand was the first self-governing country in the world to…', 'let all women vote', ['have a woman president', 'close its army'], 'Kate Sheppard led the campaign. She is on the NZ $10 note.', 'New Zealand'],
+    ['Guy Fawkes tried to blow up Parliament in 1605. What do the British celebrate on 5 November?', 'Bonfire Night', ['Boxing Day', 'Pancake Day'], '"Remember, remember the fifth of November!" People light bonfires and fireworks.', 'UK']
+  ],
+  port: [
+    ['Which ship took the Pilgrims from Plymouth, England, to America in 1620?', 'the Mayflower', ['the Titanic', 'the Endeavour'], 'The Pilgrims celebrated a harvest feast in 1621, often called the first Thanksgiving.', 'USA'],
+    ['The "First Fleet", which arrived in Sydney Cove in 1788, carried mostly…', 'convicts from Britain', ['gold miners from America', 'farmers from Ireland'], 'Australia Day, 26 January, marks the arrival. For many Aboriginal people it is a day of mourning.', 'Australia'],
+    ['Which island in New York was the entry point for millions of immigrants from 1892 to 1954?', 'Ellis Island', ['Long Island', 'Alcatraz'], 'About 12 million people arrived there. It is now a museum.', 'USA'],
+    ['Which British port city is the home of The Beatles?', 'Liverpool', ['Manchester', 'Southampton'], 'The Beatles played at the Cavern Club in Liverpool.', 'UK'],
+    ['Which British explorer mapped the coast of New Zealand on the ship Endeavour in 1769–70?', 'James Cook', ['Abel Tasman', 'Francis Drake'], 'Abel Tasman, a Dutch explorer, was the first European to see New Zealand, in 1642.', 'New Zealand']
+  ],
+  stadium: [
+    ['Which sports does the GAA organise in Ireland?', 'Gaelic football and hurling', ['rugby and cricket', 'golf and tennis'], 'The players are amateurs: they don\'t get paid! The final is played at Croke Park, Dublin.', 'Ireland'],
+    ['What is the final game of the American football season called?', 'the Super Bowl', ['the World Series', 'the Stanley Cup'], 'The World Series is baseball and the Stanley Cup is ice hockey.', 'USA'],
+    ['Canada\'s official national WINTER sport is ice hockey. What is the national SUMMER sport?', 'lacrosse', ['curling', 'baseball'], 'Lacrosse was first played by Indigenous peoples of North America.', 'Canada'],
+    ['What is the Māori dance the All Blacks perform before rugby matches?', 'the haka', ['the hula', 'the jig'], 'The best-known haka is "Ka Mate". The hula is from Hawaii and the jig from Ireland.', 'New Zealand'],
+    ['At Wimbledon, the oldest tennis tournament in the world, people traditionally eat strawberries and…', 'cream', ['custard', 'chocolate'], 'Spectators eat around 2 million strawberries during the tournament!', 'UK'],
+    ['Which sport, with an oval ball and 18 players per team, fills the MCG in Melbourne?', 'Australian rules football', ['American football', 'baseball'], 'Australians call it "footy". The MCG is also famous for cricket.', 'Australia']
+  ],
+  airport: [
+    ['Where did the Wright brothers make the first powered aeroplane flight in 1903?', 'Kitty Hawk, North Carolina', ['Chicago, Illinois', 'Los Angeles, California'], 'The first flight lasted only 12 seconds.', 'USA'],
+    ['In 1919 Alcock and Brown made the first non-stop flight across the Atlantic. Where did they land?', 'in a bog in Ireland', ['in a park in London', 'on a beach in France'], 'They landed near Clifden, in Connemara, after about 16 hours.', 'Ireland'],
+    ['Where does the name of the Australian airline Qantas come from?', 'Queensland and Northern Territory Aerial Services', ['a type of kangaroo', 'the founder\'s surname'], 'Qantas was founded in 1920 in the Queensland outback.', 'Australia'],
+    ['Shannon Airport, in Ireland, opened the world\'s first…', 'duty-free shop', ['airport hotel', 'moving walkway'], 'It opened in 1947 for passengers flying across the Atlantic.', 'Ireland'],
+    ['Who was the first woman to fly alone across the Atlantic, in 1932?', 'Amelia Earhart', ['Rosa Parks', 'Marie Curie'], 'She disappeared over the Pacific in 1937 and was never found.', 'USA']
+  ],
+  restaurant: [
+    ['Louis\' Lunch, a tiny restaurant in New Haven, says it served America\'s first…', 'hamburger sandwich (in 1900)', ['hot dog', 'pizza'], 'They still cook burgers in old iron grills from 1898, and serve them on toast, not in a bun!', 'USA'],
+    ['Haggis, Scotland\'s national dish, is traditionally cooked inside…', 'a sheep\'s stomach', ['a pumpkin', 'a loaf of bread'], 'It is made with sheep\'s heart, liver and lungs, oats, onion and spices. Scots eat it on Burns Night.', 'Scotland'],
+    ['What is Vegemite, which many Australians spread on toast?', 'a salty spread made from yeast extract', ['a sweet chocolate cream', 'a kiwi jam'], 'It was invented in Melbourne in 1922. Use just a little: it is very strong!', 'Australia'],
+    ['Poutine, from Quebec, is chips (fries) with cheese curds and…', 'gravy', ['maple syrup', 'ketchup and mustard'], 'The cheese curds should "squeak" when you eat them.', 'Canada'],
+    ['Pavlova, the dessert both Australia and New Zealand say they invented, is named after…', 'a Russian ballerina', ['a Māori queen', 'a famous racehorse'], 'Anna Pavlova toured both countries in the 1920s. The dessert is meringue, cream and fruit.', 'Australia & NZ'],
+    ['Irish soda bread uses bicarbonate of soda and buttermilk instead of…', 'yeast', ['flour', 'salt'], 'It is quick to make because you don\'t have to wait for it to rise.', 'Ireland'],
+    ['What is the main ingredient of a British "black pudding"?', 'blood, with fat and oats', ['dark chocolate', 'black beans'], 'It is part of a full English (or Irish) breakfast. It is similar to Spanish morcilla!', 'UK'],
+    ['A Yorkshire pudding is…', 'baked batter, eaten with roast beef', ['a chocolate cake', 'a rice dessert'], 'It is part of the Sunday roast, with gravy.', 'UK']
+  ],
+  library: [
+    ['Which famous library hall at Trinity College Dublin is known for its 200,000 old books and its marble busts?', 'the Long Room', ['the Great Hall', 'the Book Tower'], 'It is about 65 metres long, with busts of famous writers.', 'Ireland'],
+    ['Which Irish writer wrote "Dracula" (1897)?', 'Bram Stoker', ['Oscar Wilde', 'James Joyce'], 'Bram Stoker was born in Dublin. Oscar Wilde and James Joyce were also from Dublin.', 'Ireland'],
+    ['Which Canadian writer created "Anne of Green Gables" (1908)?', 'Lucy Maud Montgomery', ['Margaret Atwood', 'Alice Munro'], 'The story happens on Prince Edward Island.', 'Canada'],
+    ['Which writer, born in Edinburgh, created Sherlock Holmes?', 'Arthur Conan Doyle', ['Agatha Christie', 'Charles Dickens'], 'Holmes lives at 221B Baker Street, London.', 'Scotland'],
+    ['Which writer, born in Cardiff (Wales), wrote "Charlie and the Chocolate Factory"?', 'Roald Dahl', ['J.K. Rowling', 'C.S. Lewis'], 'His parents were Norwegian. C.S. Lewis was born in Belfast.', 'Wales'],
+    ['Which short-story writer, born in Wellington in 1888, is one of New Zealand\'s most famous authors?', 'Katherine Mansfield', ['Virginia Woolf', 'Jane Austen'], 'She moved to London at 19 and wrote "The Garden Party".', 'New Zealand'],
+    ['What is the largest library in the world, in Washington D.C.?', 'the Library of Congress', ['the New York Public Library', 'the Smithsonian Library'], 'It has more than 170 million items, including books, maps and recordings.', 'USA']
+  ],
+  bigben: [
+    ['What is "Big Ben" really the name of?', 'the great bell inside the tower', ['the whole clock tower', 'the architect of the tower'], 'Most people call the tower Big Ben, but the name belongs to the 13-tonne bell.', 'UK'],
+    ['What has the clock tower been called since 2012?', 'the Elizabeth Tower', ['the Victoria Tower', 'St Stephen\'s Tower'], 'It was renamed for Queen Elizabeth II. The Victoria Tower is at the other end of the Palace.', 'UK'],
+    ['To make the clock faster or slower, workers put… on the pendulum.', 'old penny coins', ['gold rings', 'small bags of sand'], 'Adding one old penny makes the clock gain about 0.4 seconds a day.', 'UK'],
+    ['In which year was the clock tower finished?', '1859', ['1666', '1924'], 'The old Palace of Westminster burned down in 1834 and was rebuilt.', 'UK']
+  ],
+  castle: [
+    ['Edinburgh Castle is built on top of…', 'an old volcano', ['a Roman temple', 'an island'], 'Castle Rock is the plug of a volcano that erupted about 350 million years ago.', 'Scotland'],
+    ['What are the "Honours of Scotland", kept in the castle?', 'the Scottish Crown Jewels', ['a famous football team', 'medals for soldiers'], 'They are the oldest crown jewels in the British Isles.', 'Scotland'],
+    ['When is the One O\'Clock Gun fired from the castle?', 'at 1 pm, every day except Sunday', ['every hour', 'only at New Year'], 'It started in 1861 so that ships could check their clocks.', 'Scotland'],
+    ['Which famous show of military bands takes place at the castle every August?', 'the Royal Edinburgh Military Tattoo', ['the Proms', 'Glastonbury'], 'Pipers and bands from all over the world perform in front of the castle.', 'Scotland']
+  ],
+  cntower: [
+    ['How tall is the CN Tower?', 'about 553 metres', ['about 155 metres', 'about 1,000 metres'], 'For 32 years it was the tallest free-standing structure in the world.', 'Canada'],
+    ['What did "CN" originally stand for?', 'Canadian National, a railway company', ['Central North', 'Canada\'s Nation'], 'The railway company built it as a TV and radio tower.', 'Canada'],
+    ['What is the CN Tower\'s "EdgeWalk"?', 'a walk around the outside of the tower, tied to a rope', ['a glass elevator', 'a revolving restaurant'], 'It is 356 metres above the ground!', 'Canada'],
+    ['In which city is the CN Tower?', 'Toronto', ['Montreal', 'Vancouver'], 'Toronto is the biggest city in Canada, but not the capital (Ottawa).', 'Canada']
+  ],
+  liberty: [
+    ['Who designed the iron skeleton inside the Statue of Liberty?', 'Gustave Eiffel', ['Thomas Edison', 'Abraham Lincoln'], 'Yes, the same engineer as the Eiffel Tower! The sculptor was Frédéric Bartholdi.', 'USA'],
+    ['Why is the statue green?', 'it is made of copper, which turned green', ['it was painted green in 1950', 'it is covered in plants'], 'At first it was a shiny brown colour, like a new coin.', 'USA'],
+    ['What date is written on the tablet she holds?', 'July 4, 1776', ['January 1, 1900', 'October 12, 1492'], 'It is written in Roman numerals: JULY IV MDCCLXXVI, Independence Day.', 'USA'],
+    ['Who gave the statue to the USA?', 'the people of France', ['the King of Spain', 'the people of Britain'], 'It arrived in 350 pieces and was opened in 1886.', 'USA']
+  ],
+  opera: [
+    ['Who designed the Sydney Opera House?', 'Jørn Utzon, a Danish architect', ['Frank Lloyd Wright, an American architect', 'an Australian engineer'], 'Utzon won a competition in 1957 with his drawings.', 'Australia'],
+    ['Who officially opened it in 1973?', 'Queen Elizabeth II', ['the Beatles', 'the Pope'], 'It took 14 years to build instead of the planned 4.', 'Australia'],
+    ['About how many tiles cover its white roof?', 'more than 1 million', ['about 10,000', 'about 500'], 'The Swedish tiles clean themselves when it rains.', 'Australia'],
+    ['Its roof is often compared to…', 'the sails of a ship', ['a kangaroo', 'a mountain'], 'It became a UNESCO World Heritage Site in 2007.', 'Australia']
+  ],
+  stonehenge: [
+    ['Roughly how old is Stonehenge?', 'about 5,000 years old', ['about 500 years old', 'about 50,000 years old'], 'Building started around 3000 BC and continued for centuries.', 'England (UK)'],
+    ['Where did its smaller "bluestones" come from?', 'Wales, more than 200 km away', ['a beach in France', 'a field next to it'], 'Nobody knows exactly how people moved them without wheels or machines.', 'England (UK)'],
+    ['When do thousands of people go to Stonehenge to watch the sun rise in line with the stones?', 'on the summer solstice (around 21 June)', ['on Christmas Day', 'on Halloween'], 'The stones line up with the sunrise in summer and the sunset in winter.', 'England (UK)'],
+    ['In which English county is Stonehenge?', 'Wiltshire', ['Yorkshire', 'Cornwall'], 'It is near the city of Salisbury.', 'England (UK)']
+  ],
+  towerbridge: [
+    ['When did Tower Bridge open?', 'in 1894', ['in 1666', 'in 1952'], 'It took eight years and more than 400 workers to build it.', 'England (UK)'],
+    ['Why can the road in the middle of Tower Bridge lift up?', 'to let tall ships pass', ['to stop invaders', 'to clean the bridge'], 'It still opens about 800 times a year.', 'England (UK)'],
+    ['In 1952 the bridge started to open while a bus was on it. What happened?', 'the bus jumped across the gap', ['the bus fell into the river', 'the bridge broke'], 'The driver, Albert Gunter, accelerated and landed safely on the other side!', 'England (UK)'],
+    ['The old "London Bridge" was sold in 1968 and rebuilt in…', 'Arizona, USA', ['Sydney, Australia', 'Dublin, Ireland'], 'It is now in Lake Havasu City. Many people confuse London Bridge with Tower Bridge.', 'England (UK)']
+  ],
+  newgrange: [
+    ['What kind of building is Newgrange?', 'a passage tomb', ['a castle', 'a church'], 'A long stone passage leads to a chamber in the middle of a huge mound.', 'Ireland'],
+    ['About how old is Newgrange?', 'about 5,200 years old', ['about 1,000 years old', 'about 500 years old'], 'It is older than Stonehenge and the Great Pyramid of Giza.', 'Ireland'],
+    ['What happens at Newgrange at sunrise around 21 December?', 'sunlight enters through a "roof-box" and lights up the chamber', ['the stones change colour', 'the river floods the tomb'], 'Every year there is a lottery to be inside on the winter solstice.', 'Ireland'],
+    ['In which Irish county is Newgrange?', 'County Meath', ['County Cork', 'County Kerry'], 'It is in the Boyne Valley, about an hour north of Dublin.', 'Ireland']
+  ],
+  whitehouse: [
+    ['Who was the first president to live in the White House (1800)?', 'John Adams', ['George Washington', 'Abraham Lincoln'], 'George Washington chose the place, but he died before it was finished.', 'USA'],
+    ['What happened to the White House in 1814?', 'British soldiers set it on fire', ['an earthquake destroyed it', 'it was sold to France'], 'It happened during the War of 1812. It was rebuilt in the following years.', 'USA'],
+    ['What is the President\'s office in the White House called?', 'the Oval Office', ['the Round Room', 'the Blue Office'], 'It is oval, like an egg.', 'USA'],
+    ['What is the address of the White House?', '1600 Pennsylvania Avenue', ['10 Downing Street', '221B Baker Street'], '10 Downing Street is the British Prime Minister\'s house; 221B Baker Street is Sherlock Holmes\'s!', 'USA']
+  ],
+  goldengate: [
+    ['What is the official colour of the Golden Gate Bridge?', 'International Orange', ['Golden Yellow', 'Fire Red'], 'The colour was chosen because it looks good in the fog and ships can see it.', 'USA'],
+    ['What is the "Golden Gate"?', 'the sea channel that the bridge crosses', ['an old gold mine', 'the main gate of San Francisco'], 'It is the entrance to San Francisco Bay from the Pacific Ocean.', 'USA'],
+    ['When did the Golden Gate Bridge open?', 'in 1937', ['in 1887', 'in 1967'], 'Until 1964 it was the longest suspension bridge in the world.', 'USA'],
+    ['Which old island prison can you see from the bridge?', 'Alcatraz', ['Ellis Island', 'Robben Island'], 'Alcatraz was a prison until 1963. Robben Island is in South Africa.', 'USA']
+  ],
+  inukshuk: [
+    ['Who traditionally build inuksuit (stone figures like this one)?', 'the Inuit of the Arctic', ['the Vikings', 'the Maya'], 'Inukshuk means something like "acting like a person" in Inuktitut.', 'Canada'],
+    ['What did an inukshuk often tell travellers?', 'which way to go, or a good place to hunt or fish', ['what time it was', 'the names of kings'], 'In the Arctic there are no trees or roads, so they were important signs.', 'Canada'],
+    ['An inukshuk appears on the flag of which Canadian territory?', 'Nunavut', ['Yukon', 'Quebec'], 'Nunavut was created in 1999. Most people there are Inuit.', 'Canada'],
+    ['Which Olympic Games used an inukshuk as its logo?', 'Vancouver 2010', ['Calgary 1988', 'Montreal 1976'], 'The logo was called Ilanaaq, which means "friend".', 'Canada']
+  ],
+  hobbiton: [
+    ['Hobbiton was built on a family sheep farm near which New Zealand town?', 'Matamata', ['Queenstown', 'Rotorua'], 'The Alexander family farm still has thousands of sheep.', 'New Zealand'],
+    ['Which New Zealand director filmed The Lord of the Rings there?', 'Peter Jackson', ['James Cameron', 'Taika Waititi'], 'Taika Waititi is also from New Zealand. He directed "Jojo Rabbit".', 'New Zealand'],
+    ['Who wrote "The Hobbit" (1937) and "The Lord of the Rings"?', 'J.R.R. Tolkien', ['C.S. Lewis', 'J.K. Rowling'], 'Tolkien was a professor at Oxford. He also invented languages like Elvish.', 'UK'],
+    ['How many hobbit holes are there at Hobbiton?', '44', ['4', '400'], 'Some are tiny so the actors look big, and others are bigger so they look small!', 'New Zealand']
+  ],
+  harbourbridge: [
+    ['What is the nickname of the Sydney Harbour Bridge?', 'the Coathanger', ['the Rainbow', 'the Boomerang'], 'Because of the shape of its arch.', 'Australia'],
+    ['When did the Sydney Harbour Bridge open?', 'in 1932', ['in 1888', 'in 1973'], 'Before, people crossed the harbour by ferry.', 'Australia'],
+    ['What can visitors do on the bridge since 1998?', 'climb to the top of the arch', ['bungee jump', 'swim under it'], 'BridgeClimb takes about 3 hours, 134 metres above the water.', 'Australia'],
+    ['Which famous building is next to the bridge, on the same harbour?', 'the Sydney Opera House', ['the CN Tower', 'Uluru'], 'Every New Year\'s Eve, fireworks are launched from the bridge.', 'Australia']
+  ]
+};
+/* Short texts shown when you look at a famous monument (after building it) */
 const READING = {
-  bigben: { title: 'Big Ben', text: 'Big Ben is the nickname of the great bell in the clock tower of the Houses of Parliament in London. The tower was finished in 1859, and in 2012 it was renamed the Elizabeth Tower to celebrate Queen Elizabeth II. The clock has four faces and the bell weighs more than 13 tonnes. Millions of people listen to it on New Year\'s Eve.',
-    qs: [['What is "Big Ben" really?', 'The great bell', ['The architect of the tower', 'The whole Parliament'], 'Read the first sentence again: it is the nickname of the bell.'],
-      ['When was the tower finished?', 'In 1859', ['In 2012', 'In 1950'], 'The tower was finished in 1859.'],
-      ['What is the tower called today?', 'The Elizabeth Tower', ['The Victoria Tower', 'The London Eye'], 'In 2012 it was renamed the Elizabeth Tower.']] },
-  liberty: { title: 'The Statue of Liberty', text: 'The Statue of Liberty stands on Liberty Island in New York Harbor. It was a gift from the people of France to the United States, and it was opened in 1886. The statue is made of copper, which turned green over time. Lady Liberty holds a torch in her right hand and a tablet with the date of American independence in her left.',
-    qs: [['Who gave the statue to the USA?', 'The people of France', ['The people of Britain', 'The King of Spain'], 'It was a gift from the people of France.'],
-      ['What is the statue made of?', 'Copper', ['Gold', 'Stone'], 'It is made of copper, which turned green.'],
-      ['What does she hold in her right hand?', 'A torch', ['A book', 'A sword'], 'A torch in her right hand, a tablet in her left.']] },
-  opera: { title: 'The Sydney Opera House', text: 'The Sydney Opera House is in Sydney, Australia. A Danish architect, Jørn Utzon, designed it, and it opened in 1973. Its white roof looks like the sails of a ship. More than 10 million people visit it every year, and it hosts more than 1,500 performances a year. In 2007 it became a UNESCO World Heritage Site.',
-    qs: [['Who designed it?', 'A Danish architect', ['An Australian singer', 'A British king'], 'Jørn Utzon, a Danish architect, designed it.'],
-      ['What does the roof look like?', 'The sails of a ship', ['A mountain', 'A bird\'s nest'], 'Its white roof looks like the sails of a ship.'],
-      ['When did it open?', 'In 1973', ['In 2007', 'In 1500'], 'It opened in 1973.']] },
-  cntower: { title: 'The CN Tower', text: 'The CN Tower is in Toronto, Canada. It is 553 metres tall, and it was the tallest free-standing structure in the world for 32 years. It was finished in 1976. Visitors can go up in glass elevators in less than a minute, and the bravest can walk around the outside of the tower on the EdgeWalk, attached to a safety rope.',
-    qs: [['Where is the CN Tower?', 'In Toronto', ['In Vancouver', 'In Sydney'], 'The CN Tower is in Toronto, Canada.'],
-      ['For how long was it the tallest structure in the world?', '32 years', ['553 years', '76 years'], 'It was the tallest for 32 years.'],
-      ['What is the EdgeWalk?', 'A walk around the outside of the tower', ['A glass elevator', 'A restaurant'], 'On the EdgeWalk people walk outside, attached to a rope.']] },
-  castle: { title: 'Edinburgh Castle', text: 'Edinburgh Castle stands on Castle Rock, an old volcano, in the capital of Scotland. People have lived on the rock since the Iron Age. Today the castle keeps the Crown Jewels of Scotland, called the Honours of Scotland. Every day except Sunday, a cannon called the One O\'Clock Gun is fired at 1 pm.',
-    qs: [['What is Castle Rock?', 'An old volcano', ['A mountain of gold', 'An island'], 'Castle Rock is an old volcano.'],
-      ['What are the Honours of Scotland?', 'The Crown Jewels', ['A football team', 'A cannon'], 'The Crown Jewels are called the Honours of Scotland.'],
-      ['When is the One O\'Clock Gun fired?', 'At 1 pm, except on Sundays', ['Every hour', 'Only on Sundays'], 'Every day except Sunday, at 1 pm.']] }
+  bigben: { title: 'Big Ben', text: 'Big Ben is the nickname of the great bell in the clock tower of the Houses of Parliament in London. The tower was finished in 1859, and in 2012 it was renamed the Elizabeth Tower to celebrate Queen Elizabeth II. The clock has four faces and the bell weighs more than 13 tonnes. Millions of people listen to it on New Year\'s Eve.' },
+  liberty: { title: 'The Statue of Liberty', text: 'The Statue of Liberty stands on Liberty Island in New York Harbor. It was a gift from the people of France to the United States, and it was opened in 1886. The statue is made of copper, which turned green over time. Lady Liberty holds a torch in her right hand and a tablet with the date of American independence in her left.' },
+  opera: { title: 'The Sydney Opera House', text: 'The Sydney Opera House is in Sydney, Australia. A Danish architect, Jørn Utzon, designed it, and it opened in 1973. Its white roof looks like the sails of a ship. More than 10 million people visit it every year, and it hosts more than 1,500 performances a year. In 2007 it became a UNESCO World Heritage Site.' },
+  cntower: { title: 'The CN Tower', text: 'The CN Tower is in Toronto, Canada. It is 553 metres tall, and it was the tallest free-standing structure in the world for 32 years. It was finished in 1976. Visitors can go up in glass elevators in less than a minute, and the bravest can walk around the outside of the tower on the EdgeWalk, attached to a safety rope.' },
+  castle: { title: 'Edinburgh Castle', text: 'Edinburgh Castle stands on Castle Rock, an old volcano, in the capital of Scotland. People have lived on the rock since the Iron Age. Today the castle keeps the Crown Jewels of Scotland, called the Honours of Scotland. Every day except Sunday, a cannon called the One O\'Clock Gun is fired at 1 pm.' },
+  stonehenge: { title: 'Stonehenge', text: 'Stonehenge is a circle of huge standing stones in Wiltshire, in the south of England. People started building it about 5,000 years ago, long before writing arrived in Britain. Some stones weigh 25 tonnes, and the smaller bluestones were brought from Wales. On the summer solstice the sun rises in line with the stones.' },
+  towerbridge: { title: 'Tower Bridge', text: 'Tower Bridge crosses the River Thames in London, next to the Tower of London. It opened in 1894. The road in the middle is made of two parts called bascules, which lift up to let tall ships pass. High above the road there are glass walkways where visitors can look down at the traffic and the river.' },
+  newgrange: { title: 'Newgrange', text: 'Newgrange is a passage tomb in County Meath, Ireland. It was built about 5,200 years ago, so it is older than Stonehenge and the pyramids of Giza. Its front wall is covered in white quartz stones. Around the winter solstice, the light of the rising sun enters a small opening called the roof-box and lights up the chamber inside for about 17 minutes.' },
+  whitehouse: { title: 'The White House', text: 'The White House, at 1600 Pennsylvania Avenue in Washington D.C., is the home and office of the President of the United States. John Adams was the first president to live there, in 1800. British soldiers set it on fire in 1814, and it was rebuilt. It has 132 rooms, a cinema, a bowling alley and the famous Oval Office.' },
+  goldengate: { title: 'The Golden Gate Bridge', text: 'The Golden Gate Bridge crosses the Golden Gate, the strait between San Francisco Bay and the Pacific Ocean. It opened in 1937, and until 1964 it was the longest suspension bridge in the world. Its colour, International Orange, helps ships see it in the thick fog that often covers the bay.' },
+  inukshuk: { title: 'The Inukshuk', text: 'An inukshuk is a figure made of stones piled on top of each other. The Inuit of the Canadian Arctic have built them for centuries to show the way, to mark good places for hunting and fishing, or to remember special places. An inukshuk appears on the flag of Nunavut, and one was the logo of the Vancouver 2010 Winter Olympics.' },
+  hobbiton: { title: 'Hobbiton', text: 'Hobbiton is the village of the hobbits from The Lord of the Rings and The Hobbit films, directed by New Zealander Peter Jackson. It is on a sheep farm near Matamata, on the North Island of New Zealand. After filming, the 44 hobbit holes were rebuilt to last, and today visitors can walk around the village and have a drink at the Green Dragon Inn.' },
+  harbourbridge: { title: 'The Sydney Harbour Bridge', text: 'The Sydney Harbour Bridge opened in 1932. Australians call it "the Coathanger" because of the shape of its big steel arch. It carries cars, trains, bicycles and people across Sydney Harbour, next to the Opera House. Since 1998 visitors can climb to the top of the arch, 134 metres above the water.' }
 };
 const MOTTOS = ['Unity is strength', 'Knowledge is power', 'Freedom and friendship', 'Work hard, be kind', 'Together we build', 'Peace, people, progress', 'Dream big, act now', 'Brave, free and fair'];
 const FLAG_COLS = ['#c62828', '#1d3fbf', '#fafafa', '#2e7d32', '#fbc02d', '#212121', '#6a1b9a', '#ef6c00', '#00838f', '#f48fb1'];
@@ -2945,6 +3293,7 @@ const NAPI = {
       const s = NAPI.local(), n = s.nation, b = BLD[id];
       if (!n.plots.includes(i) || n.buildings[i]) throw new Error('You cannot build there.');
       if (UNIQUE_B.includes(id) && Object.values(n.buildings).includes(id)) throw new Error('Your nation already has one.');
+      if (!fitsPlot(id, i)) throw new Error(RIVER.includes(i) ? 'Only bridges and ports can be built on the river.' : 'Bridges must be built on the river.');
       if (s.goyux.total < b[2]) throw new Error(`You need ${b[2]} GOYUX for this building.`);
       n.buildings[i] = id; n.spent += b[2]; store.set('nation', n);
     });
@@ -2952,7 +3301,7 @@ const NAPI = {
   move(from, to) {
     return NAPI.run('nationMove', [from, to], () => {
       const s = NAPI.local(), n = s.nation, id = n.buildings[from];
-      if (!id || id === 'cityhall' || !n.plots.includes(to) || n.buildings[to]) throw new Error('You cannot move that building there.');
+      if (!id || id === 'cityhall' || !n.plots.includes(to) || n.buildings[to] || !fitsPlot(id, to)) throw new Error('You cannot move that building there.');
       if (s.goyux.total < moveCost(id)) throw new Error(`You need ${moveCost(id)} GOYUX to move it.`);
       delete n.buildings[from]; n.buildings[to] = id; n.spent += moveCost(id); store.set('nation', n);
     });
@@ -2978,12 +3327,15 @@ function flagCss(f) {
   const dir = f && f.layout === 'v' ? '90deg' : '180deg', n = c.length;
   return `linear-gradient(${dir},${c.map((x, i) => `${x} ${i * 100 / n}% ${(i + 1) * 100 / n}%`).join(',')})`;
 }
+const flagTexCache = {};
 function flagTex(f) {
-  const c = (f && f.c && f.c.length ? f.c : ['#1d3fbf', '#fafafa', '#c62828']);
-  return canvasTex(150, 100, (g, w, h) => {
+  const c = (f && f.c && f.c.length ? f.c : ['#1d3fbf', '#fafafa', '#c62828']), key = flagKey(f);
+  if (flagTexCache[key]) return flagTexCache[key];
+  const t = flagTexCache[key] = canvasTex(150, 100, (g, w, h) => {
     if (f && f.layout === 'cross') { g.fillStyle = c[0]; g.fillRect(0, 0, w, h); g.fillStyle = c[1]; g.fillRect(w * 0.3, 0, w * 0.12, h); g.fillRect(0, h * 0.42, w, h * 0.16); return; }
     c.forEach((col, i) => { g.fillStyle = col; if (f && f.layout === 'v') g.fillRect(i * w / c.length, 0, w / c.length + 1, h); else g.fillRect(0, i * h / c.length, w, h / c.length + 1); });
   });
+  t.keep = true; return t;
 }
 const nameKey = t => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]/g, '');
 const flagKey = f => (f && f.layout || 'h') + '|' + ((f && f.c) || []).map(c => String(c).toLowerCase()).join(',');
@@ -2993,6 +3345,102 @@ const flagChip = (f, w = 30) => `<i class="flag" style="width:${w}px;background:
 const PLOT = 12, TILE = 10;
 const HALF = (NR.size - 1) / 2;
 const plotXZ = i => [((i % NR.size) - HALF) * PLOT, (Math.floor(i / NR.size) - HALF) * PLOT];
+
+/* ---------- natural island: coast, beach, mountains, lakes, forests and the river ----------
+   The plots stay on their grid (the server counts them), but the land around them is natural
+   and every nation gets its own shape, seeded by its name. North (negative z) has the mountains. */
+const RIVER_X = plotXZ(RIVER[0])[0];
+function islandPlan(seedText) {
+  let sd = [...String(seedText || 'GOBLOX')].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7) || 7;
+  const rnd = () => (sd = (sd * 1664525 + 1013904223) >>> 0) / 4294967296;
+  const ph = [0, 1, 2, 3].map(() => rnd() * 6.3);
+  // distance from the centre to the coast at world angle a (x = r cos a, z = r sin a)
+  const coast = a => { const c = Math.abs(Math.cos(a)), sn = Math.abs(Math.sin(a));
+    return 80 * Math.pow(c ** 4 + sn ** 4, -0.25) + 26 * Math.max(0, -Math.sin(a)) ** 2 + 4 * Math.sin(3 * a + ph[0]) + 3 * Math.sin(5 * a + ph[1]) + 1.5 * Math.sin(11 * a + ph[2]); };
+  const inside = (x, z, m = 0) => Math.hypot(x, z) < coast(Math.atan2(z, x)) - m;
+  // the river meanders gently between the plots and more freely outside them
+  const riverX = z => RIVER_X + (0.7 + 2.6 * clamp((Math.abs(z) - 55) / 15, 0, 1)) * Math.sin(z * 0.16 + ph[3]);
+  return { rnd, coast, inside, riverX };
+}
+function flatShape(rf, y, col, n = 180) {
+  const sh = new THREE.Shape();
+  for (let k = 0; k < n; k++) { const a = k / n * Math.PI * 2, r = rf(a); k ? sh.lineTo(Math.cos(a) * r, -Math.sin(a) * r) : sh.moveTo(Math.cos(a) * r, -Math.sin(a) * r); }
+  const m = new THREE.Mesh(new THREE.ShapeGeometry(sh), M(col)); m.rotation.x = -Math.PI / 2; m.position.y = y; m.receiveShadow = true; W.scene.add(m); return m;
+}
+function ribbon(pts, y, col) {   // pts: [[x, z, half width], …] along the river
+  const pos = [], idx = [];
+  pts.forEach(([px, pz, hw], k) => {
+    const [nx, nz] = pts[Math.min(k + 1, pts.length - 1)], [ox, oz] = pts[Math.max(k - 1, 0)];
+    let dx = nx - ox, dz = nz - oz; const L = Math.hypot(dx, dz) || 1; dx /= L; dz /= L;
+    pos.push(px - dz * hw, y, pz + dx * hw, px + dz * hw, y, pz - dx * hw);
+    if (k) { const b = k * 2; idx.push(b - 2, b, b - 1, b - 1, b, b + 1); }
+  });
+  const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); geo.setIndex(idx); geo.computeVertexNormals();
+  const m = new THREE.Mesh(geo, M(col)); m.receiveShadow = true; W.scene.add(m); return m;
+}
+const WATER = '#2d8bd6', BANK = '#c9b57c', GRASS = '#5c9e45';
+function drawIsland(seedText) {
+  const I = islandPlan(seedText), { rnd, coast, inside, riverX } = I;
+  flatShape(a => coast(a) + 14, -0.45, '#4fb3e8');
+  flatShape(coast, -0.02, '#e3d29b');
+  flatShape(a => coast(a) - 7, 0.02, GRASS);
+  const disc = (x, z, rx, rz, y, col) => { const m = new THREE.Mesh(new THREE.CircleGeometry(1, 30), M(col)); m.rotation.x = -Math.PI / 2; m.scale.set(rx, rz, 1); m.position.set(x, y, z); m.receiveShadow = true; W.scene.add(m); };
+  const lakes = [];
+  const lake = (x, z, r) => { lakes.push([x, z, r]); disc(x, z, r * 1.25 + 1, r + 1, 0.11, BANK); disc(x, z, r * 1.25, r, 0.13, WATER); };
+  /* the river: from a mountain lake to the south coast */
+  const z0 = -66; lake(riverX(z0), z0, 6);
+  let zEnd = 0; while (inside(riverX(zEnd), zEnd, 0.5) && zEnd < 140) zEnd += 0.5;
+  const pts = [];
+  for (let zz = z0; zz <= zEnd; zz += 1) pts.push([riverX(zz), zz, (zz < -54 ? 1.4 + 1.3 * clamp((zz - z0) / 12, 0, 1) : 2.7) + 1.6 * clamp((zz - zEnd + 12) / 12, 0, 1)]);
+  ribbon(pts.map(([x, z, w]) => [x, z, w + 0.9]), 0.11, BANK); ribbon(pts, 0.13, WATER);
+  /* a second lake in the north-west hills */
+  for (let t = 0; t < 8; t++) { const a = -2.1 - t * 0.08, d = coast(a) - 21, lx = Math.cos(a) * d, lz = Math.sin(a) * d; if (lz < -64) { lake(lx, lz, 7); break; } }
+  const free = (x, z, r) => lakes.every(([lx, lz, lr]) => Math.hypot(x - lx, z - lz) > lr * 1.25 + r) && Math.abs(x - riverX(z)) > r + 4;
+  /* mountains with snow in the north, green hills elsewhere */
+  const peaks = [];
+  const rock = ['#6f7d52', '#7b7466', '#68784c'], snowM = M('#f4f7fb');
+  const mountain = (x, z, r, h, snow, col) => {
+    const ry = rnd() * 3, m = new THREE.Mesh(new THREE.ConeGeometry(r, h, 7), new THREE.MeshLambertMaterial({ color: col, flatShading: true }));
+    m.position.set(x, h / 2 - 0.2, z); m.rotation.y = ry; m.castShadow = true; m.receiveShadow = true; W.scene.add(m);
+    if (snow) { const c = new THREE.Mesh(new THREE.ConeGeometry(r * 0.37, h * 0.34, 7), snowM); c.position.set(x, h * 0.835 - 0.15, z); c.rotation.y = ry; W.scene.add(c); }   // a bit wider than the slope, so it doesn't flicker
+    peaks.push([x, z, r]);
+  };
+  for (let row = 0; row < 2; row++) for (let x = -88; x <= 88; x += 15) {
+    const px = x + (rnd() - 0.5) * 8, pz = -(row ? 90 + rnd() * 12 : 74 + rnd() * 10), r = (row ? 13 : 10) + rnd() * 5, h = (row ? 26 : 16) + rnd() * 12;
+    if (inside(px, pz, r * 0.55 + 2) && pz + r * 0.7 < -57 && free(px, pz, r * 0.7)) mountain(px, pz, r, h, h > 20, rock[(rnd() * 3) | 0]);
+  }
+  for (let k = 0, made = 0; k < 60 && made < 7; k++) {
+    const a = rnd() * Math.PI * 2, d = 60 + rnd() * 30, px = Math.cos(a) * d, pz = Math.sin(a) * d, r = 6 + rnd() * 4;
+    if (pz > -50 && Math.max(Math.abs(px), Math.abs(pz)) > 60 + r * 0.6 && inside(px, pz, r + 8) && free(px, pz, r)) { mountain(px, pz, r, 4 + rnd() * 5, false, '#6a9a4a'); made++; }
+  }
+  /* forests around the plots (one shared geometry for all trees) */
+  const trunk = new THREE.BoxGeometry(0.5, 1.8, 0.5), crown = new THREE.ConeGeometry(1.4, 3.6, 8), ball = new THREE.SphereGeometry(1.4, 9, 7);
+  for (let k = 0, made = 0; k < 400 && made < 70; k++) {
+    const px = (rnd() - 0.5) * 200, pz = (rnd() - 0.5) * 200;
+    if (Math.max(Math.abs(px), Math.abs(pz)) < 58 || !inside(px, pz, 10) || !free(px, pz, 2) || peaks.some(([mx, mz, mr]) => Math.hypot(px - mx, pz - mz) < mr + 1)) continue;
+    const pine = pz < -20 || rnd() < 0.5, s = 0.8 + rnd() * 0.6;
+    const t = new THREE.Mesh(trunk, M('#6d4c41')); t.position.set(px, 0.9 * s, pz); t.scale.setScalar(s); W.scene.add(t);
+    const c = new THREE.Mesh(pine ? crown : ball, M(pine ? '#1b5e20' : '#388e3c')); c.position.set(px, (pine ? 3.2 : 2.6) * s, pz); c.scale.setScalar(s); c.castShadow = true; W.scene.add(c); made++;
+  }
+  /* palm trees on the beach (not on the mountain coast) */
+  const palm = (px, pz, lean) => {
+    for (let k = 0; k < 4; k++) part(px + lean * k * 0.25, k * 1.1, pz, 0.45 - k * 0.04, 1.15, 0.45 - k * 0.04, k % 2 ? '#8d6e63' : '#795548', { solid: false });
+    const top = new THREE.Group(); top.position.set(px + lean * 0.9, 4.5, pz); W.scene.add(top);
+    for (let k = 0; k < 6; k++) { const leaf = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.08, 0.6), M(k % 2 ? '#43a047' : '#2e7d32')); leaf.position.set(1, -0.25, 0); leaf.rotation.z = -0.35; const arm = new THREE.Group(); arm.rotation.y = k * Math.PI / 3; arm.add(leaf); top.add(arm); leaf.castShadow = true; }
+  };
+  for (let k = 0; k < 30; k++) {
+    const a = k / 30 * Math.PI * 2 + rnd() * 0.1, d = coast(a) - 3.5, px = Math.cos(a) * d, pz = Math.sin(a) * d;
+    if (Math.sin(a) > -0.35 && !(pz > 0 && Math.abs(px - riverX(pz)) < 8)) palm(px, pz, Math.cos(a) * 0.6);
+  }
+  /* boats on the sea */
+  return ['#e53935', '#fbc02d', '#1e88e5', '#fafafa'].map((c, k) => {
+    const a = 0.3 + k * 1.6, d = coast(a) + 22, b = new THREE.Group(); b.position.set(Math.cos(a) * d, -0.3, Math.sin(a) * d); b.rotation.y = k * 1.3; W.scene.add(b);
+    const hull = new THREE.Mesh(new THREE.BoxGeometry(5, 1.2, 1.8), M(c)); hull.position.y = 0.4; b.add(hull);
+    const mast = new THREE.Mesh(new THREE.BoxGeometry(0.15, 5, 0.15), M('#6d4c41')); mast.position.y = 3.2; b.add(mast);
+    const sail = new THREE.Mesh(new THREE.ConeGeometry(1.6, 4.2, 3), M('#fafafa')); sail.scale.z = 0.08; sail.position.set(0.9, 3.3, 0); b.add(sail);
+    return b;
+  });
+}
 function clockTex() {
   return canvasTex(128, 128, (g) => {
     g.fillStyle = '#c8a96a'; g.fillRect(0, 0, 128, 128); g.fillStyle = '#fffbe6'; g.beginPath(); g.arc(64, 64, 52, 0, 7); g.fill();
@@ -3000,21 +3448,61 @@ function clockTex() {
     g.lineWidth = 6; g.beginPath(); g.moveTo(64, 64); g.lineTo(64, 28); g.moveTo(64, 64); g.lineTo(90, 70); g.stroke();
   });
 }
-function drawBuilding(id, x, z, g, flag) {
+/* Windows: one texture per wall colour. The box UVs are scaled to world size, so the
+   windows keep the same size on every wall and nothing new is downloaded. */
+const facadeCache = {};
+function facadeMat(col) {
+  if (facadeCache[col]) return facadeCache[col];
+  const t = canvasTex(64, 64, g => {
+    g.fillStyle = col; g.fillRect(0, 0, 64, 64);
+    g.fillStyle = 'rgba(0,0,0,.18)'; g.fillRect(17, 13, 32, 38);
+    g.fillStyle = '#f5f5f5'; g.fillRect(15, 11, 32, 38);
+    const gr = g.createLinearGradient(0, 14, 0, 46); gr.addColorStop(0, '#d6efff'); gr.addColorStop(1, '#5a8fc4'); g.fillStyle = gr; g.fillRect(18, 14, 26, 32);
+    g.fillStyle = '#f5f5f5'; g.fillRect(30, 14, 2, 32); g.fillRect(18, 28, 26, 2);
+  });
+  t.wrapS = t.wrapT = THREE.RepeatWrapping; t.keep = true;
+  const side = new THREE.MeshLambertMaterial({ map: t }), top = M(col);
+  return facadeCache[col] = [side, side, top, top, side, side];
+}
+function addWindows(m, col, size = 1.5) {
+  const p = m.geometry.parameters, uv = m.geometry.attributes.uv;
+  for (let f = 0; f < 6; f++) {
+    const su = Math.max(1, Math.round((f < 2 ? p.depth : p.width) / size)), sv = Math.max(1, Math.round((f === 2 || f === 3 ? p.depth : p.height) / size));
+    for (let k = f * 4; k < f * 4 + 4; k++) uv.setXY(k, uv.getX(k) * su, uv.getY(k) * sv);
+  }
+  uv.needsUpdate = true; m.material = facadeMat(col); return m;
+}
+function waveFlags(t) {
+  (W.flags || []).forEach(f => { const p = f.m.geometry.attributes.position; for (let k = 0; k < p.count; k++) { const u = p.getX(k); p.setZ(k, Math.sin(u * 3.2 - t * 5 + f.ph) * 0.13 * u); } p.needsUpdate = true; });
+}
+function drawBuilding(id, x, z, g, flag, river) {
   const B = (dx, y, dz, w, h, d, col, solid = true) => part(x + dx, y, z + dz, w, h, d, col, { parent: g, solid });
   const Mx = (geo, col, dx, y, dz, rot, mat) => { const m = new THREE.Mesh(geo, mat || M(col)); m.position.set(x + dx, y, z + dz); if (rot) m.rotation.set(rot[0], rot[1], rot[2]); m.castShadow = true; g.add(m); return m; };
   const roof = (dx, y, dz, w, d, h, col) => { const r = Math.max(w, d); const m = Mx(new THREE.ConeGeometry(r * 0.72, h, 4), col, dx, y + h / 2, dz, [0, Math.PI / 4, 0]); m.scale.set(w / r, 1, d / r); };
   const tree = (dx, dz, s = 1) => { B(dx, 0, dz, 0.5 * s, 2 * s, 0.5 * s, '#6d4c41'); Mx(new THREE.SphereGeometry(1.3 * s, 10, 8), '#2e7d32', dx, 2.6 * s, dz); };
-  const pole = (dx, dz, h, f) => { B(dx, 0, dz, 0.15, h, 0.15, '#9e9e9e'); const fm = Mx(new THREE.PlaneGeometry(1.8, 1.2), null, dx + 0.95, h - 0.7, dz, null, new THREE.MeshBasicMaterial({ map: flagTex(f), side: THREE.DoubleSide })); fm.castShadow = false; };
+  const pole = (dx, dz, h, f) => {
+    B(dx, 0, dz, 0.15, h, 0.15, '#9e9e9e'); Mx(new THREE.SphereGeometry(0.14, 8, 6), '#ffd54f', dx, h + 0.06, dz);
+    const geo = new THREE.PlaneGeometry(1.8, 1.2, 8, 1); geo.translate(0.9, 0, 0);
+    const fm = Mx(geo, null, dx + 0.07, h - 0.7, dz, null, new THREE.MeshBasicMaterial({ map: flagTex(f), side: THREE.DoubleSide })); fm.castShadow = false;
+    (W.flags || (W.flags = [])).push({ m: fm, ph: Math.random() * 6 });
+  };
+  const Wn = (dx, y, dz, w, h, d, col, solid = true) => addWindows(B(dx, y, dz, w, h, d, col, solid), col);
+  const door = (dx, dz, col = '#6d4c41', w = 1, h = 1.8) => { B(dx, 0, dz, w + 0.24, h + 0.12, 0.08, '#eeeeee', false); B(dx, 0, dz + 0.05, w, h, 0.08, col, false); };
+  const seg = (x1, y1, z1, x2, y2, t, col) => { const L = Math.hypot(x2 - x1, y2 - y1); Mx(new THREE.BoxGeometry(L, t, t), col, (x1 + x2) / 2, (y1 + y2) / 2, z1, [0, 0, Math.atan2(y2 - y1, x2 - x1)]); };
+  const water = col => { if (!river) B(0, 0.1, 0, 9.4, 0.04, 9.4, col || '#29b6f6', false); };   // bridges on the river use the real river
   const collider = (w, h, d) => W.colliders.push({ minX: x - w / 2, maxX: x + w / 2, minZ: z - d / 2, maxZ: z + d / 2, minY: 0, maxY: h });
   const label = t => sign(t, x, 0.55, z + 4.75, Math.min(8.5, t.length * 0.42 + 1), 0.62, 0, { bg: '#fffde7', fg: '#263238', parent: g });
   switch (id) {
     case 'cityhall':
-      B(0, 0, -0.5, 7, 3.5, 5, '#f5f5f5'); for (let k = -3; k <= 3; k += 1.5) B(k, 0, 2.3, 0.4, 3.2, 0.4, '#e0e0e0', false);
+      Wn(0, 0, -0.5, 7, 3.5, 5, '#f5f5f5'); for (let k = -3; k <= 3; k += 1.5) B(k, 0, 2.3, 0.4, 3.2, 0.4, '#e0e0e0', false);
+      B(0, 0, 3, 4, 0.25, 1.2, '#cfd8dc', false); door(0, 2.06, '#5d4037', 1.2, 2.2);
       B(0, 3.5, -0.3, 7.6, 0.4, 5.8, '#cfd8dc', false); Mx(new THREE.SphereGeometry(1.7, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2), '#ffd54f', 0, 3.9, -0.5);
       pole(-3.6, 3.6, 6, flag); label('CITY HALL'); break;
     case 'houses':
-      [[-2.4, -2, '#ef9a9a'], [2.4, -2, '#90caf9'], [0, 1.6, '#fff59d']].forEach(([dx, dz, c]) => { B(dx, 0, dz, 3, 2.4, 3, c); roof(dx, 2.4, dz, 3.3, 3.3, 1.6, '#8d3b2f'); });
+      [[-2.4, -2, '#ef9a9a'], [2.4, -2, '#90caf9'], [0, 1.6, '#fff59d']].forEach(([dx, dz, c]) => {
+        Wn(dx, 0, dz, 3, 2.4, 3, c); roof(dx, 2.4, dz, 3.3, 3.3, 1.6, '#8d3b2f'); B(dx + 0.8, 2.6, dz - 0.5, 0.4, 1.5, 0.4, '#795548', false); door(dx, dz + 1.52, '#5d4037', 0.6, 1.3);
+      });
+      B(-2.4, 0, 0.2, 3, 0.5, 0.15, '#fafafa', false); B(2.4, 0, 0.2, 3, 0.5, 0.15, '#fafafa', false);
       label('HOUSES'); break;
     case 'farm':
       B(-1.2, 0, 0, 5, 0.15, 7.5, '#8d6e63', false); for (let k = 0; k < 4; k++) B(-3 + k * 1.2, 0.15, 0, 0.5, 0.45, 7, '#7cb342', false);
@@ -3027,13 +3515,14 @@ function drawBuilding(id, x, z, g, flag) {
         B(dx, 0, dz, 2.2, 1, 1.4, '#d7ccc8'); B(dx, 2.1, dz, 2.6, 0.15, 2, c, false); B(dx - 1.1, 0, dz - 0.8, 0.12, 2.1, 0.12, '#795548', false); B(dx + 1.1, 0, dz - 0.8, 0.12, 2.1, 0.12, '#795548', false);
       }); label('MARKET'); break;
     case 'school':
-      B(0, 0, -0.8, 7, 3.6, 4.5, '#f9a825'); B(0, 3.6, -0.8, 7.4, 0.4, 4.9, '#6d4c41', false); B(0, 0, 1.5, 1.2, 2, 0.12, '#5d4037', false);
+      Wn(0, 0, -0.8, 7, 3.6, 4.5, '#f9a825'); B(0, 3.6, -0.8, 7.4, 0.4, 4.9, '#6d4c41', false); door(0, 1.47, '#5d4037', 1.2, 2);
+      B(2.6, 0, 3.2, 2.4, 0.06, 1.6, '#ff8a65', false); pole(-3.2, 2.4, 5, flag);
       Mx(new THREE.CylinderGeometry(0.6, 0.6, 0.1, 16), '#fafafa', 0, 2.9, 1.5, [Math.PI / 2, 0, 0]); label('SCHOOL'); break;
     case 'police':
-      B(0, 0, -0.5, 6, 3, 4.5, '#1565c0'); B(0, 3, -0.5, 6.2, 0.3, 4.7, '#e0e0e0', false); B(0, 3.3, -0.5, 0.8, 0.5, 0.8, '#e53935', false);
+      Wn(0, 0, -0.5, 6, 3, 4.5, '#1565c0'); B(0, 3, -0.5, 6.2, 0.3, 4.7, '#e0e0e0', false); door(-1.2, 1.77, '#0d47a1'); B(0, 3.3, -0.5, 0.8, 0.5, 0.8, '#e53935', false);
       B(2.4, 0, 2.8, 2.2, 0.8, 1.1, '#fafafa'); B(2.4, 0.8, 2.8, 1.2, 0.5, 1, '#1565c0', false); label('POLICE'); break;
     case 'factory':
-      B(-0.5, 0, -0.5, 6.5, 3.5, 6, '#78909c'); B(1.8, 3.5, -2, 0.9, 4, 0.9, '#5d4037', false); B(-1, 3.5, -2, 0.9, 3, 0.9, '#5d4037', false);
+      Wn(-0.5, 0, -0.5, 6.5, 3.5, 6, '#78909c'); door(-0.5, 2.52, '#455a64', 2.2, 2.2); B(1.8, 3.5, -2, 0.9, 4, 0.9, '#5d4037', false); B(-1, 3.5, -2, 0.9, 3, 0.9, '#5d4037', false);
       [[1.8, 8.2], [-1, 7.2]].forEach(([dx, y]) => { const s = Mx(new THREE.SphereGeometry(0.8, 8, 6), null, dx, y, -2, null, new THREE.MeshLambertMaterial({ color: '#9e9e9e', transparent: true, opacity: 0.7 })); s.castShadow = false; });
       label('FACTORY'); break;
     case 'windfarm':
@@ -3047,22 +3536,23 @@ function drawBuilding(id, x, z, g, flag) {
       B(0, 0, 0, 7.5, 0.5, 5.5, '#e0e0e0'); B(0, 0.5, -0.6, 6.5, 3, 3.8, '#f5f5f5', false); for (let k = -3; k <= 3; k += 1.2) B(k, 0.5, 2, 0.45, 3, 0.45, '#fafafa', false);
       B(0, 3.5, -0.2, 7.2, 0.4, 5, '#e0e0e0', false); B(0, 3.9, -0.2, 5.2, 0.4, 4.6, '#eeeeee', false); B(0, 4.3, -0.2, 3, 0.4, 4.2, '#e0e0e0', false); label('MUSEUM'); break;
     case 'press':
-      B(0, 0, -0.5, 5.5, 4.5, 4, '#8e24aa'); B(1.6, 4.5, -1.5, 0.2, 4, 0.2, '#bdbdbd', false);
+      Wn(0, 0, -0.5, 5.5, 4.5, 4, '#8e24aa'); door(0, 1.52, '#4a148c', 1.2, 2); B(1.6, 4.5, -1.5, 0.2, 4, 0.2, '#bdbdbd', false);
       Mx(new THREE.SphereGeometry(1, 12, 6, 0, Math.PI * 2, 0, Math.PI / 2), '#eeeeee', -1.2, 4.6, -0.5, [-0.6, 0, 0]); label('TV & NEWS'); break;
     case 'embassy':
-      B(0, 0, -1, 6.5, 3.2, 4, '#fafafa'); B(0, 3.2, -1, 6.9, 0.35, 4.4, '#455a64', false);
+      Wn(0, 0, -1, 6.5, 3.2, 4, '#fafafa'); B(0, 3.2, -1, 6.9, 0.35, 4.4, '#455a64', false); door(0, 1.02, '#37474f', 1.2, 2);
       pole(-2.4, 2.6, 4, { c: ['#1d3fbf', '#fafafa'], layout: 'h' }); pole(0, 2.6, 4.5, flag); pole(2.4, 2.6, 4, { c: ['#2e7d32', '#fbc02d'], layout: 'v' }); label('EMBASSY'); break;
     case 'hospital':
-      B(0, 0, -0.5, 7, 4, 5, '#fafafa'); B(0, 2, 2.06, 1.8, 0.5, 0.1, '#e53935', false); B(0, 1.35, 2.06, 0.5, 1.8, 0.1, '#e53935', false);
+      Wn(0, 0, -0.5, 7, 4, 5, '#fafafa'); B(0, 2.4, 2.06, 1.8, 0.5, 0.1, '#e53935', false); B(0, 1.75, 2.06, 0.5, 1.8, 0.1, '#e53935', false);
+      door(-2.2, 2.02, '#90caf9', 1.6, 1.8); B(-2.2, 1.95, 2.6, 2.4, 0.12, 1.2, '#e53935', false);
       B(0, 4, -0.5, 3, 0.05, 3, '#43a047', false); label('HOSPITAL'); break;
     case 'army':
       B(-1.6, 0, -1.6, 5, 2.2, 3, '#556b2f'); B(2, 0, 2, 2.6, 0.9, 1.6, '#4b5320'); B(2, 0.9, 2, 1.3, 0.6, 1.1, '#4b5320', false); B(3.1, 1.1, 2, 1.6, 0.2, 0.2, '#333', false);
       pole(3.6, -3, 5, flag); label('ARMY BASE'); break;
     case 'parliament':
-      B(0, 0, -0.5, 8, 3.5, 5, '#d7ccc8'); B(-3, 0, -2, 1.6, 8, 1.6, '#bcaaa4'); roof(-3, 8, -2, 1.8, 1.8, 1.6, '#5d4037');
+      Wn(0, 0, -0.5, 8, 3.5, 5, '#d7ccc8'); Wn(-3, 0, -2, 1.6, 8, 1.6, '#bcaaa4'); roof(-3, 8, -2, 1.8, 1.8, 1.6, '#5d4037'); door(1, 2.02, '#5d4037', 1.2, 2.2);
       B(0, 3.5, -0.5, 8.2, 0.4, 5.2, '#8d6e63', false); pole(3.5, -2.6, 6.5, flag); label('PARLIAMENT'); break;
     case 'port':
-      B(0, 0, 1.6, 9.4, 0.1, 5, '#29b6f6', false); B(-2.4, 0.1, 1.6, 1.5, 0.4, 5, '#8d6e63', false);
+      B(0, 0, 1.6, 9.4, 0.14, 5, '#29b6f6', false); B(-2.4, 0.1, 1.6, 1.5, 0.4, 5, '#8d6e63', false);
       B(2.5, 0, -2.6, 0.5, 6, 0.5, '#fbc02d'); B(1.1, 5.6, -2.6, 3.4, 0.4, 0.4, '#fbc02d', false);
       B(1.8, 0.1, 2, 2.2, 1, 4, '#e53935', false); B(1.8, 1.1, 2.8, 1.4, 1, 1.4, '#fafafa', false); label('PORT'); break;
     case 'stadium': {
@@ -3073,6 +3563,90 @@ function drawBuilding(id, x, z, g, flag) {
       B(0, 0, 1.2, 9.4, 0.08, 2.6, '#37474f', false); for (let k = -3.5; k <= 3.5; k += 1.75) B(k, 0.08, 1.2, 0.9, 0.02, 0.2, '#fafafa', false);
       B(-3, 0, -2.6, 1.2, 5, 1.2, '#eceff1'); B(-3, 5, -2.6, 2, 1.2, 2, '#4fc3f7', false);
       B(1.5, 0.5, -2.2, 4, 0.8, 0.8, '#fafafa'); B(1.5, 0.7, -2.2, 1, 0.15, 4.2, '#fafafa', false); B(-0.3, 1.1, -2.2, 0.6, 1, 0.15, '#e53935', false); label('AIRPORT'); break;
+    case 'restaurant':
+      Wn(0, 0, -1, 6.5, 3, 4, '#ffccbc'); B(0, 3, -1, 6.8, 0.3, 4.3, '#6d4c41', false); door(0, 1.02, '#4e342e', 1.1, 1.9);
+      for (let k = 0; k < 7; k++) Mx(new THREE.BoxGeometry(0.94, 0.1, 1.5), k % 2 ? '#fafafa' : '#d32f2f', -2.82 + k * 0.94, 2.45, 1.6, [0.4, 0, 0]);
+      [[-2.4, '#43a047'], [2.4, '#fbc02d']].forEach(([dx, c]) => { B(dx, 0, 3.4, 0.9, 0.8, 0.9, '#fafafa', false); B(dx, 0.8, 3.4, 0.08, 1.3, 0.08, '#9e9e9e', false); Mx(new THREE.ConeGeometry(1, 0.5, 8), c, dx, 2.3, 3.4); });
+      label('RESTAURANT'); break;
+    case 'library':
+      Wn(0, 0, -1, 7, 3.6, 4.4, '#a1665e'); B(0, 3.6, -1, 7.4, 0.4, 4.8, '#5d4037', false); roof(0, 4, -1, 7.4, 4.8, 1.2, '#4e342e');
+      B(0, 0, 1.7, 3.4, 0.25, 1, '#bdbdbd', false); door(0, 1.22, '#3e2723', 1.3, 2.3);
+      [['#c62828', -3.2], ['#1565c0', -2.7], ['#2e7d32', -2.2]].forEach(([c, dx]) => B(dx, 0, 2.9, 0.45, 1.6, 1.1, c, false));
+      B(2.6, 0, 2.9, 1.7, 0.45, 1.2, '#f9a825', false); B(2.6, 0.45, 2.9, 1.6, 0.45, 1.1, '#8e24aa', false); label('LIBRARY'); break;
+    case 'stonehenge': {
+      B(0, 0, 0, 9, 0.15, 9, '#9ccc65', false);
+      const N = 12, r = 3.5;
+      for (let k = 0; k < N; k++) {
+        const a = k / N * Math.PI * 2; Mx(new THREE.BoxGeometry(0.95, 2.5, 0.6), k % 2 ? '#9e9e9e' : '#8d8d8d', Math.cos(a) * r, 1.4, Math.sin(a) * r, [0, -a - Math.PI / 2, 0]);
+        if (k % 2 === 0 && k !== 4) { const am = a + Math.PI / N; Mx(new THREE.BoxGeometry(2.2, 0.45, 0.6), '#9a9a9a', Math.cos(am) * r, 2.85, Math.sin(am) * r, [0, -am - Math.PI / 2, 0]); }
+      }
+      [[-1.2, -0.6, 0.6], [1.2, -0.6, -0.6], [0, -1.6, 0]].forEach(([dx, dz, ry]) => { B(dx - 0.5, 0.15, dz, 0.6, 3.2, 0.6, '#8a8a8a', false); B(dx + 0.5, 0.15, dz, 0.6, 3.2, 0.6, '#8a8a8a', false); B(dx, 3.35, dz, 1.8, 0.5, 0.7, '#9e9e9e', false); });
+      Mx(new THREE.BoxGeometry(0.8, 1.8, 0.7), '#a1887f', 0.5, 1.05, 4.3, [0, 0, 0.15]); label('STONEHENGE'); break;
+    }
+    case 'towerbridge':
+      water();
+      [-2.7, 2.7].forEach(dx => {
+        Wn(dx, 0, 0, 1.8, 6.4, 1.8, '#d7ccc8'); roof(dx, 6.4, 0, 1.9, 1.9, 1.8, '#37474f');
+        [[-0.75, -0.75], [0.75, -0.75], [-0.75, 0.75], [0.75, 0.75]].forEach(([a, b]) => Mx(new THREE.ConeGeometry(0.22, 1.1, 6), '#37474f', dx + a, 6.95, b));
+      });
+      B(0, 1.5, 0, 9.4, 0.3, 1.6, '#546e7a', false); B(0, 1.8, 0.75, 9.4, 0.25, 0.08, '#64b5f6', false); B(0, 1.8, -0.75, 9.4, 0.25, 0.08, '#64b5f6', false);
+      B(0, 5, 0.5, 3.6, 0.5, 0.35, '#64b5f6', false); B(0, 5, -0.5, 3.6, 0.5, 0.35, '#64b5f6', false);
+      [-1, 1].forEach(sd => [0.75, -0.75].forEach(zz => seg(sd * 3.6, 5.6, zz, sd * 4.7, 1.8, 0.16, '#64b5f6')));
+      label('TOWER BRIDGE'); break;
+    case 'newgrange': {
+      B(0, 0, 0, 9, 0.12, 9, '#7cb342', false);
+      Mx(new THREE.CylinderGeometry(3.6, 3.8, 1.5, 28), '#f5f5f5', 0, 0.75, -0.3);
+      const dome = Mx(new THREE.SphereGeometry(3.6, 28, 10, 0, Math.PI * 2, 0, Math.PI / 2), '#689f38', 0, 1.5, -0.3); dome.scale.y = 0.42;
+      for (let k = 0; k < 18; k++) { const a = k / 18 * Math.PI * 2; if (Math.abs(a - Math.PI / 2) > 0.3) Mx(new THREE.BoxGeometry(0.7, 0.45, 0.35), '#90a4ae', Math.cos(a) * 3.95, 0.22, Math.sin(a) * 3.95 - 0.3, [0, -a - Math.PI / 2, 0]); }
+      B(0, 0, 3.45, 1, 1.15, 0.2, '#263238', false); B(0, 1.25, 3.45, 1, 0.25, 0.2, '#37474f', false);
+      B(0, 0, 4.15, 2, 0.6, 0.45, '#9e9e9e', false);
+      W.colliders.push({ minX: x - 3.8, maxX: x + 3.8, minZ: z - 4.1, maxZ: z + 3.5, minY: 0, maxY: 2.6 }); label('NEWGRANGE'); break;
+    }
+    case 'whitehouse':
+      Wn(0, 0, -1.2, 8.4, 3.4, 4, '#fafafa'); B(0, 3.4, -1.2, 8.6, 0.35, 4.2, '#eceff1', false);
+      for (let k = -1.5; k <= 1.5; k += 0.75) Mx(new THREE.CylinderGeometry(0.17, 0.2, 3.1, 10), '#fafafa', k, 1.55, 1.5);
+      B(0, 3.1, 1.15, 3.8, 0.35, 1.3, '#f5f5f5', false); Mx(new THREE.CylinderGeometry(2.2, 2.2, 1.3, 3), '#eeeeee', 0, 3.78, 1.15, [-Math.PI / 2, 0, 0]).scale.z = 0.3; door(0, 0.82, '#5d4037', 1, 2);
+      B(0, 0, 3.4, 6.5, 0.05, 1.8, '#66bb6a', false); Mx(new THREE.CylinderGeometry(0.7, 0.75, 0.3, 18), '#cfd8dc', 0, 0.15, 3.4); Mx(new THREE.CylinderGeometry(0.55, 0.55, 0.32, 18), '#4fc3f7', 0, 0.17, 3.4);
+      pole(0, -1.2, 6.2, flag); label('THE WHITE HOUSE'); break;
+    case 'goldengate': {
+      water('#1e88e5');
+      const RED = '#d8431b';
+      [-2.4, 2.4].forEach(dx => { B(dx, 0, 0.75, 0.38, 7.2, 0.38, RED); B(dx, 0, -0.75, 0.38, 7.2, 0.38, RED); [3.4, 5.3, 7].forEach(y => B(dx, y, 0, 0.38, 0.35, 1.9, RED, false)); });
+      B(0, 1.7, 0, 9.4, 0.35, 1.6, '#bf360c', false); B(0, 2.05, 0.7, 9.4, 0.12, 0.12, RED, false); B(0, 2.05, -0.7, 9.4, 0.12, 0.12, RED, false);
+      const cy = xx => { const a = Math.abs(xx); return a <= 2.4 ? 2.4 + 4.6 * (a / 2.4) ** 2 : 7 - 4.8 * (a - 2.4) / 2.3; };
+      [0.75, -0.75].forEach(zz => {
+        for (let k = 0; k < 16; k++) { const x1 = -4.7 + k * 9.4 / 16, x2 = x1 + 9.4 / 16; seg(x1, cy(x1), zz, x2, cy(x2), 0.12, RED); }
+        for (let xx = -4.2; xx <= 4.2; xx += 0.6) if (Math.abs(Math.abs(xx) - 2.4) > 0.2 && cy(xx) > 2.15) B(xx, 2.05, zz, 0.04, cy(xx) - 2.05, 0.04, RED, false);
+      });
+      label('GOLDEN GATE BRIDGE'); break;
+    }
+    case 'inukshuk':
+      B(0, 0, 0, 7, 0.08, 7, '#eceff1', false);
+      Mx(new THREE.BoxGeometry(0.8, 1.6, 0.7), '#78909c', -0.8, 0.8, 0, [0, 0.1, 0]); Mx(new THREE.BoxGeometry(0.8, 1.6, 0.7), '#8d9ba3', 0.8, 0.8, 0, [0, -0.1, 0]);
+      Mx(new THREE.BoxGeometry(2.7, 0.6, 0.8), '#90a4ae', 0, 1.9, 0, [0, 0, 0.03]); Mx(new THREE.BoxGeometry(1.2, 1.2, 0.7), '#78909c', 0, 2.8, 0, [0, 0.15, 0]);
+      Mx(new THREE.BoxGeometry(4.2, 0.5, 0.8), '#8d9ba3', 0, 3.65, 0, [0, 0, -0.04]); Mx(new THREE.BoxGeometry(0.9, 0.9, 0.7), '#78909c', 0, 4.35, 0, [0, -0.2, 0]);
+      [[-2.6, 2], [2.8, 1.2], [1.8, -2.6], [-2.2, -2.4]].forEach(([dx, dz], k) => Mx(new THREE.DodecahedronGeometry(0.35 + k * 0.08), '#90a4ae', dx, 0.3, dz));
+      collider(2.8, 4.8, 1); label('INUKSHUK'); break;
+    case 'hobbiton': {
+      const hill = Mx(new THREE.SphereGeometry(4, 26, 12, 0, Math.PI * 2, 0, Math.PI / 2), '#7cb342', 0, 0, -1); hill.scale.set(1.1, 0.55, 0.8); hill.receiveShadow = true;
+      [[0, 2.08, 0, '#2e7d32'], [-2.2, 1.6, -0.55, '#fbc02d'], [2.2, 1.6, 0.55, '#c62828']].forEach(([dx, dz, ry, c]) => {
+        const fx = Math.sin(ry), fz = Math.cos(ry);
+        [[0.72, '#8d6e63', 0], [0.58, c, 0.04]].forEach(([r, col, o]) => { const d = Mx(new THREE.CylinderGeometry(r, r, 0.12, 20), col, dx + fx * o, 0.62, dz + fz * o, [Math.PI / 2, ry, 0]); d.rotation.order = 'YXZ'; });
+        Mx(new THREE.SphereGeometry(0.08, 8, 6), '#ffd54f', dx + fx * 0.12, 0.62, dz + fz * 0.12);
+      });
+      B(1.2, 1.7, -1.4, 0.35, 1, 0.35, '#8d6e63', false); B(-1.4, 1.7, -0.6, 0.35, 0.8, 0.35, '#8d6e63', false);
+      B(0, 0, 3.2, 1, 0.12, 2.4, '#d7ccc8', false); [[-1.6, '#e91e63'], [1.5, '#ffeb3b'], [-2.8, '#ab47bc'], [2.9, '#ff7043']].forEach(([dx, c]) => Mx(new THREE.SphereGeometry(0.35, 8, 6), c, dx, 0.3, 2.9));
+      tree(3.4, -3.4, 1.3); W.colliders.push({ minX: x - 4.2, maxX: x + 4.2, minZ: z - 3.8, maxZ: z + 1.6, minY: 0, maxY: 2.2 }); label('HOBBITON'); break;
+    }
+    case 'harbourbridge':
+      water('#1e88e5');
+      [-3.9, 3.9].forEach(dx => Wn(dx, 0, 0, 1.2, 3.8, 2.2, '#d7ccc8'));
+      [0.75, -0.75].forEach(zz => {
+        const outer = Mx(new THREE.TorusGeometry(3.4, 0.18, 6, 28, Math.PI), '#607d8b', 0, 1.1, zz); outer.scale.y = 0.95;
+        const inner = Mx(new THREE.TorusGeometry(3.05, 0.12, 6, 28, Math.PI), '#607d8b', 0, 1.1, zz); inner.scale.y = 0.85;
+        for (let xx = -2.4; xx <= 2.4; xx += 0.6) { const top = 1.1 + 0.95 * Math.sqrt(Math.max(0, 3.4 * 3.4 - xx * xx)); if (top > 2.6) B(xx, 2.45, zz, 0.06, top - 2.45, 0.06, '#78909c', false); }
+      });
+      B(0, 2.2, 0, 9.4, 0.28, 1.8, '#546e7a', false); label('HARBOUR BRIDGE'); break;
     case 'bigben': {
       B(0, 0, 0, 2.6, 11, 2.6, '#c8a96a'); B(0, 11, 0, 3, 1, 3, '#b08d57', false);
       const ct = new THREE.MeshBasicMaterial({ map: clockTex() });
@@ -3100,19 +3674,34 @@ function drawBuilding(id, x, z, g, flag) {
 }
 function renderPlots() {
   const s = G.s, st = s.state, n = st.nation;
-  (s.layers || []).forEach(l => { W.scene.remove(l.g); const dead = new Set(l.refs); W.colliders = W.colliders.filter(c => !dead.has(c)); });
-  s.layers = [];
+  (s.layers || []).forEach(l => {
+    W.scene.remove(l.g); const dead = new Set(l.refs); W.colliders = W.colliders.filter(c => !dead.has(c));
+    // free GPU memory: the whole island is redrawn after every change (cached textures are kept)
+    l.g.traverse(o => { if (o.geometry) o.geometry.dispose(); const m = o.material; if (m && !Array.isArray(m) && m.map && !m.map.keep) { m.map.dispose(); m.dispose(); } });
+  });
+  s.layers = []; W.flags = [];
   for (let i = 0; i < NR.size * NR.size; i++) {
     const g = new THREE.Group(); W.scene.add(g); const c0 = W.colliders.length;
-    const [x, z] = plotXZ(i), owned = !!n && n.plots.includes(i);
-    part(x, 0, z, TILE, 0.1, TILE, owned ? '#7cc36b' : '#4a8a3b', { solid: false, parent: g, shadow: false });
-    if (owned) [[0, -5, TILE, 0.3], [0, 5, TILE, 0.3], [-5, 0, 0.3, TILE], [5, 0, 0.3, TILE]].forEach(([dx, dz, w, d]) => part(x + dx, 0.1, z + dz, w, 0.15, d, '#f5f5dc', { solid: false, parent: g, shadow: false }));
-    else {
+    const [x, z] = plotXZ(i), owned = !!n && n.plots.includes(i), river = RIVER.includes(i);
+    if (owned) {
+      // your land: a lighter lawn, a kerb and a road around it (the river crosses the north and south sides)
+      part(x, 0, z, TILE, 0.1, TILE, '#7cc36b', { solid: false, parent: g, shadow: false });
+      [[0, -5, TILE, 0.3, 1], [0, 5, TILE, 0.3, 1], [-5, 0, 0.3, TILE], [5, 0, 0.3, TILE]].forEach(([dx, dz, w, d, ns]) => { if (!(river && ns)) part(x + dx, 0.1, z + dz, w, 0.15, d, '#f5f5dc', { solid: false, parent: g, shadow: false }); });
+      [[0, -5.5, PLOT, 1, 1], [0, 5.5, PLOT, 1, 1], [-5.5, 0, 1, PLOT], [5.5, 0, 1, PLOT]].forEach(([dx, dz, w, d, ns]) => { if (!(river && ns)) part(x + dx, 0, z + dz, w, 0.07, d, '#b9b4aa', { solid: false, parent: g, shadow: false }); });
+    } else {
       let seed = i * 7919 + 13; const r = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
-      for (let k = 0; k < 2 + Math.floor(r() * 2); k++) { const tx = x + (r() - 0.5) * 7, tz = z + (r() - 0.5) * 7; part(tx, 0.1, tz, 0.5, 1.8, 0.5, '#6d4c41', { parent: g }); const t = new THREE.Mesh(new THREE.SphereGeometry(1.1 + r() * 0.5, 9, 7), M('#2e7d32')); t.position.set(tx, 2.4, tz); t.castShadow = true; g.add(t); }
+      for (let k = 0; k < (river ? 0 : 2 + Math.floor(r() * 2)); k++) {
+        const tx = x + (r() - 0.5) * 7, tz = z + (r() - 0.5) * 7, pine = r() < 0.4, sz = 1.1 + r() * 0.5;
+        part(tx, 0.1, tz, 0.5, 1.8, 0.5, '#6d4c41', { parent: g });
+        const t = new THREE.Mesh(pine ? new THREE.ConeGeometry(sz, sz * 2.6, 8) : new THREE.SphereGeometry(sz, 9, 7), M(pine ? '#1b5e20' : ['#2e7d32', '#388e3c', '#43a047'][k % 3]));
+        t.position.set(tx, pine ? 1.6 + sz * 1.3 : 2.4, tz); t.castShadow = true; g.add(t);
+      }
+      if (!river && r() < 0.5) { const rk = new THREE.Mesh(new THREE.DodecahedronGeometry(0.5 + r() * 0.4), M('#9e9e9e')); rk.position.set(x + (r() - 0.5) * 6, 0.25, z + (r() - 0.5) * 6); rk.castShadow = true; g.add(rk); }
       if (n && !s.visit && adjacentPlot(i, n.plots)) { part(x, 0.1, z + 4, 0.15, 1.4, 0.15, '#795548', { parent: g, solid: false }); sign(`FOR SALE\n${plotPrice(n.plots.length)} GOYUX`, x, 1.6, z + 4.08, 1.8, 0.9, 0, { bg: '#fffde7', fg: '#b71c1c', parent: g }); }
     }
-    const b = n && n.buildings[i]; if (b) drawBuilding(b, x, z, g, n.flag);
+    const b = n && n.buildings[i];
+    if (b && river && !RIVER_OK.includes(b)) part(x, 0, z, 8.6, 0.16, 8.6, '#7cc36b', { solid: false, parent: g, shadow: false });   // built before the river existed: a small island
+    if (b) drawBuilding(b, x, z, g, n.flag, river);
     s.layers.push({ g, refs: W.colliders.slice(c0) });
   }
 }
@@ -3121,8 +3710,8 @@ function plotInteractions() {
     const [x, z] = plotXZ(i);
     inter({
       at: () => ({ x, y: 0, z }), r: 6.2, h: 4.5,
-      get obj() { const n = G.s.state.nation, b = n && n.buildings[i]; return b ? BLD[b][1] + ' ' + BLD[b][0] : (n && n.plots.includes(i) ? 'Your land' : 'Wild land'); },
-      get label() { const n = G.s.state.nation, mv = G.s.moving; if (!n) return ''; if (n.buildings[i]) return mv ? 'Occupied' : 'Look'; if (n.plots.includes(i)) return mv ? `Move ${BLD[mv.id][0]} here · ${moveCost(mv.id)} GOYUX` : 'Build here'; return `Buy land · ${plotPrice(n.plots.length)} GOYUX`; },
+      get obj() { const n = G.s.state.nation, b = n && n.buildings[i], rv = RIVER.includes(i); return b ? BLD[b][1] + ' ' + BLD[b][0] : (n && n.plots.includes(i) ? (rv ? '🌊 Your river' : 'Your land') : (rv ? '🌊 Wild river' : 'Wild land')); },
+      get label() { const n = G.s.state.nation, mv = G.s.moving; if (!n) return ''; if (n.buildings[i]) return mv ? 'Occupied' : 'Look'; if (n.plots.includes(i)) return mv ? (fitsPlot(mv.id, i) ? `Move ${BLD[mv.id][0]} here · ${moveCost(mv.id)} GOYUX` : (RIVER.includes(i) ? 'Only bridges and ports go on the river' : 'Bridges go on the river')) : (RIVER.includes(i) ? 'Build a bridge or a port' : 'Build here'); return `Buy land · ${plotPrice(n.plots.length)} GOYUX`; },
       when: () => { const n = G.s.state.nation; if (!n) return false; if (G.s.visit) return !!n.buildings[i]; return n.plots.includes(i) || adjacentPlot(i, n.plots); },
       act: () => { const n = G.s.state.nation; if (n.buildings[i]) buildingInfo(n.buildings[i], i); else if (n.plots.includes(i)) (G.s.moving ? moveHere(i) : buildMenu(i)); else buyPlot(i); }
     });
@@ -3193,9 +3782,13 @@ async function launchNation(visit) {
   const ext = HALF * PLOT + 6; W.bounds = { minX: -ext + 1, maxX: ext - 1, minZ: -ext + 1, maxZ: ext + 1 };
   W.scene.fog = new THREE.Fog('#a8dcff', 110, 300);
   const sea = new THREE.Mesh(new THREE.PlaneGeometry(700, 700), new THREE.MeshLambertMaterial({ color: '#2f80d0' })); sea.rotation.x = -Math.PI / 2; sea.position.y = -0.5; W.scene.add(sea);
-  part(0, -2, 0, ext * 2 + 4, 2, ext * 2 + 6, '#e3d29b', { solid: false, shadow: false, mat: new THREE.MeshLambertMaterial({ map: studTex('#e3d29b', ext + 2) }) });
+  const boats = drawIsland(st.nation ? st.nation.name : 'GOBLOX');
   renderPlots(); plotInteractions();
-  W.update = dt => { W.spin.forEach(h => { h.rotation.z += dt * 2.2; }); };
+  W.update = dt => {
+    W.spin.forEach(h => { h.rotation.z += dt * 2.2; });
+    waveFlags(W.t);
+    boats.forEach((b, k) => { b.position.y = -0.3 + Math.sin(W.t * 1.3 + k) * 0.15; b.rotation.z = Math.sin(W.t * 1.1 + k * 2) * 0.05; });
+  };
   if (!visit) {
     const gd = pick1(['f', 'm']);
     const adv = npc(`${NPC_NAME[gd]} (Advisor)`, Object.assign({ shirt: '#37474f', pants: '#263238', sleeves: true, tie: '#c62828', shoes: true }, pick1(STAFF_LOOKS[gd])), 6, 6, -Math.PI / 4, { color: '#ffd54f', voice: NPC_VOICE[gd] });
@@ -3231,8 +3824,9 @@ function advisorTalk() {
   if (s.pop < 150) tips.push(['Our people need homes. Houses and a hospital will make our population grow.', 'Necesitamos casas y un hospital para crecer.']);
   if (s.env < 40) tips.push(['The air is dirty! Build a park or a wind farm to help the environment.', 'Construye un parque o un parque eólico.']);
   if (s.happy < 45) tips.push(['People are not happy. A park, a stadium or a hospital would help.', 'La gente no está contenta.']);
+  if (!blds.some(b => BRIDGES.includes(b)) && s.cult > 40) tips.push(['Have you seen the river? Buy a river plot and build a famous bridge across it!', 'Compra un terreno del río y construye un puente famoso.']);
   if (!blds.includes('embassy')) tips.push(['With an embassy we could write to other nations and sign treaties.', 'Con una embajada podrás firmar tratados.']);
-  if (!blds.some(b => MONUMENTS.includes(b))) tips.push(['A famous monument would bring culture and tourists. Read about it, then build it!', 'Un monumento famoso traería cultura y turistas.']);
+  if (!blds.some(b => MONUMENTS.includes(b))) tips.push(['A famous monument would bring culture and tourists. Learn about it, then build it!', 'Un monumento famoso traería cultura y turistas.']);
   if (!st.taxReady) tips.unshift(['Taxes are collected for today. To earn more GOYUX, go through the Mission Portal and play a mission!', 'Para ganar más GOYUX, entra en el portal y juega una misión.']);
   tips.push(['Every mission you play gives us more GOYUX for new land and buildings. Use the Mission Portal!', 'Cada misión te da más GOYUX. Usa el portal de misiones.']);
   const t = tips[0];
@@ -3301,16 +3895,22 @@ function foundNation() {
 
 /* ---------- English test ---------- */
 function runQuiz(o) {
-  const reading = o.topic && o.topic.startsWith('r:') ? READING[o.topic.slice(2)] : null;
-  const pool = o.topic === 'any' ? Object.values(QB).flatMap(t => t.qs) : reading ? reading.qs : QB[o.topic].qs;
-  const qs = reading ? shuffle(pool.slice()) : sample(pool, Math.min(o.n || 5, pool.length));
-  const need = Math.ceil(qs.length * 0.8), label = reading ? 'Reading: ' + reading.title : o.topic === 'any' ? 'Mixed grammar' : QB[o.topic].label;
+  /* o.n grammar questions from o.topic (or 'any'), then one culture question from CULT[o.culture] */
+  const pool = o.topic === 'any' ? Object.values(QB).flatMap(t => t.qs) : QB[o.topic].qs;
+  const qs = sample(pool, Math.min(o.n || 5, pool.length)).map(q => ({ q }));
+  if (o.culture && CULT[o.culture]) qs.push({ q: pick1(CULT[o.culture]), culture: true });
+  const need = Math.ceil(qs.length * 0.8);
+  const label = (o.topic === 'any' ? 'Mixed grammar' : QB[o.topic].label) + (o.culture ? ' + 🌍 culture' : '');
   let i = 0, right = 0;
   const show = () => {
-    const [q, a, wrong, tip] = qs[i];
+    const { q: [q, a, wrong, tip, where], culture } = qs[i];
     const box = el('div', 'quiz');
-    if (reading) box.append(el('div', 'quiz-text', escH(reading.text)));
-    box.append(el('div', 'quiz-q', `<small>Question ${i + 1} of ${qs.length}</small>${escH(q)}`));
+    box.append(el('div', 'quiz-q', `<small>Question ${i + 1} of ${qs.length}${culture ? ` · <span class="q-cult">🌍 Culture${where ? ': ' + escH(where) : ''}</span>` : ''}</small>${escH(q)}`));
+    if (culture) {
+      const look = el('a', 'q-search', '🔎 Not sure? Search it on the web');
+      look.href = 'https://www.google.com/search?q=' + encodeURIComponent(q); look.target = '_blank'; look.rel = 'noopener';
+      box.append(look);
+    }
     const opts = el('div', 'dlg-opts');
     shuffle([a].concat(wrong)).forEach((t, k) => { const b = el('button', 'opt', `<span class="n">${k + 1}</span><span>${escH(t)}</span>`); b.dataset.t = t; b.onclick = () => answer(t, b); opts.append(b); });
     box.append(opts);
@@ -3320,7 +3920,9 @@ function runQuiz(o) {
       const ok = t === a; if (ok) right++;
       opts.querySelectorAll('button').forEach(x => { x.disabled = true; if (x.dataset.t === a) x.classList.add('right'); });
       if (!ok) b.classList.add('wrong');
-      fb.hidden = false; fb.className = 'quiz-fb ' + (ok ? 'good' : 'bad'); fb.textContent = ok ? '✔ Correct!' : '✘ ' + tip;
+      fb.hidden = false; fb.className = 'quiz-fb ' + (ok ? 'good' : 'bad');
+      // culture questions always teach the fact; grammar tips only appear after a mistake
+      fb.textContent = culture ? (ok ? '✔ Correct! ' : `✘ The answer is: ${a}. `) + tip : ok ? '✔ Correct!' : '✘ ' + tip;
       const f = $('#panelFoot'); f.innerHTML = '';
       const nx = el('button', 'btn primary', i + 1 < qs.length ? 'Next question' : 'See my result'); nx.onclick = () => { i++; i < qs.length ? show() : end(); }; f.append(nx); nx.focus();
     }
@@ -3344,21 +3946,21 @@ function buyPlot(i) {
 function fxChips(fx) { return N_KEYS.map((k, j) => fx[j] ? `<span class="fx ${fx[j] > 0 ? 'up' : 'down'}">${N_EMO[k]} ${fx[j] > 0 ? '+' : ''}${fx[j]}</span>` : '').join(''); }
 function buildMenu(i) {
   const st = G.s.state, n = st.nation, have = Object.values(n.buildings);
-  const grid = el('div', 'bgrid');
-  Object.entries(BLD).filter(([id]) => id !== 'cityhall').forEach(([id, b]) => {
-    const done = UNIQUE_B.includes(id) && have.includes(id), poor = st.goyux.total < b[2];
-    const topic = b[4].startsWith('r:') ? 'Reading: ' + READING[b[4].slice(2)].title : QB[b[4]].label;
+  const grid = el('div', 'bgrid'), rv = RIVER.includes(i);
+  Object.entries(BLD).filter(([id]) => id !== 'cityhall').sort(([a], [c]) => fitsPlot(c, i) - fitsPlot(a, i)).forEach(([id, b]) => {
+    const done = UNIQUE_B.includes(id) && have.includes(id), poor = st.goyux.total < b[2], fits = fitsPlot(id, i);
+    const topic = QB[b[4]].label + ' + 🌍 culture';
     const c = el('div', 'bcard' + (MONUMENTS.includes(id) ? ' mon' : ''), `<div class="b-top"><span class="b-emo">${b[1]}</span><b>${escH(b[0])}</b><span class="b-cost"><i class="gx">G</i>${b[2]}</span></div>
       <p>${escH(b[5])}</p><div class="fxs">${fxChips(b[3])}</div><small>📝 ${escH(topic)}</small>`);
-    const btn = el('button', 'btn ' + (done || poor ? '' : 'primary'), done ? 'Already built' : poor ? `Need ${b[2] - st.goyux.total} more GOYUX` : 'Take the test & build');
-    btn.disabled = done || poor;
-    btn.onclick = () => runQuiz({ title: `Build: ${b[0]}`, topic: b[4], n: 5, onPass: async () => {
+    const btn = el('button', 'btn ' + (done || poor || !fits ? '' : 'primary'), !fits ? (rv ? 'Not on the river' : '🌊 Only on the river') : done ? 'Already built' : poor ? `Need ${b[2] - st.goyux.total} more GOYUX` : 'Take the test & build');
+    btn.disabled = done || poor || !fits;
+    btn.onclick = () => runQuiz({ title: `Build: ${b[0]}`, topic: b[4], culture: id, n: 4, onPass: async () => {
       try { applyNation(await NAPI.build(i, id)); notify('🏗 Built!', `${b[0]} is ready. ${N_KEYS.map((k, j) => b[3][j] ? `${N_LABEL[k]} ${b[3][j] > 0 ? '+' : ''}${b[3][j]}` : '').filter(Boolean).join(', ')}`, 'good'); }
       catch (e) { notify('⚠️ Not built', e.message, 'bad'); }
     } });
     c.append(btn); grid.append(c);
   });
-  panel('What do you want to build?', `You have <b>${st.goyux.total} GOYUX</b>. To build, pass an English test (4 of 5 correct).`, grid, [], { onClose: () => {} });
+  panel(rv ? '🌊 Build on the river' : 'What do you want to build?', `${rv ? 'This plot is on the river: only <b>bridges</b> and <b>ports</b> can go here. ' : ''}You have <b>${st.goyux.total} GOYUX</b>. To build, pass a test: 4 grammar questions + 1 culture question about the English-speaking world (4 of 5 correct).`, grid, [], { onClose: () => {} });
 }
 function buildingInfo(id, plot) {
   const b = BLD[id], own = !G.s.visit && plot != null && id !== 'cityhall', st = G.s.state;
@@ -3367,10 +3969,11 @@ function buildingInfo(id, plot) {
     closePanel(); G.s.moving = { from: plot, id }; nationHud();
     notify('🚚 Moving ' + b[0], `Walk to an empty plot of yours and press E. Moving costs ${moveCost(id)} GOYUX. Use ✖ in the bar to cancel.`);
   } });
-  panel(`${b[1]} ${b[0]}`, '', `<p class="panel-p">${escH(b[5])}</p><div class="fxs">${fxChips(b[3])}</div>${b[4] && b[4].startsWith('r:') ? `<div class="quiz-text">${escH(READING[b[4].slice(2)].text)}</div>` : ''}`, btns, { onClose: () => {} });
+  panel(`${b[1]} ${b[0]}`, '', `<p class="panel-p">${escH(b[5])}</p><div class="fxs">${fxChips(b[3])}</div>${READING[id] ? `<div class="quiz-text">${escH(READING[id].text)}</div>` : ''}`, btns, { onClose: () => {} });
 }
 function moveHere(to) {
   const mv = G.s.moving, b = BLD[mv.id];
+  if (!fitsPlot(mv.id, to)) { notify('🌊 Not here', RIVER.includes(to) ? 'Only bridges and ports can go on the river.' : 'Bridges must be built on the river.', 'warn'); return; }
   panel(`Move ${b[0]} here?`, `It costs ${moveCost(mv.id)} GOYUX. You have ${G.s.state.goyux.total} GOYUX.`, '<p class="panel-p">The building will be taken down and built again on this plot.</p>', [
     { t: 'Cancel', fn: closePanel },
     { t: `Move it · ${moveCost(mv.id)} GOYUX`, cls: 'primary', fn: async () => {

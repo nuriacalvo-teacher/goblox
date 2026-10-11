@@ -504,19 +504,27 @@ function teacherSetGuest(code, active) {
 
 /* =====================================================================
    MY NATION — every student founds and builds an English-speaking country.
-   The rules below must match NATION_RULES in index.html.
+   The rules below must match BLD, RIVER and fitsPlot in index.html.
    ===================================================================== */
 const N_SIZE = 9, N_CAPITAL = 40, N_START = [31, 39, 40, 41, 49];
 // id: [cost, population, happiness, economy, security, culture, environment]
 const BUILD = {
   cityhall: [0, 0, 5, 5, 5, 0, 0], houses: [40, 40, 2, 0, 0, 0, -2], farm: [45, 10, 2, 6, 0, 0, 2], park: [30, 0, 6, 0, 0, 0, 8],
-  market: [70, 5, 5, 9, 0, 0, 0], school: [70, 5, 4, 4, 0, 8, 0], police: [70, 0, 3, 0, 12, 0, 0], factory: [90, 0, -3, 16, 0, 0, -10],
+  market: [70, 5, 5, 9, 0, 0, 0], restaurant: [60, 5, 7, 6, 0, 2, 0], library: [80, 0, 4, 2, 0, 10, 0], school: [70, 5, 4, 4, 0, 8, 0], police: [70, 0, 3, 0, 12, 0, 0], factory: [90, 0, -3, 16, 0, 0, -10],
   windfarm: [90, 0, 0, 8, 0, 0, 6], museum: [90, 0, 4, 3, 0, 12, 0], press: [90, 0, 3, 2, 0, 8, 0], embassy: [90, 0, 2, 2, 2, 4, 0],
   hospital: [110, 25, 10, 0, 0, 0, 0], army: [110, 0, -2, 0, 18, 0, -2], parliament: [130, 0, 6, 4, 6, 4, 0], port: [130, 10, 0, 14, 0, 2, -4],
   stadium: [130, 0, 12, 4, 0, 4, -2], airport: [160, 15, 2, 12, 0, 4, -6],
-  bigben: [200, 0, 6, 6, 0, 20, 0], castle: [200, 0, 6, 4, 6, 16, 0], cntower: [200, 0, 4, 8, 0, 18, 0], liberty: [240, 0, 8, 6, 0, 22, 0], opera: [240, 0, 8, 6, 0, 22, 0]
+  bigben: [200, 0, 6, 6, 0, 20, 0], castle: [200, 0, 6, 4, 6, 16, 0], cntower: [200, 0, 4, 8, 0, 18, 0], liberty: [240, 0, 8, 6, 0, 22, 0], opera: [240, 0, 8, 6, 0, 22, 0],
+  stonehenge: [200, 0, 4, 2, 0, 20, 2], newgrange: [200, 0, 4, 2, 0, 20, 2], inukshuk: [160, 0, 4, 0, 2, 16, 4], towerbridge: [220, 0, 6, 8, 0, 16, 0],
+  hobbiton: [220, 0, 10, 6, 0, 16, 4], whitehouse: [240, 0, 6, 6, 8, 16, 0], goldengate: [240, 0, 6, 10, 0, 18, 0], harbourbridge: [240, 0, 6, 10, 0, 18, 0]
 };
-const UNIQUE = ['cityhall', 'parliament', 'embassy', 'port', 'stadium', 'airport', 'bigben', 'castle', 'cntower', 'liberty', 'opera'];
+const MONUMENTS = ['bigben', 'castle', 'stonehenge', 'newgrange', 'cntower', 'inukshuk', 'towerbridge', 'hobbiton', 'liberty', 'whitehouse', 'goldengate', 'opera', 'harbourbridge'];
+const UNIQUE = ['cityhall', 'parliament', 'embassy', 'port', 'stadium', 'airport'].concat(MONUMENTS);
+// the river crosses every island through plot column 6: bridges only there, and only bridges and ports on it
+const RIVER = [6, 15, 24, 33, 42, 51, 60, 69, 78];
+const BRIDGES = ['towerbridge', 'goldengate', 'harbourbridge'];
+const RIVER_OK = BRIDGES.concat(['port']);
+const fitsPlot_ = (id, i) => RIVER.indexOf(i) >= 0 ? RIVER_OK.indexOf(id) >= 0 : BRIDGES.indexOf(id) < 0;
 // treaty type: [population, happiness, economy, security, culture, environment] — max 3 of each type count
 const TREATY = { trade: [0, 0, 6, 0, 0, 0], culture: [0, 0, 0, 0, 6, 0], peace: [0, 4, 0, 4, 0, 0] };
 const N_KEYS = ['pop', 'happy', 'econ', 'secu', 'cult', 'env'];
@@ -674,6 +682,7 @@ function nationBuild(i, id, guestCode) {
     if (!b || id === 'cityhall') throw new Error('Unknown building.');
     if (!n.plots.includes(i) || n.buildings[i]) throw new Error('You cannot build there.');
     if (UNIQUE.includes(id) && Object.values(n.buildings).includes(id)) throw new Error('Your nation already has one.');
+    if (!fitsPlot_(id, i)) throw new Error(RIVER.includes(i) ? 'Only bridges and ports can be built on the river.' : 'Bridges must be built on the river.');
     if (available_(u.email, n) < b[0]) throw new Error('You need ' + b[0] + ' GOYUX for this building.');
     n.buildings[i] = id; n.spent += b[0]; saveNation_(n);
     return nationState_(u.email);
@@ -686,6 +695,7 @@ function nationMove(from, to, guestCode) {
     const n = getNation_(u.email); if (!n) throw new Error('Found your nation first.');
     const id = n.buildings[from];
     if (!id || id === 'cityhall' || !n.plots.includes(to) || n.buildings[to]) throw new Error('You cannot move that building there.');
+    if (!fitsPlot_(id, to)) throw new Error(RIVER.includes(to) ? 'Only bridges and ports can go on the river.' : 'Bridges must be on the river.');
     const cost = moveCost_(id);
     if (available_(u.email, n) < cost) throw new Error('You need ' + cost + ' GOYUX to move it.');
     delete n.buildings[from]; n.buildings[to] = id; n.spent += cost; saveNation_(n);
