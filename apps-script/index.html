@@ -1161,7 +1161,7 @@ function updatePlayer(dt) {
   }
   const fx = -Math.sin(cam.yaw), fz = -Math.cos(cam.yaw), rx = Math.cos(cam.yaw), rz = -Math.sin(cam.yaw);
   let mx = fx * iz + rx * ix, mz = fz * iz + rz * ix; const len = Math.hypot(mx, mz);
-  P.moving = false;
+  P.moving = false; const ox = P.pos.x, oz = P.pos.z;
   if (len > 0.08) {
     const s = Math.min(len, 1) / len * 8.5; mx *= s; mz *= s;
     P.pos.x += mx * dt; P.pos.z += mz * dt; P.moving = true;
@@ -1173,6 +1173,7 @@ function updatePlayer(dt) {
   const gY = collide();
   if (P.pos.y <= gY) { P.pos.y = gY; P.vy = 0; P.ground = true; } else P.ground = P.pos.y - gY < 0.05;
   const b = W.bounds; P.pos.x = clamp(P.pos.x, b.minX, b.maxX); P.pos.z = clamp(P.pos.z, b.minZ, b.maxZ);
+  if (W.walk && !W.walk(P.pos.x, P.pos.z) && W.walk(ox, oz)) { P.pos.x = ox; P.pos.z = oz; }
   P.av.rotation.y = P.yaw;
   animAv(P.av, P.moving && P.ground, W.t, dt);
 }
@@ -2765,6 +2766,9 @@ const BLD = {
   houses: ['Houses', '🏘', 40, [40, 2, 0, 0, 0, -2], 'houses', 'Homes for 40 new citizens.'],
   farm: ['Farm', '🌾', 45, [10, 2, 6, 0, 0, 2], 'farm', 'Fresh food for your people and for the market.'],
   park: ['Park', '🌳', 30, [0, 6, 0, 0, 0, 8], 'park', 'Trees, a pond and benches. People love it.'],
+  forest: ['Forest', '🌲', 25, [0, 3, 0, 0, 0, 10], 'future', 'Plant trees: clean air and a home for wildlife.'],
+  lighthouse: ['Lighthouse', '🔦', 70, [0, 2, 4, 6, 6, 0], 'port', 'Guides ships safely to your coast.'],
+  mine: ['Mine', '⛏', 100, [5, -2, 18, 0, 0, -6], 'factory', 'Metals and jobs from the mountain, but it is dirty.'],
   market: ['Market', '🛒', 70, [5, 5, 9, 0, 0, 0], 'market', 'Shops and stalls where people buy and sell.'],
   restaurant: ['Restaurant', '🍽', 60, [5, 7, 6, 0, 2, 0], 'food', 'Tasty food from all over the English-speaking world.'],
   school: ['School', '🏫', 70, [5, 4, 4, 0, 8, 0], 'school', 'Educated citizens make a stronger nation.'],
@@ -2795,14 +2799,23 @@ const BLD = {
   opera: ['Sydney Opera House (Australia)', '🎭', 240, [0, 8, 6, 0, 22, 0], 'relative', 'A famous monument from Sydney.'],
   harbourbridge: ['Sydney Harbour Bridge (Australia)', '🦘', 240, [0, 6, 10, 0, 18, 0], 'used', 'Sydney\'s giant steel arch, "the Coathanger".']
 };
-/* The river crosses every island through plot column 6, from the mountains to the sea.
-   Bridges can only be built on it, and only bridges and ports fit on it. Must match RIVER in Code.gs. */
+/* The map (must match Code.gs):
+   - the city: the 9×9 grid (plots 0–80). New city land must touch land you already own.
+   - the river crosses the city through column 6, from the mountains to the sea: only bridges.
+   - the countryside (plots 100–113): fields, forests and rural buildings. Can be bought at any time.
+   - special sites (plots 200–204): each one holds only one kind of building. */
 const RIVER = [6, 15, 24, 33, 42, 51, 60, 69, 78];
 const BRIDGES = ['towerbridge', 'goldengate', 'harbourbridge'];
-const RIVER_OK = BRIDGES.concat(['port']);
-const fitsPlot = (id, i) => RIVER.includes(i) ? RIVER_OK.includes(id) : !BRIDGES.includes(id);
+const COUNTRY = { 100: [-70, -40], 101: [-70, 4], 102: [-70, 30], 103: [-62, 64], 104: [-46, 70], 105: [-26, 70], 113: [2, 70], 106: [46, 70], 107: [66, 62], 108: [70, 40], 109: [70, -14], 110: [68, -34], 111: [60, -66], 112: [-46, -68] };
+const SITES = { 200: ['port', 'Harbour'], 201: ['airport', 'Airfield'], 202: ['mine', 'Mountain mine'], 203: ['lighthouse', 'Cape'], 204: ['castle', 'Castle Rock'] };
+const SITE_ONLY = Object.values(SITES).map(v => v[0]);
+const RURAL = ['houses', 'farm', 'forest', 'park', 'windfarm', 'factory', 'stonehenge', 'newgrange', 'inukshuk', 'hobbiton'];
+const OUTER = Object.keys(COUNTRY).concat(Object.keys(SITES)).map(Number);
+const isOuter = i => OUTER.includes(i);
+const fitsPlot = (id, i) => SITES[i] ? SITES[i][0] === id : SITE_ONLY.includes(id) ? false : RIVER.includes(i) ? BRIDGES.includes(id) : COUNTRY[i] ? RURAL.includes(id) : !BRIDGES.includes(id);
+const whereFits = id => SITE_ONLY.includes(id) ? `only at the ${Object.values(SITES).find(v => v[0] === id)[1]} site` : BRIDGES.includes(id) ? 'only on the river' : '';
 const MONUMENTS = ['bigben', 'castle', 'stonehenge', 'newgrange', 'cntower', 'inukshuk', 'towerbridge', 'hobbiton', 'liberty', 'whitehouse', 'goldengate', 'opera', 'harbourbridge'];
-const UNIQUE_B = ['cityhall', 'parliament', 'embassy', 'port', 'stadium', 'airport'].concat(MONUMENTS);
+const UNIQUE_B = ['cityhall', 'parliament', 'embassy', 'port', 'stadium', 'airport', 'mine', 'lighthouse'].concat(MONUMENTS);
 const TREATY_FX = { trade: [0, 0, 6, 0, 0, 0], culture: [0, 0, 0, 0, 6, 0], peace: [0, 4, 0, 4, 0, 0] };
 const TREATY_NAME = { trade: 'Trade Agreement', culture: 'Cultural Exchange', peace: 'Peace Treaty' };
 function nStats(n, treaties) {
@@ -2815,6 +2828,7 @@ function nStats(n, treaties) {
   return s;
 }
 const plotPrice = owned => 30 + 4 * Math.max(0, owned - NR.start.length);
+const landPrice = (i, owned) => plotPrice(owned) + (SITES[i] ? 20 : 0);   // special sites cost a bit more
 const moveCost = id => Math.max(10, Math.round(BLD[id][2] / 2));
 const taxAmount = st => Math.min(30, 5 + Math.floor(Math.max(0, st.econ) / 10));
 const adjacentPlot = (i, plots) => { const r = Math.floor(i / NR.size), c = i % NR.size; return plots.some(p => Math.abs(Math.floor(p / NR.size) - r) + Math.abs(p % NR.size - c) === 1); };
@@ -3012,6 +3026,16 @@ const QB = {
     ['Tall ships ___ sail under the bridge every day.', 'used to', ['use to', 'are used'], 'Past habit → used to + sail.'],
     ['There ___ be a market here, but now it\'s a park.', 'used to', ['use to', 'was used to'], 'Something true in the past, not now → used to.'],
     ['London ___ be much smaller than it is today.', 'used to', ['was used', 'use'], 'Past state → used to be.']
+  ] },
+  future: { label: 'The future: will and going to', qs: [
+    ['We ___ plant 500 trees next spring. We\'ve already bought them.', 'are going to', ['will going to', 'plant'], 'A plan you have already decided → be going to.'],
+    ['I think it ___ be sunny tomorrow.', 'will', ['is', 'going'], 'Opinions and predictions with "I think" → will.'],
+    ['___ you help me carry these young trees, please?', 'Will', ['Are', 'Going'], 'Asking for help → Will you…?'],
+    ['Don\'t worry, I ___ tell anyone your secret.', 'won\'t', ['don\'t', 'am not'], 'A promise → will / won\'t.'],
+    ['What ___ you going to do this summer?', 'are', ['will', 'do'], 'Plans: What are you going to do?'],
+    ['She\'s going ___ study biology at university.', 'to', ['for', 'at'], 'be going TO + verb.'],
+    ['If we cut down the forest, the animals ___ have a home.', 'won\'t', ['don\'t', 'aren\'t'], 'First conditional: if + present, will / won\'t + verb.'],
+    ['These trees ___ be 20 metres tall in fifty years.', 'will', ['are', 'going'], 'A prediction about the future → will + be.']
   ] }
 };
 /* Culture: one random question after the 4 grammar questions.
@@ -3162,6 +3186,31 @@ const CULT = {
     ['Which short-story writer, born in Wellington in 1888, is one of New Zealand\'s most famous authors?', 'Katherine Mansfield', ['Virginia Woolf', 'Jane Austen'], 'She moved to London at 19 and wrote "The Garden Party".', 'New Zealand'],
     ['What is the largest library in the world, in Washington D.C.?', 'the Library of Congress', ['the New York Public Library', 'the Smithsonian Library'], 'It has more than 170 million items, including books, maps and recordings.', 'USA']
   ],
+  forest: [
+    ['Sherwood Forest, home of the legend of Robin Hood, is in which English county?', 'Nottinghamshire', ['Yorkshire', 'Kent'], 'Its famous Major Oak is between 800 and 1,000 years old.', 'England (UK)'],
+    ['The tallest trees in the world, the coast redwoods, grow in…', 'California, USA', ['Scotland, UK', 'Tasmania, Australia'], 'The tallest one, called Hyperion, is about 116 metres tall.', 'USA'],
+    ['Tāne Mahuta, a giant tree in New Zealand\'s Waipoua Forest, is a…', 'kauri', ['eucalyptus', 'maple'], 'Its name means "Lord of the Forest" in Māori. It may be about 2,000 years old.', 'New Zealand'],
+    ['Koalas eat almost only the leaves of…', 'eucalyptus trees', ['maple trees', 'oak trees'], 'Eucalyptus leaves are poisonous for most animals, but not for koalas.', 'Australia'],
+    ['About how much of Canada is covered by forest?', 'about 40%', ['about 5%', 'about 90%'], 'Canada has almost 9% of all the forests in the world.', 'Canada'],
+    ['In 1918 only about 1% of Ireland had forests. How much does it have today?', 'about 11%', ['about 50%', 'about 90%'], 'Long ago most of Ireland was forest. Today the country plants millions of trees every year.', 'Ireland'],
+    ['On Arbor Day, which started in Nebraska in 1872, people…', 'plant trees', ['cut down old trees', 'paint trees'], 'About one million trees were planted on the first Arbor Day.', 'USA']
+  ],
+  mine: [
+    ['Where was gold discovered in 1848, starting the gold rush of the "Forty-Niners"?', 'California', ['Alaska', 'Texas'], 'About 300,000 people rushed to California, and San Francisco grew very fast.', 'USA'],
+    ['The Klondike Gold Rush (1896–1899) took place in…', 'the Yukon, Canada', ['Texas, USA', 'Ontario, Canada'], 'Many miners travelled through Alaska and then over the mountains, in terrible cold.', 'Canada'],
+    ['A gold rush started in Victoria, Australia, in 1851. Which city grew rich and built grand buildings?', 'Melbourne', ['Perth', 'Darwin'], 'For a time it was called "Marvellous Melbourne", one of the richest cities in the world.', 'Australia'],
+    ['The valleys of South Wales were famous for mining…', 'coal', ['gold', 'diamonds'], 'The Rhondda valley had dozens of coal mines. Today you can visit the Big Pit mining museum.', 'Wales'],
+    ['Cornwall, in the south-west of England, was famous for its mines of…', 'tin and copper', ['silver and gold', 'salt'], 'Its old mines are a UNESCO World Heritage Site.', 'England (UK)'],
+    ['In 1861 Gabriel Read found gold in a gully in which region of New Zealand?', 'Otago', ['Auckland', 'Wellington'], 'Thousands of miners arrived, and Dunedin became New Zealand\'s biggest city for a time.', 'New Zealand']
+  ],
+  lighthouse: [
+    ['Hook Head, in County Wexford, is one of the oldest working lighthouses in the world. About how old is it?', 'about 800 years old', ['about 80 years old', 'about 2,000 years old'], 'Monks kept a light there even before the tower was built.', 'Ireland'],
+    ['Which famous American statue worked as a lighthouse from 1886 to 1902?', 'the Statue of Liberty', ['Mount Rushmore', 'the Lincoln Memorial'], 'Its torch was not bright enough for ships, so it stopped being a lighthouse.', 'USA'],
+    ['The Fastnet Rock lighthouse, off the coast of Cork, is nicknamed…', 'Ireland\'s Teardrop', ['the Green Candle', 'the Lucky Rock'], 'It was the last part of Ireland that many emigrants saw on their way to America.', 'Ireland'],
+    ['Which famous writer\'s grandfather, Robert Stevenson, built the Bell Rock Lighthouse in Scotland (1810)?', 'Robert Louis Stevenson', ['Arthur Conan Doyle', 'J.K. Rowling'], 'Robert Louis Stevenson wrote "Treasure Island". Bell Rock is the oldest lighthouse in the world built on a rock in the open sea.', 'Scotland'],
+    ['Māori tradition says that at Cape Reinga, the northern tip of New Zealand…', 'the spirits of the dead leave for their homeland', ['the first rugby match was played', 'the sun rises first in the world'], 'Its Māori name, Te Rerenga Wairua, means "the leaping place of the spirits".', 'New Zealand'],
+    ['Peggy\'s Cove, one of the most photographed lighthouses in Canada, is in which province?', 'Nova Scotia', ['British Columbia', 'Quebec'], 'Nova Scotia means "New Scotland" in Latin.', 'Canada']
+  ],
   bigben: [
     ['What is "Big Ben" really the name of?', 'the great bell inside the tower', ['the whole clock tower', 'the architect of the tower'], 'Most people call the tower Big Ben, but the name belongs to the 13-tonne bell.', 'UK'],
     ['What has the clock tower been called since 2012?', 'the Elizabeth Tower', ['the Victoria Tower', 'St Stephen\'s Tower'], 'It was renamed for Queen Elizabeth II. The Victoria Tower is at the other end of the Palace.', 'UK'],
@@ -3282,8 +3331,9 @@ const NAPI = {
   },
   buyPlot(i) {
     return NAPI.run('nationBuyPlot', [i], () => {
-      const s = NAPI.local(), n = s.nation, price = plotPrice(n.plots.length);
-      if (n.plots.includes(i) || !adjacentPlot(i, n.plots)) throw new Error('You can only buy land next to your country.');
+      const s = NAPI.local(), n = s.nation, price = landPrice(i, n.plots.length);
+      if (n.plots.includes(i) || !(isOuter(i) || (i >= 0 && i < NR.size * NR.size))) throw new Error('You cannot buy that land.');
+      if (!isOuter(i) && !adjacentPlot(i, n.plots)) throw new Error('You can only buy city land next to your country.');
       if (s.goyux.total < price) throw new Error(`You need ${price} GOYUX to buy this land.`);
       n.plots.push(i); n.spent += price; store.set('nation', n);
     });
@@ -3293,7 +3343,7 @@ const NAPI = {
       const s = NAPI.local(), n = s.nation, b = BLD[id];
       if (!n.plots.includes(i) || n.buildings[i]) throw new Error('You cannot build there.');
       if (UNIQUE_B.includes(id) && Object.values(n.buildings).includes(id)) throw new Error('Your nation already has one.');
-      if (!fitsPlot(id, i)) throw new Error(RIVER.includes(i) ? 'Only bridges and ports can be built on the river.' : 'Bridges must be built on the river.');
+      if (!fitsPlot(id, i)) throw new Error(`${BLD[id][0]} can't be built there.`);
       if (s.goyux.total < b[2]) throw new Error(`You need ${b[2]} GOYUX for this building.`);
       n.buildings[i] = id; n.spent += b[2]; store.set('nation', n);
     });
@@ -3350,24 +3400,37 @@ const plotXZ = i => [((i % NR.size) - HALF) * PLOT, (Math.floor(i / NR.size) - H
    The plots stay on their grid (the server counts them), but the land around them is natural
    and every nation gets its own shape, seeded by its name. North (negative z) has the mountains. */
 const RIVER_X = plotXZ(RIVER[0])[0];
+const CAPE_A = -0.4;   // the lighthouse cape points east-north-east
 function islandPlan(seedText) {
   let sd = [...String(seedText || 'GOBLOX')].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7) || 7;
   const rnd = () => (sd = (sd * 1664525 + 1013904223) >>> 0) / 4294967296;
   const ph = [0, 1, 2, 3].map(() => rnd() * 6.3);
-  // distance from the centre to the coast at world angle a (x = r cos a, z = r sin a)
-  const coast = a => { const c = Math.abs(Math.cos(a)), sn = Math.abs(Math.sin(a));
-    return 80 * Math.pow(c ** 4 + sn ** 4, -0.25) + 26 * Math.max(0, -Math.sin(a)) ** 2 + 4 * Math.sin(3 * a + ph[0]) + 3 * Math.sin(5 * a + ph[1]) + 1.5 * Math.sin(11 * a + ph[2]); };
+  // distance from the centre to the coast at world angle a (x = r cos a, z = r sin a; north = negative z)
+  const coast = a => {
+    const c = Math.abs(Math.cos(a)), sn = Math.abs(Math.sin(a)), dc = Math.atan2(Math.sin(a - CAPE_A), Math.cos(a - CAPE_A));
+    return 100 * Math.pow(c ** 4 + sn ** 4, -0.25) + 30 * Math.max(0, -Math.sin(a)) ** 2 + 16 * Math.exp(-((dc / 0.11) ** 2))
+      + 3 * Math.sin(3 * a + ph[0]) + 2 * Math.sin(5 * a + ph[1]) + Math.sin(11 * a + ph[2]);
+  };
   const inside = (x, z, m = 0) => Math.hypot(x, z) < coast(Math.atan2(z, x)) - m;
-  // the river meanders gently between the plots and more freely outside them
+  // the river meanders gently in the city and more freely outside it
   const riverX = z => RIVER_X + (0.7 + 2.6 * clamp((Math.abs(z) - 55) / 15, 0, 1)) * Math.sin(z * 0.16 + ph[3]);
-  return { rnd, coast, inside, riverX };
+  // where the special sites are on this island
+  const hz = coast(Math.atan2(92, -12)) - 4, cd = coast(CAPE_A) - 6;
+  const sites = { 200: [-12, hz], 201: [78, 22], 202: [-14, -78], 203: [Math.cos(CAPE_A) * cd, Math.sin(CAPE_A) * cd], 204: [-82, -18] };
+  const pos = i => i < 81 ? plotXZ(i) : COUNTRY[i] || sites[i];
+  // country lanes: from each outer plot to the nearest edge of the city
+  const lanes = OUTER.map(k => {
+    const [x, z] = pos(k), tx = clamp(x, -55, 55), tz = clamp(z, -55, 55), dx = tx - x, dz = tz - z;
+    return Math.abs(dx) > Math.abs(dz) ? [x + Math.sign(dx) * 5.2, z, tx, tz] : [x, z + Math.sign(dz) * 5.2, tx, tz];   // from the plot's gate to the city
+  });
+  return { rnd, coast, inside, riverX, pos, lanes };
 }
-function flatShape(rf, y, col, n = 180) {
+function flatShape(rf, y, col, n = 200) {
   const sh = new THREE.Shape();
   for (let k = 0; k < n; k++) { const a = k / n * Math.PI * 2, r = rf(a); k ? sh.lineTo(Math.cos(a) * r, -Math.sin(a) * r) : sh.moveTo(Math.cos(a) * r, -Math.sin(a) * r); }
   const m = new THREE.Mesh(new THREE.ShapeGeometry(sh), M(col)); m.rotation.x = -Math.PI / 2; m.position.y = y; m.receiveShadow = true; W.scene.add(m); return m;
 }
-function ribbon(pts, y, col) {   // pts: [[x, z, half width], …] along the river
+function ribbon(pts, y, col) {   // pts: [[x, z, half width], …] along a river or a lane
   const pos = [], idx = [];
   pts.forEach(([px, pz, hw], k) => {
     const [nx, nz] = pts[Math.min(k + 1, pts.length - 1)], [ox, oz] = pts[Math.max(k - 1, 0)];
@@ -3378,63 +3441,75 @@ function ribbon(pts, y, col) {   // pts: [[x, z, half width], …] along the riv
   const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); geo.setIndex(idx); geo.computeVertexNormals();
   const m = new THREE.Mesh(geo, M(col)); m.receiveShadow = true; W.scene.add(m); return m;
 }
-const WATER = '#2d8bd6', BANK = '#c9b57c', GRASS = '#5c9e45';
-function drawIsland(seedText) {
-  const I = islandPlan(seedText), { rnd, coast, inside, riverX } = I;
-  flatShape(a => coast(a) + 14, -0.45, '#4fb3e8');
+const WATER = '#2d8bd6', BANK = '#c9b57c', GRASS = '#5c9e45', LANE = '#d9caa0';
+const segDist = (px, pz, [x1, z1, x2, z2]) => { const dx = x2 - x1, dz = z2 - z1, L = dx * dx + dz * dz || 1, t = clamp(((px - x1) * dx + (pz - z1) * dz) / L, 0, 1); return Math.hypot(px - x1 - t * dx, pz - z1 - t * dz); };
+function drawIsland(I) {
+  const { rnd, coast, inside, riverX, pos, lanes } = I;
+  flatShape(a => coast(a) + 16, -0.45, '#4fb3e8');
   flatShape(coast, -0.02, '#e3d29b');
-  flatShape(a => coast(a) - 7, 0.02, GRASS);
+  flatShape(a => coast(a) - 8, 0.02, GRASS);
   const disc = (x, z, rx, rz, y, col) => { const m = new THREE.Mesh(new THREE.CircleGeometry(1, 30), M(col)); m.rotation.x = -Math.PI / 2; m.scale.set(rx, rz, 1); m.position.set(x, y, z); m.receiveShadow = true; W.scene.add(m); };
   const lakes = [];
   const lake = (x, z, r) => { lakes.push([x, z, r]); disc(x, z, r * 1.25 + 1, r + 1, 0.11, BANK); disc(x, z, r * 1.25, r, 0.13, WATER); };
+  /* country lanes */
+  lanes.forEach(([x1, z1, x2, z2]) => { const n = Math.max(2, Math.ceil(Math.hypot(x2 - x1, z2 - z1) / 3)); ribbon([...Array(n + 1)].map((_, k) => [x1 + (x2 - x1) * k / n, z1 + (z2 - z1) * k / n, 0.9]), 0.05, LANE); });
   /* the river: from a mountain lake to the south coast */
-  const z0 = -66; lake(riverX(z0), z0, 6);
-  let zEnd = 0; while (inside(riverX(zEnd), zEnd, 0.5) && zEnd < 140) zEnd += 0.5;
+  const z0 = -68; lake(riverX(z0), z0, 6);
+  let zEnd = 0; while (inside(riverX(zEnd), zEnd, 0.5) && zEnd < 160) zEnd += 0.5;
   const pts = [];
   for (let zz = z0; zz <= zEnd; zz += 1) pts.push([riverX(zz), zz, (zz < -54 ? 1.4 + 1.3 * clamp((zz - z0) / 12, 0, 1) : 2.7) + 1.6 * clamp((zz - zEnd + 12) / 12, 0, 1)]);
   ribbon(pts.map(([x, z, w]) => [x, z, w + 0.9]), 0.11, BANK); ribbon(pts, 0.13, WATER);
+  // nothing natural may cover a plot, a lane, a lake or the river
+  const plotsAt = OUTER.map(k => pos(k));
+  const free = (x, z, r) => lakes.every(([lx, lz, lr]) => Math.hypot(x - lx, z - lz) > lr * 1.25 + r) && Math.abs(x - riverX(z)) > r + 4
+    && plotsAt.every(([px, pz]) => Math.max(Math.abs(x - px), Math.abs(z - pz)) > r + 6) && lanes.every(l => segDist(x, z, l) > r + 1.5)
+    && Math.max(Math.abs(x), Math.abs(z)) > 56 + r;
   /* a second lake in the north-west hills */
-  for (let t = 0; t < 8; t++) { const a = -2.1 - t * 0.08, d = coast(a) - 21, lx = Math.cos(a) * d, lz = Math.sin(a) * d; if (lz < -64) { lake(lx, lz, 7); break; } }
-  const free = (x, z, r) => lakes.every(([lx, lz, lr]) => Math.hypot(x - lx, z - lz) > lr * 1.25 + r) && Math.abs(x - riverX(z)) > r + 4;
-  /* mountains with snow in the north, green hills elsewhere */
-  const peaks = [];
-  const rock = ['#6f7d52', '#7b7466', '#68784c'], snowM = M('#f4f7fb');
+  for (let t = 0; t < 14; t++) { const a = -2.0 - t * 0.06, d = coast(a) - 22, lx = Math.cos(a) * d, lz = Math.sin(a) * d; if (free(lx, lz, 9)) { lake(lx, lz, 7); break; } }
+  /* mountains with snow in the north (one right behind the mine), green hills elsewhere */
+  const peaks = [], rock = ['#6f7d52', '#7b7466', '#68784c'], snowM = M('#f4f7fb');
   const mountain = (x, z, r, h, snow, col) => {
     const ry = rnd() * 3, m = new THREE.Mesh(new THREE.ConeGeometry(r, h, 7), new THREE.MeshLambertMaterial({ color: col, flatShading: true }));
     m.position.set(x, h / 2 - 0.2, z); m.rotation.y = ry; m.castShadow = true; m.receiveShadow = true; W.scene.add(m);
     if (snow) { const c = new THREE.Mesh(new THREE.ConeGeometry(r * 0.37, h * 0.34, 7), snowM); c.position.set(x, h * 0.835 - 0.15, z); c.rotation.y = ry; W.scene.add(c); }   // a bit wider than the slope, so it doesn't flicker
-    peaks.push([x, z, r]);
+    peaks.push([x, z, r]); W.colliders.push({ minX: x - r * 0.55, maxX: x + r * 0.55, minZ: z - r * 0.55, maxZ: z + r * 0.55, minY: 0, maxY: h });
   };
-  for (let row = 0; row < 2; row++) for (let x = -88; x <= 88; x += 15) {
-    const px = x + (rnd() - 0.5) * 8, pz = -(row ? 90 + rnd() * 12 : 74 + rnd() * 10), r = (row ? 13 : 10) + rnd() * 5, h = (row ? 26 : 16) + rnd() * 12;
-    if (inside(px, pz, r * 0.55 + 2) && pz + r * 0.7 < -57 && free(px, pz, r * 0.7)) mountain(px, pz, r, h, h > 20, rock[(rnd() * 3) | 0]);
+  const [mx, mz] = pos(202); mountain(mx, mz - 19, 12, 30, true, rock[1]);
+  for (let row = 0; row < 3; row++) for (let x = -100; x <= 100; x += 15) {
+    const px = x + (rnd() - 0.5) * 8, pz = -(84 + row * 13 + rnd() * 8), r = 10 + row * 2 + rnd() * 5, h = 16 + row * 6 + rnd() * 12;
+    if (inside(px, pz, r * 0.5 + 2) && free(px, pz, r * 0.6)) mountain(px, pz, r, h, h > 21, rock[(rnd() * 3) | 0]);
   }
-  for (let k = 0, made = 0; k < 60 && made < 7; k++) {
-    const a = rnd() * Math.PI * 2, d = 60 + rnd() * 30, px = Math.cos(a) * d, pz = Math.sin(a) * d, r = 6 + rnd() * 4;
-    if (pz > -50 && Math.max(Math.abs(px), Math.abs(pz)) > 60 + r * 0.6 && inside(px, pz, r + 8) && free(px, pz, r)) { mountain(px, pz, r, 4 + rnd() * 5, false, '#6a9a4a'); made++; }
+  for (let k = 0, made = 0; k < 120 && made < 8; k++) {
+    const a = rnd() * Math.PI * 2, d = 66 + rnd() * 40, px = Math.cos(a) * d, pz = Math.sin(a) * d, r = 6 + rnd() * 4;
+    if (pz > -60 && inside(px, pz, r + 10) && free(px, pz, r)) { mountain(px, pz, r, 4 + rnd() * 5, false, '#6a9a4a'); made++; }
   }
-  /* forests around the plots (one shared geometry for all trees) */
+  /* Castle Rock: a crown of big rocks around the site; rocks on the cape too */
+  const boulder = (x, z, r, col = '#8a8580') => { const b = new THREE.Mesh(new THREE.DodecahedronGeometry(r), new THREE.MeshLambertMaterial({ color: col, flatShading: true })); b.position.set(x, r * 0.45, z); b.rotation.set(rnd() * 3, rnd() * 3, 0); b.castShadow = true; W.scene.add(b); };
+  const [cx, cz] = pos(204); for (let k = 0; k < 12; k++) { const a = k / 12 * Math.PI * 2; if (Math.abs(a - Math.PI * 0.0) > 0.4) boulder(cx + Math.cos(a) * 7.6, cz + Math.sin(a) * 7.6, 1.8 + rnd() * 1.4); }
+  const [lx, lz] = pos(203); for (let k = 0; k < 7; k++) { const a = CAPE_A + (rnd() - 0.5) * 2.4, d = 7 + rnd() * 3; boulder(lx + Math.cos(a) * d, lz + Math.sin(a) * d, 1 + rnd() * 1.2, '#9e9e9e'); }
+  /* forests (one shared geometry for every tree) */
   const trunk = new THREE.BoxGeometry(0.5, 1.8, 0.5), crown = new THREE.ConeGeometry(1.4, 3.6, 8), ball = new THREE.SphereGeometry(1.4, 9, 7);
-  for (let k = 0, made = 0; k < 400 && made < 70; k++) {
-    const px = (rnd() - 0.5) * 200, pz = (rnd() - 0.5) * 200;
-    if (Math.max(Math.abs(px), Math.abs(pz)) < 58 || !inside(px, pz, 10) || !free(px, pz, 2) || peaks.some(([mx, mz, mr]) => Math.hypot(px - mx, pz - mz) < mr + 1)) continue;
-    const pine = pz < -20 || rnd() < 0.5, s = 0.8 + rnd() * 0.6;
+  for (let k = 0, made = 0; k < 700 && made < 95; k++) {
+    const px = (rnd() - 0.5) * 250, pz = (rnd() - 0.5) * 250;
+    if (!inside(px, pz, 11) || !free(px, pz, 1) || peaks.some(([qx, qz, qr]) => Math.hypot(px - qx, pz - qz) < qr + 1)) continue;
+    const pine = pz < -30 || rnd() < 0.5, s = 0.8 + rnd() * 0.6;
     const t = new THREE.Mesh(trunk, M('#6d4c41')); t.position.set(px, 0.9 * s, pz); t.scale.setScalar(s); W.scene.add(t);
     const c = new THREE.Mesh(pine ? crown : ball, M(pine ? '#1b5e20' : '#388e3c')); c.position.set(px, (pine ? 3.2 : 2.6) * s, pz); c.scale.setScalar(s); c.castShadow = true; W.scene.add(c); made++;
   }
-  /* palm trees on the beach (not on the mountain coast) */
+  /* palm trees on the beach (not on the mountain coast, the harbour or the river mouth) */
   const palm = (px, pz, lean) => {
     for (let k = 0; k < 4; k++) part(px + lean * k * 0.25, k * 1.1, pz, 0.45 - k * 0.04, 1.15, 0.45 - k * 0.04, k % 2 ? '#8d6e63' : '#795548', { solid: false });
     const top = new THREE.Group(); top.position.set(px + lean * 0.9, 4.5, pz); W.scene.add(top);
     for (let k = 0; k < 6; k++) { const leaf = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.08, 0.6), M(k % 2 ? '#43a047' : '#2e7d32')); leaf.position.set(1, -0.25, 0); leaf.rotation.z = -0.35; const arm = new THREE.Group(); arm.rotation.y = k * Math.PI / 3; arm.add(leaf); top.add(arm); leaf.castShadow = true; }
   };
-  for (let k = 0; k < 30; k++) {
-    const a = k / 30 * Math.PI * 2 + rnd() * 0.1, d = coast(a) - 3.5, px = Math.cos(a) * d, pz = Math.sin(a) * d;
-    if (Math.sin(a) > -0.35 && !(pz > 0 && Math.abs(px - riverX(pz)) < 8)) palm(px, pz, Math.cos(a) * 0.6);
+  const [hx, hz] = pos(200);
+  for (let k = 0; k < 36; k++) {
+    const a = k / 36 * Math.PI * 2 + rnd() * 0.08, d = coast(a) - 3.5, px = Math.cos(a) * d, pz = Math.sin(a) * d;
+    if (Math.sin(a) > -0.35 && !(pz > 0 && Math.abs(px - riverX(pz)) < 8) && Math.hypot(px - hx, pz - hz) > 12 && plotsAt.every(([qx, qz]) => Math.hypot(px - qx, pz - qz) > 9)) palm(px, pz, Math.cos(a) * 0.6);
   }
   /* boats on the sea */
   return ['#e53935', '#fbc02d', '#1e88e5', '#fafafa'].map((c, k) => {
-    const a = 0.3 + k * 1.6, d = coast(a) + 22, b = new THREE.Group(); b.position.set(Math.cos(a) * d, -0.3, Math.sin(a) * d); b.rotation.y = k * 1.3; W.scene.add(b);
+    const a = 0.3 + k * 1.6, d = coast(a) + 24, b = new THREE.Group(); b.position.set(Math.cos(a) * d, -0.3, Math.sin(a) * d); b.rotation.y = k * 1.3; W.scene.add(b);
     const hull = new THREE.Mesh(new THREE.BoxGeometry(5, 1.2, 1.8), M(c)); hull.position.y = 0.4; b.add(hull);
     const mast = new THREE.Mesh(new THREE.BoxGeometry(0.15, 5, 0.15), M('#6d4c41')); mast.position.y = 3.2; b.add(mast);
     const sail = new THREE.Mesh(new THREE.ConeGeometry(1.6, 4.2, 3), M('#fafafa')); sail.scale.z = 0.08; sail.position.set(0.9, 3.3, 0); b.add(sail);
@@ -3475,7 +3550,7 @@ function addWindows(m, col, size = 1.5) {
 function waveFlags(t) {
   (W.flags || []).forEach(f => { const p = f.m.geometry.attributes.position; for (let k = 0; k < p.count; k++) { const u = p.getX(k); p.setZ(k, Math.sin(u * 3.2 - t * 5 + f.ph) * 0.13 * u); } p.needsUpdate = true; });
 }
-function drawBuilding(id, x, z, g, flag, river) {
+function drawBuilding(id, x, z, g, flag, river, site) {
   const B = (dx, y, dz, w, h, d, col, solid = true) => part(x + dx, y, z + dz, w, h, d, col, { parent: g, solid });
   const Mx = (geo, col, dx, y, dz, rot, mat) => { const m = new THREE.Mesh(geo, mat || M(col)); m.position.set(x + dx, y, z + dz); if (rot) m.rotation.set(rot[0], rot[1], rot[2]); m.castShadow = true; g.add(m); return m; };
   const roof = (dx, y, dz, w, d, h, col) => { const r = Math.max(w, d); const m = Mx(new THREE.ConeGeometry(r * 0.72, h, 4), col, dx, y + h / 2, dz, [0, Math.PI / 4, 0]); m.scale.set(w / r, 1, d / r); };
@@ -3554,7 +3629,9 @@ function drawBuilding(id, x, z, g, flag, river) {
     case 'port':
       B(0, 0, 1.6, 9.4, 0.14, 5, '#29b6f6', false); B(-2.4, 0.1, 1.6, 1.5, 0.4, 5, '#8d6e63', false);
       B(2.5, 0, -2.6, 0.5, 6, 0.5, '#fbc02d'); B(1.1, 5.6, -2.6, 3.4, 0.4, 0.4, '#fbc02d', false);
-      B(1.8, 0.1, 2, 2.2, 1, 4, '#e53935', false); B(1.8, 1.1, 2.8, 1.4, 1, 1.4, '#fafafa', false); label('PORT'); break;
+      B(1.8, 0.1, 2, 2.2, 1, 4, '#e53935', false); B(1.8, 1.1, 2.8, 1.4, 1, 1.4, '#fafafa', false);
+      if (site) { B(-2.4, 0.1, 10, 1.6, 0.35, 12, '#8d6e63', false); for (let k = 0; k < 6; k++) B(-2.4 + (k % 2 ? 0.7 : -0.7), -0.6, 5 + k * 2, 0.25, 1.05, 0.25, '#5d4037', false); B(1.8, -0.3, 11, 2.6, 1.2, 6, '#1565c0', false); B(1.8, 0.9, 10, 1.8, 1, 2, '#fafafa', false); }
+      label('PORT'); break;
     case 'stadium': {
       const ring = Mx(new THREE.CylinderGeometry(4.3, 4.3, 2.6, 28, 1, true), null, 0, 1.3, 0, null, new THREE.MeshLambertMaterial({ color: '#90a4ae', side: THREE.DoubleSide }));
       ring.receiveShadow = true; B(0, 0, 0, 6, 0.12, 5, '#43a047', false); collider(8.6, 2.6, 8.6); label('STADIUM'); break;
@@ -3563,6 +3640,27 @@ function drawBuilding(id, x, z, g, flag, river) {
       B(0, 0, 1.2, 9.4, 0.08, 2.6, '#37474f', false); for (let k = -3.5; k <= 3.5; k += 1.75) B(k, 0.08, 1.2, 0.9, 0.02, 0.2, '#fafafa', false);
       B(-3, 0, -2.6, 1.2, 5, 1.2, '#eceff1'); B(-3, 5, -2.6, 2, 1.2, 2, '#4fc3f7', false);
       B(1.5, 0.5, -2.2, 4, 0.8, 0.8, '#fafafa'); B(1.5, 0.7, -2.2, 1, 0.15, 4.2, '#fafafa', false); B(-0.3, 1.1, -2.2, 0.6, 1, 0.15, '#e53935', false); label('AIRPORT'); break;
+    case 'forest': {
+      B(0, 0, 0, 9, 0.1, 9, '#4e7d32', false);
+      let sd = 7; const rr = () => (sd = (sd * 9301 + 49297) % 233280) / 233280;
+      for (let k = 0; k < 14; k++) { const dx = -3.6 + (k % 4) * 2.4 + (rr() - 0.5), dz = -3.6 + Math.floor(k / 4) * 2.4 + (rr() - 0.5), sc = 0.7 + rr() * 0.6, pine = k % 3 !== 0;
+        B(dx, 0, dz, 0.4 * sc, 1.6 * sc, 0.4 * sc, '#6d4c41', false); Mx(pine ? new THREE.ConeGeometry(1.2 * sc, 3.4 * sc, 8) : new THREE.SphereGeometry(1.2 * sc, 9, 7), pine ? '#1b5e20' : '#2e7d32', dx, (pine ? 3.1 : 2.4) * sc, dz); }
+      B(2.6, 0, 3.6, 0.5, 0.9, 0.5, '#8d6e63', false); B(2.6, 0.9, 3.6, 0.3, 0.3, 0.6, '#795548', false); label('FOREST'); break;
+    }
+    case 'mine':
+      Mx(new THREE.DodecahedronGeometry(4.2), '#8a7f74', 0, 1.6, -2.6).scale.set(1.2, 0.9, 0.8);
+      B(0, 0, 0.6, 2.4, 2.4, 0.3, '#212121', false); B(-1.3, 0, 0.8, 0.35, 2.7, 0.35, '#795548', false); B(1.3, 0, 0.8, 0.35, 2.7, 0.35, '#795548', false); B(0, 2.6, 0.8, 3, 0.35, 0.4, '#795548', false);
+      [-0.45, 0.45].forEach(dx => B(dx, 0.1, 3, 0.1, 0.08, 4.6, '#9e9e9e', false)); for (let k = 0; k < 6; k++) B(0, 0.1, 1.2 + k * 0.75, 1.3, 0.05, 0.2, '#6d4c41', false);
+      B(0, 0.25, 3.2, 1.2, 0.7, 1.4, '#607d8b', false); B(0, 0.95, 3.2, 1, 0.3, 1.2, '#455a64', false);
+      Mx(new THREE.ConeGeometry(1.6, 1.6, 7), '#5d5149', 3, 0.8, 2.6); Mx(new THREE.ConeGeometry(1.1, 1.1, 7), '#d4a017', -3, 0.55, 2.6);
+      collider(8, 4, 5); label('MINE'); break;
+    case 'lighthouse':
+      for (let k = 0; k < 5; k++) Mx(new THREE.CylinderGeometry(1.15 - k * 0.12, 1.25 - k * 0.12, 1.6, 16), k % 2 ? '#d32f2f' : '#fafafa', 0, 0.8 + k * 1.6, 0);
+      B(0, 8, 0, 2.2, 0.2, 2.2, '#37474f', false);
+      Mx(new THREE.CylinderGeometry(0.65, 0.65, 1.1, 12), null, 0, 8.75, 0, null, new THREE.MeshBasicMaterial({ color: '#fff59d' }));
+      Mx(new THREE.ConeGeometry(0.85, 0.9, 12), '#d32f2f', 0, 9.75, 0);
+      Wn(2.8, 0, 2, 2.6, 2, 2.4, '#fafafa'); roof(2.8, 2, 2, 2.8, 2.6, 1.2, '#d32f2f'); door(2.8, 3.22, '#37474f', 0.7, 1.4);
+      collider(2.6, 8, 2.6); label('LIGHTHOUSE'); break;
     case 'restaurant':
       Wn(0, 0, -1, 6.5, 3, 4, '#ffccbc'); B(0, 3, -1, 6.8, 0.3, 4.3, '#6d4c41', false); door(0, 1.02, '#4e342e', 1.1, 1.9);
       for (let k = 0; k < 7; k++) Mx(new THREE.BoxGeometry(0.94, 0.1, 1.5), k % 2 ? '#fafafa' : '#d32f2f', -2.82 + k * 0.94, 2.45, 1.6, [0.4, 0, 0]);
@@ -3672,19 +3770,32 @@ function drawBuilding(id, x, z, g, flag, river) {
       collider(8.4, 3.5, 6); label('SYDNEY OPERA HOUSE'); break;
   }
 }
+const ALL_PLOTS = [...Array(NR.size * NR.size).keys()].concat(OUTER);
+const SITE_COL = { 200: '#bcaaa4', 201: '#90a4ae', 202: '#a1887f', 203: '#cfd8dc', 204: '#9e9e9e' };
 function renderPlots() {
-  const s = G.s, st = s.state, n = st.nation;
+  const s = G.s, st = s.state, n = st.nation, pos = s.plan.pos;
   (s.layers || []).forEach(l => {
     W.scene.remove(l.g); const dead = new Set(l.refs); W.colliders = W.colliders.filter(c => !dead.has(c));
-    // free GPU memory: the whole island is redrawn after every change (cached textures are kept)
+    // free GPU memory: every plot is redrawn after each change (cached textures are kept)
     l.g.traverse(o => { if (o.geometry) o.geometry.dispose(); const m = o.material; if (m && !Array.isArray(m) && m.map && !m.map.keep) { m.map.dispose(); m.dispose(); } });
   });
   s.layers = []; W.flags = [];
-  for (let i = 0; i < NR.size * NR.size; i++) {
+  const forSale = (txt, x, z, g, bg = '#fffde7', fg = '#b71c1c') => { part(x, 0.1, z + 4, 0.15, 1.4, 0.15, '#795548', { parent: g, solid: false }); sign(txt, x, 1.6, z + 4.08, 2.2, 1, 0, { bg, fg, parent: g }); };
+  ALL_PLOTS.forEach(i => {
     const g = new THREE.Group(); W.scene.add(g); const c0 = W.colliders.length;
-    const [x, z] = plotXZ(i), owned = !!n && n.plots.includes(i), river = RIVER.includes(i);
-    if (owned) {
-      // your land: a lighter lawn, a kerb and a road around it (the river crosses the north and south sides)
+    const [x, z] = pos(i), owned = !!n && n.plots.includes(i), river = RIVER.includes(i), site = SITES[i], country = !!COUNTRY[i];
+    if (i >= 81) {
+      /* countryside and special sites */
+      if (owned) {
+        part(x, 0, z, TILE, 0.1, TILE, site ? SITE_COL[i] : '#8cc657', { solid: false, parent: g, shadow: false });
+        [[0, -5, TILE, 0.4], [0, 5, TILE, 0.4], [-5, 0, 0.4, TILE], [5, 0, 0.4, TILE]].forEach(([dx, dz, w, d]) => part(x + dx, 0.1, z + dz, w, site ? 0.15 : 0.5, d, site ? '#f5f5dc' : '#558b2f', { solid: false, parent: g }));
+        if (site && !n.buildings[i]) forSale(`${site[1].toUpperCase()}\nBuild: ${BLD[site[0]][0]}`, x, z, g, '#263238', '#ffd54f');
+      } else {
+        [[0, -5, TILE, 0.25], [0, 5, TILE, 0.25], [-5, 0, 0.25, TILE], [5, 0, 0.25, TILE]].forEach(([dx, dz, w, d]) => part(x + dx, 0.03, z + dz, w, 0.05, d, site ? '#ffd54f' : '#e6dcae', { solid: false, parent: g, shadow: false }));
+        if (n && !s.visit) forSale(site ? `${site[1].toUpperCase()}\n${landPrice(i, n.plots.length)} GOYUX` : `COUNTRYSIDE\n${landPrice(i, n.plots.length)} GOYUX`, x, z, g, site ? '#263238' : '#fffde7', site ? '#ffd54f' : '#2e7d32');
+      }
+    } else if (owned) {
+      // your city land: a lighter lawn, a kerb and a road around it (the river crosses the north and south sides)
       part(x, 0, z, TILE, 0.1, TILE, '#7cc36b', { solid: false, parent: g, shadow: false });
       [[0, -5, TILE, 0.3, 1], [0, 5, TILE, 0.3, 1], [-5, 0, 0.3, TILE], [5, 0, 0.3, TILE]].forEach(([dx, dz, w, d, ns]) => { if (!(river && ns)) part(x + dx, 0.1, z + dz, w, 0.15, d, '#f5f5dc', { solid: false, parent: g, shadow: false }); });
       [[0, -5.5, PLOT, 1, 1], [0, 5.5, PLOT, 1, 1], [-5.5, 0, 1, PLOT], [5.5, 0, 1, PLOT]].forEach(([dx, dz, w, d, ns]) => { if (!(river && ns)) part(x + dx, 0, z + dz, w, 0.07, d, '#b9b4aa', { solid: false, parent: g, shadow: false }); });
@@ -3697,25 +3808,37 @@ function renderPlots() {
         t.position.set(tx, pine ? 1.6 + sz * 1.3 : 2.4, tz); t.castShadow = true; g.add(t);
       }
       if (!river && r() < 0.5) { const rk = new THREE.Mesh(new THREE.DodecahedronGeometry(0.5 + r() * 0.4), M('#9e9e9e')); rk.position.set(x + (r() - 0.5) * 6, 0.25, z + (r() - 0.5) * 6); rk.castShadow = true; g.add(rk); }
-      if (n && !s.visit && adjacentPlot(i, n.plots)) { part(x, 0.1, z + 4, 0.15, 1.4, 0.15, '#795548', { parent: g, solid: false }); sign(`FOR SALE\n${plotPrice(n.plots.length)} GOYUX`, x, 1.6, z + 4.08, 1.8, 0.9, 0, { bg: '#fffde7', fg: '#b71c1c', parent: g }); }
+      if (n && !s.visit && adjacentPlot(i, n.plots)) forSale(`FOR SALE\n${plotPrice(n.plots.length)} GOYUX`, x, z, g);
     }
     const b = n && n.buildings[i];
-    if (b && river && !RIVER_OK.includes(b)) part(x, 0, z, 8.6, 0.16, 8.6, '#7cc36b', { solid: false, parent: g, shadow: false });   // built before the river existed: a small island
-    if (b) drawBuilding(b, x, z, g, n.flag, river);
+    if (b && river && !BRIDGES.includes(b)) part(x, 0, z, 8.6, 0.16, 8.6, '#7cc36b', { solid: false, parent: g, shadow: false });   // built before the river existed: a small island
+    if (b) drawBuilding(b, x, z, g, n.flag, river, site);
     s.layers.push({ g, refs: W.colliders.slice(c0) });
-  }
+  });
 }
+const plotKind = i => SITES[i] ? `${SITES[i][1]} site` : COUNTRY[i] ? 'countryside' : RIVER.includes(i) ? 'river' : 'city';
 function plotInteractions() {
-  for (let i = 0; i < NR.size * NR.size; i++) {
-    const [x, z] = plotXZ(i);
+  ALL_PLOTS.forEach(i => {
     inter({
-      at: () => ({ x, y: 0, z }), r: 6.2, h: 4.5,
-      get obj() { const n = G.s.state.nation, b = n && n.buildings[i], rv = RIVER.includes(i); return b ? BLD[b][1] + ' ' + BLD[b][0] : (n && n.plots.includes(i) ? (rv ? '🌊 Your river' : 'Your land') : (rv ? '🌊 Wild river' : 'Wild land')); },
-      get label() { const n = G.s.state.nation, mv = G.s.moving; if (!n) return ''; if (n.buildings[i]) return mv ? 'Occupied' : 'Look'; if (n.plots.includes(i)) return mv ? (fitsPlot(mv.id, i) ? `Move ${BLD[mv.id][0]} here · ${moveCost(mv.id)} GOYUX` : (RIVER.includes(i) ? 'Only bridges and ports go on the river' : 'Bridges go on the river')) : (RIVER.includes(i) ? 'Build a bridge or a port' : 'Build here'); return `Buy land · ${plotPrice(n.plots.length)} GOYUX`; },
-      when: () => { const n = G.s.state.nation; if (!n) return false; if (G.s.visit) return !!n.buildings[i]; return n.plots.includes(i) || adjacentPlot(i, n.plots); },
+      at: () => { const [x, z] = G.s.plan.pos(i); return { x, y: 0, z }; }, r: 6.2, h: 4.5,
+      get obj() {
+        const n = G.s.state.nation, b = n && n.buildings[i], k = plotKind(i), mine = n && n.plots.includes(i);
+        if (b) return BLD[b][1] + ' ' + BLD[b][0];
+        return SITES[i] ? `${mine ? '🏗 Your' : '🏗'} ${SITES[i][1]} site` : RIVER.includes(i) ? (mine ? '🌊 Your river' : '🌊 Wild river') : k === 'countryside' ? (mine ? '🌾 Your countryside' : '🌾 Countryside') : (mine ? 'Your land' : 'Wild land');
+      },
+      get label() {
+        const n = G.s.state.nation, mv = G.s.moving; if (!n) return '';
+        if (n.buildings[i]) return mv ? 'Occupied' : 'Look';
+        if (n.plots.includes(i)) {
+          if (mv) return fitsPlot(mv.id, i) ? `Move ${BLD[mv.id][0]} here · ${moveCost(mv.id)} GOYUX` : `${BLD[mv.id][0]} can't go here`;
+          return SITES[i] ? `Build the ${BLD[SITES[i][0]][0]}` : RIVER.includes(i) ? 'Build a bridge' : COUNTRY[i] ? 'Build: fields, forest, rural buildings' : 'Build here';
+        }
+        return `Buy ${isOuter(i) ? 'this ' + plotKind(i) : 'land'} · ${landPrice(i, n.plots.length)} GOYUX`;
+      },
+      when: () => { const n = G.s.state.nation; if (!n) return false; if (G.s.visit) return !!n.buildings[i]; return n.plots.includes(i) || isOuter(i) || adjacentPlot(i, n.plots); },
       act: () => { const n = G.s.state.nation; if (n.buildings[i]) buildingInfo(n.buildings[i], i); else if (n.plots.includes(i)) (G.s.moving ? moveHere(i) : buildMenu(i)); else buyPlot(i); }
     });
-  }
+  });
 }
 
 /* ---------- state, HUD, goals ---------- */
@@ -3779,10 +3902,12 @@ async function launchNation(visit) {
   newWorld();
   G = { id: 'nation', sc: SCEN.nation, t0: performance.now(), money: 0, good: 0, bad: 0, hints: 0, manners: 100, mistakes: [], obj: [], inv: [], over: false, s: { state: st, visit: visit || null, layers: [] } };
   W.spin = [];
-  const ext = HALF * PLOT + 6; W.bounds = { minX: -ext + 1, maxX: ext - 1, minZ: -ext + 1, maxZ: ext + 1 };
+  const plan = G.s.plan = islandPlan(st.nation ? st.nation.name : 'GOBLOX');
+  W.bounds = { minX: -170, maxX: 170, minZ: -170, maxZ: 170 };
+  W.walk = (x, z) => plan.inside(x, z, 2);   // walk anywhere on the island, not into the sea
   W.scene.fog = new THREE.Fog('#a8dcff', 110, 300);
   const sea = new THREE.Mesh(new THREE.PlaneGeometry(700, 700), new THREE.MeshLambertMaterial({ color: '#2f80d0' })); sea.rotation.x = -Math.PI / 2; sea.position.y = -0.5; W.scene.add(sea);
-  const boats = drawIsland(st.nation ? st.nation.name : 'GOBLOX');
+  const boats = drawIsland(plan);
   renderPlots(); plotInteractions();
   W.update = dt => {
     W.spin.forEach(h => { h.rotation.z += dt * 2.2; });
@@ -3824,6 +3949,7 @@ function advisorTalk() {
   if (s.pop < 150) tips.push(['Our people need homes. Houses and a hospital will make our population grow.', 'Necesitamos casas y un hospital para crecer.']);
   if (s.env < 40) tips.push(['The air is dirty! Build a park or a wind farm to help the environment.', 'Construye un parque o un parque eólico.']);
   if (s.happy < 45) tips.push(['People are not happy. A park, a stadium or a hospital would help.', 'La gente no está contenta.']);
+  if (!n.plots.some(isOuter)) tips.push(['Outside the city there is countryside for fields and forests, and special sites: a harbour, an airfield, a mine, a cape for a lighthouse and Castle Rock. Follow the country lanes!', 'Fuera de la ciudad hay campo y lugares especiales: puerto, aeródromo, mina, cabo y Castle Rock.']);
   if (!blds.some(b => BRIDGES.includes(b)) && s.cult > 40) tips.push(['Have you seen the river? Buy a river plot and build a famous bridge across it!', 'Compra un terreno del río y construye un puente famoso.']);
   if (!blds.includes('embassy')) tips.push(['With an embassy we could write to other nations and sign treaties.', 'Con una embajada podrás firmar tratados.']);
   if (!blds.some(b => MONUMENTS.includes(b))) tips.push(['A famous monument would bring culture and tourists. Learn about it, then build it!', 'Un monumento famoso traería cultura y turistas.']);
@@ -3937,8 +4063,9 @@ function runQuiz(o) {
 
 /* ---------- land and buildings ---------- */
 function buyPlot(i) {
-  const st = G.s.state, price = plotPrice(st.nation.plots.length);
-  panel('Buy this land?', `New land costs ${price} GOYUX. You have ${st.goyux.total} GOYUX.`, `<p class="panel-p">Land gets more expensive as your nation grows, so plan where you want to build.</p>`, [
+  const st = G.s.state, price = landPrice(i, st.nation.plots.length);
+  const what = SITES[i] ? `This is a special site: only a <b>${escH(BLD[SITES[i][0]][0])}</b> can be built here.` : COUNTRY[i] ? `Countryside: here you can plant a forest, make fields (farm) or build rural buildings: ${RURAL.filter(id => !MONUMENTS.includes(id)).map(id => BLD[id][0].toLowerCase()).join(', ')}, and rural monuments like Stonehenge or Hobbiton.` : RIVER.includes(i) ? 'This land is on the river: only bridges can be built here.' : 'City land: you can build almost anything here.';
+  panel(SITES[i] ? `Buy the ${SITES[i][1]} site?` : 'Buy this land?', `It costs ${price} GOYUX. You have ${st.goyux.total} GOYUX.`, `<p class="panel-p">${what}</p><p class="panel-p">Land gets more expensive as your nation grows, so plan where you want to build.</p>`, [
     { t: 'Cancel', fn: closePanel },
     { t: `Buy for ${price} GOYUX`, cls: 'primary', disabled: st.goyux.total < price, fn: async () => { closePanel(); try { applyNation(await NAPI.buyPlot(i)); notify('🗺 New land!', 'Your nation is bigger now.', 'good'); } catch (e) { notify('⚠️ Not bought', e.message, 'bad'); } } }
   ], { onClose: () => {} });
@@ -3946,21 +4073,22 @@ function buyPlot(i) {
 function fxChips(fx) { return N_KEYS.map((k, j) => fx[j] ? `<span class="fx ${fx[j] > 0 ? 'up' : 'down'}">${N_EMO[k]} ${fx[j] > 0 ? '+' : ''}${fx[j]}</span>` : '').join(''); }
 function buildMenu(i) {
   const st = G.s.state, n = st.nation, have = Object.values(n.buildings);
-  const grid = el('div', 'bgrid'), rv = RIVER.includes(i);
-  Object.entries(BLD).filter(([id]) => id !== 'cityhall').sort(([a], [c]) => fitsPlot(c, i) - fitsPlot(a, i)).forEach(([id, b]) => {
-    const done = UNIQUE_B.includes(id) && have.includes(id), poor = st.goyux.total < b[2], fits = fitsPlot(id, i);
+  const grid = el('div', 'bgrid');
+  Object.entries(BLD).filter(([id]) => id !== 'cityhall' && fitsPlot(id, i)).forEach(([id, b]) => {
+    const done = UNIQUE_B.includes(id) && have.includes(id), poor = st.goyux.total < b[2];
     const topic = QB[b[4]].label + ' + 🌍 culture';
     const c = el('div', 'bcard' + (MONUMENTS.includes(id) ? ' mon' : ''), `<div class="b-top"><span class="b-emo">${b[1]}</span><b>${escH(b[0])}</b><span class="b-cost"><i class="gx">G</i>${b[2]}</span></div>
       <p>${escH(b[5])}</p><div class="fxs">${fxChips(b[3])}</div><small>📝 ${escH(topic)}</small>`);
-    const btn = el('button', 'btn ' + (done || poor || !fits ? '' : 'primary'), !fits ? (rv ? 'Not on the river' : '🌊 Only on the river') : done ? 'Already built' : poor ? `Need ${b[2] - st.goyux.total} more GOYUX` : 'Take the test & build');
-    btn.disabled = done || poor || !fits;
+    const btn = el('button', 'btn ' + (done || poor ? '' : 'primary'), done ? 'Already built' : poor ? `Need ${b[2] - st.goyux.total} more GOYUX` : 'Take the test & build');
+    btn.disabled = done || poor;
     btn.onclick = () => runQuiz({ title: `Build: ${b[0]}`, topic: b[4], culture: id, n: 4, onPass: async () => {
       try { applyNation(await NAPI.build(i, id)); notify('🏗 Built!', `${b[0]} is ready. ${N_KEYS.map((k, j) => b[3][j] ? `${N_LABEL[k]} ${b[3][j] > 0 ? '+' : ''}${b[3][j]}` : '').filter(Boolean).join(', ')}`, 'good'); }
       catch (e) { notify('⚠️ Not built', e.message, 'bad'); }
     } });
     c.append(btn); grid.append(c);
   });
-  panel(rv ? '🌊 Build on the river' : 'What do you want to build?', `${rv ? 'This plot is on the river: only <b>bridges</b> and <b>ports</b> can go here. ' : ''}You have <b>${st.goyux.total} GOYUX</b>. To build, pass a test: 4 grammar questions + 1 culture question about the English-speaking world (4 of 5 correct).`, grid, [], { onClose: () => {} });
+  const where = SITES[i] ? `This is the <b>${SITES[i][1]}</b> site. ` : RIVER.includes(i) ? 'This plot is on the river: only <b>bridges</b> go here. ' : COUNTRY[i] ? 'Countryside: fields, forests and rural buildings. ' : 'City land. Bridges go on the river; ports, airports, mines, lighthouses and Edinburgh Castle have their own special sites around the island. ';
+  panel(SITES[i] ? `🏗 ${SITES[i][1]}` : RIVER.includes(i) ? '🌊 Build on the river' : COUNTRY[i] ? '🌾 Build in the countryside' : 'What do you want to build?', `${where}You have <b>${st.goyux.total} GOYUX</b>. To build, pass a test: 4 grammar questions + 1 culture question about the English-speaking world (4 of 5 correct).`, grid, [], { onClose: () => {} });
 }
 function buildingInfo(id, plot) {
   const b = BLD[id], own = !G.s.visit && plot != null && id !== 'cityhall', st = G.s.state;
@@ -3973,7 +4101,7 @@ function buildingInfo(id, plot) {
 }
 function moveHere(to) {
   const mv = G.s.moving, b = BLD[mv.id];
-  if (!fitsPlot(mv.id, to)) { notify('🌊 Not here', RIVER.includes(to) ? 'Only bridges and ports can go on the river.' : 'Bridges must be built on the river.', 'warn'); return; }
+  if (!fitsPlot(mv.id, to)) { notify('🚫 Not here', `${b[0]} can't go on ${plotKind(to)} land${whereFits(mv.id) ? ': ' + whereFits(mv.id) : ''}.`, 'warn'); return; }
   panel(`Move ${b[0]} here?`, `It costs ${moveCost(mv.id)} GOYUX. You have ${G.s.state.goyux.total} GOYUX.`, '<p class="panel-p">The building will be taken down and built again on this plot.</p>', [
     { t: 'Cancel', fn: closePanel },
     { t: `Move it · ${moveCost(mv.id)} GOYUX`, cls: 'primary', fn: async () => {

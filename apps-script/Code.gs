@@ -504,12 +504,13 @@ function teacherSetGuest(code, active) {
 
 /* =====================================================================
    MY NATION — every student founds and builds an English-speaking country.
-   The rules below must match BLD, RIVER and fitsPlot in index.html.
+   The rules below must match BLD, RIVER, COUNTRY, SITES, RURAL and fitsPlot in index.html.
    ===================================================================== */
 const N_SIZE = 9, N_CAPITAL = 40, N_START = [31, 39, 40, 41, 49];
 // id: [cost, population, happiness, economy, security, culture, environment]
 const BUILD = {
   cityhall: [0, 0, 5, 5, 5, 0, 0], houses: [40, 40, 2, 0, 0, 0, -2], farm: [45, 10, 2, 6, 0, 0, 2], park: [30, 0, 6, 0, 0, 0, 8],
+  forest: [25, 0, 3, 0, 0, 0, 10], lighthouse: [70, 0, 2, 4, 6, 6, 0], mine: [100, 5, -2, 18, 0, 0, -6],
   market: [70, 5, 5, 9, 0, 0, 0], restaurant: [60, 5, 7, 6, 0, 2, 0], library: [80, 0, 4, 2, 0, 10, 0], school: [70, 5, 4, 4, 0, 8, 0], police: [70, 0, 3, 0, 12, 0, 0], factory: [90, 0, -3, 16, 0, 0, -10],
   windfarm: [90, 0, 0, 8, 0, 0, 6], museum: [90, 0, 4, 3, 0, 12, 0], press: [90, 0, 3, 2, 0, 8, 0], embassy: [90, 0, 2, 2, 2, 4, 0],
   hospital: [110, 25, 10, 0, 0, 0, 0], army: [110, 0, -2, 0, 18, 0, -2], parliament: [130, 0, 6, 4, 6, 4, 0], port: [130, 10, 0, 14, 0, 2, -4],
@@ -519,12 +520,21 @@ const BUILD = {
   hobbiton: [220, 0, 10, 6, 0, 16, 4], whitehouse: [240, 0, 6, 6, 8, 16, 0], goldengate: [240, 0, 6, 10, 0, 18, 0], harbourbridge: [240, 0, 6, 10, 0, 18, 0]
 };
 const MONUMENTS = ['bigben', 'castle', 'stonehenge', 'newgrange', 'cntower', 'inukshuk', 'towerbridge', 'hobbiton', 'liberty', 'whitehouse', 'goldengate', 'opera', 'harbourbridge'];
-const UNIQUE = ['cityhall', 'parliament', 'embassy', 'port', 'stadium', 'airport'].concat(MONUMENTS);
-// the river crosses every island through plot column 6: bridges only there, and only bridges and ports on it
+const UNIQUE = ['cityhall', 'parliament', 'embassy', 'port', 'stadium', 'airport', 'mine', 'lighthouse'].concat(MONUMENTS);
+/* The map:
+   - the city: the 9×9 grid (plots 0–80); new city land must touch land you already own.
+   - the river crosses the city through column 6: only bridges.
+   - the countryside (plots 100–113): fields, forests and rural buildings; can be bought at any time.
+   - special sites (plots 200–204): each one holds only one kind of building. */
 const RIVER = [6, 15, 24, 33, 42, 51, 60, 69, 78];
 const BRIDGES = ['towerbridge', 'goldengate', 'harbourbridge'];
-const RIVER_OK = BRIDGES.concat(['port']);
-const fitsPlot_ = (id, i) => RIVER.indexOf(i) >= 0 ? RIVER_OK.indexOf(id) >= 0 : BRIDGES.indexOf(id) < 0;
+const COUNTRY = [100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113];
+const SITES = { 200: 'port', 201: 'airport', 202: 'mine', 203: 'lighthouse', 204: 'castle' };
+const SITE_ONLY = Object.keys(SITES).map(k => SITES[k]);
+const RURAL = ['houses', 'farm', 'forest', 'park', 'windfarm', 'factory', 'stonehenge', 'newgrange', 'inukshuk', 'hobbiton'];
+const isOuter_ = i => COUNTRY.indexOf(i) >= 0 || !!SITES[i];
+const fitsPlot_ = (id, i) => SITES[i] ? SITES[i] === id : SITE_ONLY.indexOf(id) >= 0 ? false : RIVER.indexOf(i) >= 0 ? BRIDGES.indexOf(id) >= 0
+  : COUNTRY.indexOf(i) >= 0 ? RURAL.indexOf(id) >= 0 : BRIDGES.indexOf(id) < 0;
 // treaty type: [population, happiness, economy, security, culture, environment] — max 3 of each type count
 const TREATY = { trade: [0, 0, 6, 0, 0, 0], culture: [0, 0, 0, 0, 6, 0], peace: [0, 4, 0, 4, 0, 0] };
 const N_KEYS = ['pop', 'happy', 'econ', 'secu', 'cult', 'env'];
@@ -538,6 +548,7 @@ function nStats_(n, treaties) {
   return s;
 }
 const plotPrice_ = owned => 30 + 4 * Math.max(0, owned - N_START.length);
+const landPrice_ = (i, owned) => plotPrice_(owned) + (SITES[i] ? 20 : 0);
 const moveCost_ = id => Math.max(10, Math.round(BUILD[id][0] / 2));
 const taxAmount_ = st => Math.min(30, 5 + Math.floor(Math.max(0, st.econ) / 10));
 function adjacent_(i, plots) {
@@ -665,9 +676,9 @@ function nationBuyPlot(i, guestCode) {
   i = Math.round(Number(i));
   return withLock_(() => {
     const n = getNation_(u.email); if (!n) throw new Error('Found your nation first.');
-    if (!(i >= 0 && i < N_SIZE * N_SIZE) || n.plots.includes(i)) throw new Error('You cannot buy that land.');
-    if (!adjacent_(i, n.plots)) throw new Error('You can only buy land next to your country.');
-    const price = plotPrice_(n.plots.length);
+    if (!((i >= 0 && i < N_SIZE * N_SIZE) || isOuter_(i)) || n.plots.includes(i)) throw new Error('You cannot buy that land.');
+    if (!isOuter_(i) && !adjacent_(i, n.plots)) throw new Error('You can only buy city land next to your country.');
+    const price = landPrice_(i, n.plots.length);
     if (available_(u.email, n) < price) throw new Error('You need ' + price + ' GOYUX to buy this land.');
     n.plots.push(i); n.spent += price; saveNation_(n);
     return nationState_(u.email);
@@ -682,7 +693,7 @@ function nationBuild(i, id, guestCode) {
     if (!b || id === 'cityhall') throw new Error('Unknown building.');
     if (!n.plots.includes(i) || n.buildings[i]) throw new Error('You cannot build there.');
     if (UNIQUE.includes(id) && Object.values(n.buildings).includes(id)) throw new Error('Your nation already has one.');
-    if (!fitsPlot_(id, i)) throw new Error(RIVER.includes(i) ? 'Only bridges and ports can be built on the river.' : 'Bridges must be built on the river.');
+    if (!fitsPlot_(id, i)) throw new Error('That building cannot be built on this plot.');
     if (available_(u.email, n) < b[0]) throw new Error('You need ' + b[0] + ' GOYUX for this building.');
     n.buildings[i] = id; n.spent += b[0]; saveNation_(n);
     return nationState_(u.email);
@@ -695,7 +706,7 @@ function nationMove(from, to, guestCode) {
     const n = getNation_(u.email); if (!n) throw new Error('Found your nation first.');
     const id = n.buildings[from];
     if (!id || id === 'cityhall' || !n.plots.includes(to) || n.buildings[to]) throw new Error('You cannot move that building there.');
-    if (!fitsPlot_(id, to)) throw new Error(RIVER.includes(to) ? 'Only bridges and ports can go on the river.' : 'Bridges must be on the river.');
+    if (!fitsPlot_(id, to)) throw new Error('That building cannot go on this plot.');
     const cost = moveCost_(id);
     if (available_(u.email, n) < cost) throw new Error('You need ' + cost + ' GOYUX to move it.');
     delete n.buildings[from]; n.buildings[to] = id; n.spent += cost; saveNation_(n);
