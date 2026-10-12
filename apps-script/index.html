@@ -5111,7 +5111,7 @@ const GQ = {
     ['While she ___ dinner, she cut her finger.', 'was cooking', ['cooked', 'cooks'], 'while + past continuous for the background action.'],
     ['I didn\'t ___ your email.', 'receive', ['received', 'receiving'], 'After didn\'t, use the base form.']
   ], [
-    ['When we arrived, the film ___.', 'had already started', ['already started', 'has already started'], 'Something that happened before another past action → past perfect.'],
+    ['When we arrived, the film ___.', 'had already started', ['already starts', 'has already started'], 'Something that happened before another past action → past perfect.'],
     ['By the time the police arrived, the thief ___.', 'had escaped', ['has escaped', 'escapes'], 'By the time + past → past perfect for the earlier action.'],
     ['She was exhausted because she ___ all day.', 'had been working', ['has been working', 'is working'], 'Past perfect continuous: an activity that continued up to a moment in the past.']
   ], [
@@ -5238,7 +5238,7 @@ const GQ = {
     ['He worked ___ to finish on time.', 'hard', ['hardly', 'hardy'], '"Hard" is also the adverb. "Hardly" means almost not.'],
     ['Choose the correct sentence.', 'I have never been to Canada.', ['I never have been to Canada.', 'I have been never to Canada.'], 'Adverb between the auxiliary and the participle: have never been.']
   ], [
-    ['I could ___ hear you: the music was so loud.', 'hardly', ['hard', 'nearly'], 'hardly = almost not.'],
+    ['I could ___ hear you: the music was so loud.', 'hardly', ['hard', 'not hardly'], 'hardly = almost not.'],
     ['Have you seen the new film ___?', 'yet', ['already', 'still'], 'yet in questions and negatives, at the end.'],
     ['She ___ lives with her parents. She hasn\'t moved out.', 'still', ['yet', 'already'], 'still = the situation continues.']
   ], [
@@ -5397,7 +5397,509 @@ function gradedQs(n, built, id) {
 }
 /* Grammar questions about each building: [level 1-4, GQ topic, sentence, answer, wrong options, tip] */
 const TQ = {};
-/*TQ_DATA*/
+const TQ_PARTS = [];
+TQ_PARTS.push({
+  houses: [
+    [1, 'prep', 'Our new house is ___ Oak Street.', 'on', ['in', 'at'], 'Streets → on (on Oak Street).'],
+    [1, 'pres', 'My sister ___ in a small house with a red door.', 'lives', ['live', 'is live'], 'Present simple: he / she / it → verb + -s (lives).'],
+    [1, 'compare', 'Our new house is ___ than our old flat.', 'bigger', ['more big', 'biger'], 'Short adjectives: big → bigger (double the consonant).'],
+    [2, 'passive', 'These forty houses ___ last year.', 'were built', ['built', 'are building'], 'The houses didn\'t build anything → past passive: were built.'],
+    [2, 'relative', 'This is the house ___ my grandparents live.', 'where', ['which', 'who'], 'Places → where (= in which).'],
+    [2, 'modal', 'The house is already clean, so you ___ clean it today. Relax!', 'don\'t have to', ['mustn\'t', 'don\'t must'], 'No obligation → don\'t have to.'],
+    [3, 'causative', 'We\'re having the roof ___ next week.', 'repaired', ['repair', 'repairing'], 'have + object + past participle: someone else does it for you.'],
+    [3, 'cond', 'If we ___ a bigger garden, we would get a dog.', 'had', ['have', 'will have'], 'Second conditional: if + past simple, would + verb.'],
+    [3, 'part', 'The new families have ___ all their furniture into the houses.', 'brought', ['bringed', 'brang'], 'bring – brought – brought.'],
+    [4, 'verbpat', 'It\'s no use ___ the walls before the roof is finished.', 'painting', ['to paint', 'paint'], 'It\'s no use + -ing.'],
+    [4, 'connect', 'The houses were finished on time ___ the bad weather.', 'despite', ['although', 'however'], 'despite + noun. Although needs subject + verb.'],
+    [4, 'adverb', 'Not only ___ cheap, but they are also beautiful.', 'are the houses', ['the houses are', 'the houses is'], 'After "Not only" at the start → inversion: are the houses.']
+  ],
+  farm: [
+    [1, 'partitive', 'Can you get a ___ of milk from the farm shop?', 'bottle', ['loaf', 'slice'], 'a bottle / carton of milk; a loaf of bread; a slice of cake.'],
+    [1, 'past', 'Yesterday the farmer ___ up at five o\'clock.', 'got', ['gets', 'has got'], '"Yesterday" is finished time → past simple: got.'],
+    [1, 'aux', '___ the cows give milk every day?', 'Do', ['Does', 'Are'], 'Present simple question with a plural subject → Do.'],
+    [2, 'passive', 'Fresh eggs ___ at the farm shop every Saturday.', 'are sold', ['sell', 'are selling'], 'The eggs don\'t sell anything → present passive: are sold.'],
+    [2, 'fut', 'The farmer will plant the seeds when the rain ___.', 'stops', ['will stop', 'stopped'], 'After when (future meaning) → present simple.'],
+    [2, 'verbpat', 'The children enjoy ___ the animals on the farm.', 'feeding', ['to feed', 'feed'], 'enjoy + -ing.'],
+    [3, 'reported', '"Where do you sell your cheese?" → She asked the farmer where ___ his cheese.', 'he sold', ['did he sell', 'does he sell'], 'Reported questions use normal word order (subject + verb), no do/did.'],
+    [3, 'prep', 'A good harvest depends ___ the weather.', 'on', ['of', 'from'], 'depend on (not "depend of", like in Spanish).'],
+    [3, 'modal', 'The cows ___ be hungry: nobody has fed them since yesterday.', 'must', ['mustn\'t', 'can'], 'Logical deduction (I\'m almost sure) → must.'],
+    [4, 'cond', 'If it had rained more last spring, we ___ more vegetables now.', 'would have', ['would have had', 'will have'], 'Mixed conditional: past condition → present result (now).'],
+    [4, 'causative', 'The farmer had the old barn ___ down.', 'pulled', ['pull', 'to pull'], 'have + object + past participle: someone else did it.'],
+    [4, 'compare', 'This year\'s harvest is ___ better than last year\'s.', 'far', ['very', 'more'], 'far / much + comparative. Never "very better".']
+  ],
+  park: [
+    [1, 'prep', 'Let\'s have a picnic in the park ___ Saturday.', 'on', ['in', 'at'], 'Days → on.'],
+    [1, 'pres', 'Look! Two ducks ___ across the pond.', 'are swimming', ['swims', 'swim'], 'Happening now → present continuous.'],
+    [1, 'pron', 'This bench is wet. Don\'t sit on ___.', 'it', ['them', 'its'], 'Object pronoun for one thing → it.'],
+    [2, 'relative', 'The man ___ looks after the park is called Mr Green.', 'who', ['which', 'whose'], 'People → who (or that).'],
+    [2, 'adverb', 'The gardeners worked ___ to plant all the new trees.', 'hard', ['hardly', 'hardy'], '"Hard" is also the adverb. "Hardly" means almost not.'],
+    [2, 'part', 'Oh no! Someone has ___ the new bench.', 'broken', ['broke', 'breaked'], 'break – broke – broken.'],
+    [3, 'passive', 'The pond ___ at the moment, so the path next to it is closed.', 'is being cleaned', ['is cleaning', 'has cleaned'], 'Present continuous passive: is being + participle.'],
+    [3, 'connect', '___ the cold, lots of people walked in the park.', 'Despite', ['Although', 'However'], 'despite + noun (despite the cold).'],
+    [3, 'aux', '"I can\'t see the ducks." "Neither ___ I."', 'can', ['can\'t', 'do'], 'Neither + positive auxiliary + subject.'],
+    [4, 'verbpat', 'I\'ll never forget ___ my first squirrel in this park.', 'seeing', ['to see', 'see'], 'forget / remember + -ing = a memory of the past.'],
+    [4, 'modal', 'The grass is all wet. It ___ rained last night.', 'must have', ['can have', 'should have'], 'Deduction about the past → must have + participle.'],
+    [4, 'fut', 'By the time the park opens in May, the gardeners ___ 500 trees.', 'will have planted', ['will plant', 'plant'], 'Completed before a future moment → future perfect (will have + participle).']
+  ],
+  forest: [
+    [1, 'part', 'The birds have ___ a nest in the tall tree.', 'built', ['builded', 'build'], 'build – built – built.'],
+    [1, 'connect', 'We plant trees ___ they clean the air.', 'because', ['so', 'but'], 'because → reason.'],
+    [1, 'compare', 'This oak is the ___ tree in the forest.', 'oldest', ['older', 'most old'], 'Superlative of short adjectives: old → the oldest.'],
+    [2, 'reported', 'The ranger ___ us that the forest was full of deer.', 'told', ['said', 'spoke'], 'tell + person (told us); say + nothing (said that…).'],
+    [2, 'fut', 'When the trees ___ bigger, the birds will come back.', 'grow', ['will grow', 'grew'], 'After when (future meaning) → present simple.'],
+    [2, 'pres', 'Our town ___ 2,000 trees since 2020.', 'has planted', ['planted', 'plants'], 'since + a situation up to now → present perfect.'],
+    [3, 'verbpat', 'Remember ___ your rubbish home: don\'t leave it in the forest.', 'to take', ['taking', 'take'], 'remember to do = don\'t forget to do it.'],
+    [3, 'partitive', 'The ranger gave us some useful ___ about the forest animals.', 'information', ['informations', 'an information'], 'Information is uncountable: some information / a piece of information.'],
+    [3, 'cond', 'If we hadn\'t planted the forest, the birds ___ back.', 'wouldn\'t have come', ['won\'t have come', 'didn\'t come'], 'Third conditional: if + had + participle, would have + participle.'],
+    [4, 'relative', 'The forest has hundreds of old trees, most of ___ are oaks.', 'which', ['them', 'what'], 'most of / some of + which (things) or whom (people).'],
+    [4, 'passive', 'This forest is said ___ more than 500 years old.', 'to be', ['being', 'be'], 'be said / believed / thought + to + verb.'],
+    [4, 'prep', 'Wildlife will benefit ___ the new forest.', 'from', ['of', 'with'], 'benefit from something.']
+  ],
+  lighthouse: [
+    [1, 'past', 'The lighthouse keeper ___ a big storm last night.', 'saw', ['see', 'has seen'], '"Last night" is finished time → past simple: saw.'],
+    [1, 'modal', 'Ships ___ come too close to the rocks. It\'s dangerous.', 'mustn\'t', ['don\'t have to', 'needn\'t'], 'Prohibition → mustn\'t.'],
+    [1, 'adverb', 'The keeper climbs the old stairs very ___.', 'carefully', ['careful', 'care'], 'How he climbs → adverb (careful → carefully).'],
+    [2, 'passive', 'The lighthouse ___ white and red every ten years.', 'is painted', ['paints', 'is painting'], 'The lighthouse doesn\'t paint anything → present passive: is painted.'],
+    [2, 'cond', 'If the light ___, ships would hit the rocks.', 'failed', ['fails', 'will fail'], 'Second conditional: if + past simple, would + verb.'],
+    [2, 'connect', 'The sea was very rough. ___, the ship arrived safely.', 'However', ['Therefore', 'Moreover'], 'However → contrast between two sentences.'],
+    [3, 'pres', 'The keeper ___ in the lighthouse for twenty years, and he still loves it.', 'has lived', ['lives', 'is living'], 'for + a situation that continues now → present perfect.'],
+    [3, 'aux', 'Let\'s climb to the top of the lighthouse, ___?', 'shall we', ['will we', 'don\'t we'], 'Let\'s… shall we?'],
+    [3, 'relative', 'That\'s the keeper ___ son saved the fishermen.', 'whose', ['who', 'who\'s'], 'Possession → whose (his son → whose son).'],
+    [4, 'reported', '"Is the light working?" → The captain asked ___ the light was working.', 'if', ['that', 'what'], 'Yes/no questions → ask if / whether.'],
+    [4, 'fut', 'Hurry! The ship is ___ hit the rocks!', 'about to', ['going hit', 'near to'], 'be about to + verb = very soon.'],
+    [4, 'pron', 'The two keepers help ___ when the weather is bad.', 'each other', ['themself', 'theirselves'], 'each other = one to the other (reciprocal).']
+  ],
+  mine: [
+    [1, 'pres', 'The miners ___ under the mountain every day.', 'work', ['works', 'are work'], 'Routines → present simple. They → work (no -s).'],
+    [1, 'fut', 'I think the mine ___ make our town rich.', 'will', ['is', 'are going'], 'I think + will for opinions about the future.'],
+    [1, 'pron', 'The miners are tired. Let\'s help ___.', 'them', ['they', 'their'], 'After a verb → object pronoun: them.'],
+    [2, 'connect', '___ the mine is dirty, it gives jobs to many people.', 'Although', ['Despite', 'Because'], 'although + subject + verb. "Despite" needs a noun or -ing.'],
+    [2, 'verbpat', 'The town decided ___ a new mine in the mountain.', 'to open', ['opening', 'open'], 'decide + to + verb.'],
+    [2, 'modal', 'You look tired after your shift in the mine. You ___ rest.', 'should', ['must to', 'ought'], 'Advice → should + verb (or ought to).'],
+    [3, 'passive', 'Silver ___ from this mountain for over a hundred years.', 'has been taken', ['has taken', 'is taking'], 'Present perfect passive: has been + participle.'],
+    [3, 'causative', 'The mine owner has the air ___ every week.', 'tested', ['test', 'testing'], 'have + object + past participle.'],
+    [3, 'compare', 'The deeper the miners dig, the ___ it gets.', 'hotter', ['more hot', 'hottest'], 'The + comparative…, the + comparative (two comparatives).'],
+    [4, 'reported', '"You should wear a mask." → The doctor ___ the miners to wear masks.', 'advised', ['said', 'suggested'], 'advise somebody to do. We can\'t say "suggested them to".'],
+    [4, 'part', 'Tons of rock have been ___ out of the mountain.', 'dug', ['digged', 'dugged'], 'dig – dug – dug.'],
+    [4, 'cond', 'If the town had cleaned the river earlier, the fish ___ still here now.', 'would be', ['would have been', 'will be'], 'Mixed conditional: past condition → present result (now).']
+  ],
+  market: [
+    [1, 'partitive', 'I\'d like a ___ of bread, please.', 'loaf', ['bar', 'can'], 'a loaf of bread.'],
+    [1, 'aux', '___ you sell apples?', 'Do', ['Are', 'Does'], 'Present simple question with you → Do.'],
+    [1, 'compare', 'Apples are ___ than mangoes at this market.', 'cheaper', ['more cheap', 'cheapper'], 'Short adjectives: cheap → cheaper.'],
+    [2, 'reported', '"Come back tomorrow," the seller said. → The seller told us ___ back the next day.', 'to come', ['come', 'coming'], 'tell somebody + to + verb for orders.'],
+    [2, 'prep', 'The fruit stall is open ___ 9 a.m. until 2 p.m.', 'from', ['since', 'for'], 'from… until / to… (not "since", which needs a link to now).'],
+    [2, 'past', 'I ___ for tomatoes when I saw my teacher at the market.', 'was looking', ['am looking', 'have looked'], 'A longer action interrupted by a short one → past continuous.'],
+    [3, 'relative', 'That stall, ___ sells old books, is my favourite.', 'which', ['that', 'what'], 'Extra information between commas → which / who, never "that".'],
+    [3, 'pron', 'The sellers taught ___ to speak a little English.', 'themselves', ['theirselves', 'themself'], 'they → themselves.'],
+    [3, 'adverb', 'The market was so noisy that I could ___ hear the seller.', 'hardly', ['hard', 'not hardly'], 'hardly = almost not.'],
+    [4, 'causative', 'The baker has her bread ___ to the market every morning.', 'delivered', ['deliver', 'delivering'], 'have + object + past participle: someone else does it.'],
+    [4, 'verbpat', 'The seller suggested ___ the cheese before buying it.', 'trying', ['to try', 'try'], 'suggest + -ing (or suggest that we try).'],
+    [4, 'past', 'My grandmother ___ sell vegetables here, but now she\'s retired.', 'used to', ['use to', 'was used to'], 'Past habits → used to + base verb.']
+  ]
+});
+TQ_PARTS.push({
+  restaurant: [
+    [1, 'partitive', 'Can I have a ___ of orange juice, please?', 'glass', ['slice', 'loaf'], 'a glass of juice / water.'],
+    [1, 'pres', 'The chef ___ fresh bread every morning.', 'bakes', ['bake', 'baking'], 'Routines → present simple. The chef (he/she) → bakes.'],
+    [1, 'prep', 'The restaurant opens ___ 7 o\'clock in the evening.', 'at', ['in', 'on'], 'Clock times → at.'],
+    [2, 'relative', 'The waiter ___ served us was very friendly.', 'who', ['which', 'where'], 'People → who (or that).'],
+    [2, 'modal', 'You ___ book a table on Mondays: the restaurant is never full.', 'don\'t have to', ['mustn\'t', 'must'], 'No obligation → don\'t have to.'],
+    [2, 'passive', 'All our burgers ___ by hand in our kitchen.', 'are made', ['make', 'are making'], 'The burgers don\'t make anything → present passive: are + past participle.'],
+    [3, 'compare', 'The steak here is ___ better than at the café next door.', 'much', ['very', 'more'], 'much / far / a lot + comparative. Never "very better".'],
+    [3, 'causative', 'We\'re having our birthday cake ___ by the restaurant\'s chef.', 'made', ['make', 'to make'], 'have + object + past participle: someone else does it for you.'],
+    [3, 'fut', 'This time tomorrow, the chef ___ dinner for the wedding guests.', 'will be cooking', ['will cook', 'cooks'], 'An action in progress at a future moment → future continuous.'],
+    [4, 'modal', 'We ___ have booked a table: the restaurant was almost empty.', 'needn\'t', ['mustn\'t', 'couldn\'t'], 'needn\'t have + participle = you did it, but it wasn\'t necessary.'],
+    [4, 'verbpat', 'I\'ll never forget ___ real Irish stew for the first time.', 'tasting', ['to taste', 'taste'], 'forget / remember + -ing = a memory of the past.'],
+    [4, 'cond', 'I wish I ___ how to cook like my grandmother.', 'knew', ['know', 'would know'], 'wish + past simple for present situations you want to change.']
+  ],
+  school: [
+    [1, 'prep', 'We have English ___ Mondays and Wednesdays.', 'on', ['in', 'at'], 'Days → on.'],
+    [1, 'pron', 'Our teacher, Mrs Smith, is very nice. We all like ___.', 'her', ['she', 'hers'], 'After a verb → object pronoun: her.'],
+    [1, 'cond', 'If you don\'t do your homework, the teacher ___ angry.', 'will be', ['would be', 'be'], 'First conditional: if + present, will + verb.'],
+    [2, 'reported', '"Open your books," the teacher said. → The teacher told us ___ our books.', 'to open', ['open', 'opening'], 'tell somebody + to + verb for orders.'],
+    [2, 'compare', 'For me, science is ___ than art.', 'more interesting', ['interestinger', 'most interesting'], 'Long adjectives → more + adjective + than.'],
+    [2, 'part', 'Oh no! I\'ve ___ my maths book at home!', 'forgotten', ['forgot', 'forgetted'], 'forget – forgot – forgotten.'],
+    [3, 'verbpat', 'Remember ___ your project before Friday!', 'to finish', ['finishing', 'finish'], 'remember to do = don\'t forget to do it.'],
+    [3, 'aux', '"I haven\'t finished the test." "Neither ___ I."', 'have', ['haven\'t', 'do'], 'Neither + positive auxiliary + subject.'],
+    [3, 'connect', 'She studied every evening ___ she could pass her exams.', 'so that', ['in order to', 'because of'], 'so that + subject + can/could. "In order to" needs a verb directly.'],
+    [4, 'passive', 'Most students hate ___ homework on Fridays.', 'being given', ['giving', 'be given'], 'Passive -ing form: being + participle.'],
+    [4, 'relative', 'There are thirty students in my class, most of ___ speak two languages.', 'whom', ['who', 'them'], 'most of / some of / all of + whom (people) or which (things).'],
+    [4, 'adverb', 'Never ___ such a difficult exam!', 'have I taken', ['I have taken', 'I took'], 'After a negative adverb at the start → inversion: Never have I…']
+  ],
+  police: [
+    [1, 'past', 'The police ___ the thief yesterday.', 'caught', ['catched', 'catch'], 'catch – caught (irregular past).'],
+    [1, 'modal', 'You ___ cross the road when the light is red. It\'s dangerous.', 'mustn\'t', ['don\'t have to', 'needn\'t'], 'Prohibition → mustn\'t.'],
+    [1, 'adverb', 'The police officer spoke ___ to the lost child.', 'kindly', ['kind', 'kindness'], 'How she spoke → adverb (kind → kindly).'],
+    [2, 'passive', 'My bike ___ last night! I\'m going to tell the police.', 'was stolen', ['stole', 'was stealing'], 'Past passive: was/were + past participle.'],
+    [2, 'connect', 'You can\'t drive a car ___ you have a driving licence.', 'unless', ['if', 'although'], 'unless = if… not.'],
+    [2, 'reported', 'The officer ___ me that my car was in the wrong place.', 'told', ['said', 'spoke'], 'tell + person (told me); say + nothing (said that…).'],
+    [3, 'past', 'When the officers arrived at the bank, the robbers ___.', 'had escaped', ['have escaped', 'are escaping'], 'Something that happened before another past action → past perfect.'],
+    [3, 'causative', 'After the burglary, we had new locks ___ on all our doors.', 'installed', ['install', 'to install'], 'have + object + past participle.'],
+    [3, 'relative', 'The police found the woman ___ handbag was stolen.', 'whose', ['who', 'who\'s'], 'Possession → whose (her handbag → whose handbag).'],
+    [4, 'reported', '"Where were you at ten o\'clock?" → The detective asked him where ___ at ten o\'clock.', 'he had been', ['had he been', 'was he'], 'Reported questions use normal word order (subject + verb).'],
+    [4, 'cond', '___ the police arrived earlier, they would have caught him.', 'Had', ['If', 'Have'], 'Had the police arrived = If the police had arrived (inversion, formal).'],
+    [4, 'pron', 'The two suspects blamed ___ for the crime.', 'each other', ['themself', 'theirselves'], 'each other = one to the other (reciprocal).']
+  ],
+  factory: [
+    [1, 'pres', 'This factory ___ cars and lorries.', 'makes', ['make', 'making'], 'Present simple: it (the factory) → makes.'],
+    [1, 'compare', 'The new factory is ___ than the old one.', 'bigger', ['biger', 'more big'], 'Short adjectives: big → bigger (double the consonant).'],
+    [1, 'fut', 'Look at that black smoke! It ___ make the air dirty.', 'is going to', ['goes to', 'is going'], 'A prediction based on what you can see → be going to + verb.'],
+    [2, 'passive', 'Thousands of phones ___ in this factory every day.', 'are produced', ['produce', 'are producing'], 'Present passive: is/are + past participle.'],
+    [2, 'verbpat', 'The company decided ___ a new factory near the river.', 'to build', ['building', 'build'], 'decide + to + verb.'],
+    [2, 'prep', 'The factory has been here ___ 1985.', 'since', ['for', 'from'], 'since + a point in time (1985, Monday).'],
+    [3, 'connect', '___ the pollution, many people want to work at the factory.', 'Despite', ['Although', 'However'], 'despite + noun / -ing (despite the pollution).'],
+    [3, 'partitive', 'The factory makes a lot of ___ for schools and offices.', 'furniture', ['furnitures', 'a furniture'], 'Furniture is uncountable: no plural, no "a".'],
+    [3, 'part', 'Pollution from the factory has ___ again this year.', 'risen', ['rose', 'raised'], 'rise – rose – risen. ("Raise" needs an object.)'],
+    [4, 'causative', 'The manager had the old machines ___ by robots.', 'replaced', ['replace', 'replacing'], 'have + object + past participle.'],
+    [4, 'modal', 'The river is full of dead fish. The factory ___ have polluted it.', 'must', ['can', 'should'], 'Deduction about the past → must have + participle.'],
+    [4, 'cond', 'If the factory hadn\'t closed, my dad ___ a job there now.', 'would still have', ['would still have had', 'will still have'], 'Mixed conditional: past condition → present result (now).']
+  ],
+  windfarm: [
+    [1, 'connect', 'It\'s very windy today, ___ the turbines are making a lot of electricity.', 'so', ['but', 'because'], 'so → result.'],
+    [1, 'part', 'Have you ever ___ a wind turbine up close?', 'seen', ['saw', 'seed'], 'see – saw – seen.'],
+    [1, 'aux', '___ wind turbines make a lot of noise?', 'Do', ['Are', 'Does'], 'Present simple question with a plural subject → Do.'],
+    [2, 'fut', 'When the wind ___ stronger, the turbines will turn faster.', 'gets', ['will get', 'is going to get'], 'After when (future meaning) → present simple.'],
+    [2, 'passive', 'This wind farm ___ in 2015.', 'was built', ['built', 'is building'], 'The wind farm didn\'t build anything → passive: was built.'],
+    [2, 'adverb', 'The new turbines work very ___.', 'well', ['good', 'goodly'], 'good (adjective) → well (adverb).'],
+    [3, 'cond', 'If they had built the turbines on the hill, they ___ more electricity.', 'would have produced', ['will have produced', 'produced'], 'Third conditional: if + past perfect, would have + participle.'],
+    [3, 'pres', 'The turbines ___ electricity since six o\'clock this morning.', 'have been producing', ['are producing', 'produce'], 'An activity that started in the past and continues now → present perfect continuous.'],
+    [3, 'compare', 'The ___ the wind blows, the more electricity we get.', 'harder', ['hardest', 'more hard'], 'The + comparative…, the + comparative… (two comparatives).'],
+    [4, 'relative', 'The wind farm has fifty turbines, most of ___ are near the coast.', 'which', ['whom', 'them'], 'most of / some of + which (things) or whom (people).'],
+    [4, 'verbpat', 'It\'s no use ___ about the noise: the turbines are staying.', 'complaining', ['to complain', 'complain'], 'It\'s no use + -ing.'],
+    [4, 'fut', 'By next year, this turbine ___ for twenty years.', 'will have been turning', ['will turn', 'is turning'], 'Duration up to a future moment → future perfect continuous.']
+  ],
+  museum: [
+    [1, 'prep', 'The museum opens ___ 10 o\'clock.', 'at', ['in', 'on'], 'Clock times → at.'],
+    [1, 'past', 'Hundreds of years ago, the first king of our nation ___ in a castle.', 'lived', ['live', 'was live'], 'Finished time (years ago) → past simple: lived.'],
+    [1, 'pron', 'This painting is very old. Do you like ___?', 'it', ['them', 'its'], 'Object pronoun for one thing → it.'],
+    [2, 'relative', 'This is the room ___ the king slept.', 'where', ['which', 'who'], 'Places → where (= in which).'],
+    [2, 'passive', 'These old letters ___ by a soldier during the war.', 'were written', ['wrote', 'are writing'], 'Past passive: was/were + past participle.'],
+    [2, 'causative', 'Last year the museum had all its old paintings ___.', 'cleaned', ['clean', 'to clean'], 'have + object + past participle: someone else did it.'],
+    [3, 'reported', '"When was this statue made?" → I asked the guide when the statue ___.', 'had been made', ['was it made', 'had it been made'], 'Reported questions use normal word order (subject + verb).'],
+    [3, 'adverb', 'The old castle walls are ___ standing after 800 years.', 'still', ['yet', 'already'], 'still = the situation continues.'],
+    [3, 'partitive', 'In this glass case you can see a ___ of the king\'s boots.', 'pair', ['piece', 'bunch'], 'a pair of boots / shoes / gloves.'],
+    [4, 'modal', 'This helmet is very small. It ___ have belonged to a child.', 'must', ['can', 'should'], 'Deduction about the past → must have + participle.'],
+    [4, 'fut', 'Hurry up! The guided tour is ___ start.', 'about to', ['going', 'near'], 'be about to + verb = very soon.'],
+    [4, 'verbpat', 'I remember ___ this museum with my grandad when I was little.', 'visiting', ['to visit', 'visit'], 'remember + -ing = a memory of the past.']
+  ],
+  library: [
+    [1, 'aux', 'The library ___ open on Sundays.', 'isn\'t', ['doesn\'t', 'don\'t'], 'With "be" + adjective, the negative is isn\'t, not doesn\'t.'],
+    [1, 'modal', '___ I borrow this book, please?', 'Can', ['Do', 'Am'], 'Asking for permission → Can I…? / May I…?'],
+    [1, 'compare', 'This dictionary is ___ than my school bag!', 'heavier', ['heavyer', 'more heavy'], 'Adjectives ending in -y: heavy → heavier.'],
+    [2, 'pres', 'I ___ five books from the library since September.', 'have borrowed', ['borrow', 'am borrowing'], 'since + a time up to now → present perfect.'],
+    [2, 'prep', 'This book is ___ the history of our nation.', 'about', ['of', 'over'], 'A book is about a topic.'],
+    [2, 'verbpat', 'I enjoy ___ in the quiet reading room.', 'studying', ['to study', 'study'], 'enjoy + -ing.'],
+    [3, 'modal', 'The library ___ be closed: the lights are on and people are going in.', 'can\'t', ['mustn\'t', 'doesn\'t'], 'Impossible (I\'m sure it isn\'t) → can\'t.'],
+    [3, 'part', 'Oh no! I\'ve ___ my library card at home!', 'left', ['leaved', 'lefted'], 'leave – left – left.'],
+    [3, 'cond', 'If you ___ the book on time, you wouldn\'t have had to pay a fine.', 'had returned', ['returned', 'would return'], 'Third conditional: if + had + participle.'],
+    [4, 'passive', 'This book must ___ to the library by Friday.', 'be returned', ['return', 'have return'], 'Modal passive: must be + participle.'],
+    [4, 'connect', 'Bring your library card; ___, you can\'t borrow anything.', 'otherwise', ['therefore', 'however'], 'otherwise = if not.'],
+    [4, 'reported', '"You should read more." → The librarian ___ me to read more.', 'advised', ['said', 'suggested'], 'advise somebody to do. We can\'t say "suggested me to".']
+  ]
+});
+TQ_PARTS.push({
+  press: [
+    [1, 'prep', 'The news starts ___ nine o\'clock every evening.', 'at', ['in', 'on'], 'Clock times → at.'],
+    [1, 'pres', 'My dad ___ the newspaper every morning.', 'reads', ['read', 'is reading'], 'Routines → present simple. He → reads.'],
+    [1, 'compare', 'This newspaper is ___ than that one: it costs only one euro.', 'cheaper', ['more cheap', 'cheapper'], 'Short adjectives → -er: cheap → cheaper.'],
+    [2, 'reported', 'The reporter ___ us that the match was cancelled.', 'told', ['said', 'spoke'], 'tell + person (told us); say + nothing (said that…).'],
+    [2, 'passive', 'The news ___ by millions of people every day.', 'is watched', ['watches', 'is watching'], 'Present passive: is/are + past participle (+ by…).'],
+    [2, 'part', 'The journalist has ___ an article about the new park.', 'written', ['wrote', 'writed'], 'write – wrote – written.'],
+    [3, 'relative', 'That\'s the journalist ___ article won a prize.', 'whose', ['who', 'who\'s'], 'Possession → whose (her article → whose article).'],
+    [3, 'connect', 'The reporter took two cameras ___ one stopped working.', 'in case', ['unless', 'so that'], 'in case = because it might happen.'],
+    [3, 'modal', 'That photo in the newspaper ___ be real: people can\'t fly!', 'can\'t', ['mustn\'t', 'doesn\'t'], 'Impossible (I\'m sure it isn\'t) → can\'t.'],
+    [4, 'reported', '"Did you write this article?" → The editor asked her ___ she had written that article.', 'whether', ['that', 'what'], 'Yes/no questions → ask if / whether.'],
+    [4, 'verbpat', 'The reporter admitted ___ a mistake in the article.', 'making', ['to make', 'make'], 'admit + -ing.'],
+    [4, 'passive', 'According to the newspaper, the actor is believed ___ in Paris at the moment.', 'to be', ['being', 'be'], 'be said / believed / thought + to + verb.']
+  ],
+  embassy: [
+    [1, 'pron', 'The ambassador is very kind. Everybody likes ___.', 'her', ['she', 'hers'], 'After a verb → object pronoun: her.'],
+    [1, 'aux', '___ the ambassador speak Spanish?', 'Does', ['Do', 'Is'], 'He / she / it → Does + subject + verb?'],
+    [1, 'past', 'The two presidents ___ a treaty last year.', 'signed', ['sign', 'have signed'], '"Last year" is finished time → past simple.'],
+    [2, 'relative', 'An embassy is a building ___ diplomats work.', 'where', ['which', 'who'], 'Places → where (= in which).'],
+    [2, 'fut', 'I\'ll send you the letter as soon as the ambassador ___ it.', 'signs', ['will sign', 'signed'], 'as soon as + present simple for the future.'],
+    [2, 'prep', 'The new ambassador has lived here ___ 2021.', 'since', ['for', 'from'], 'since + a point in time (2021, Monday).'],
+    [3, 'causative', 'I need to get my passport ___ at the embassy.', 'renewed', ['renew', 'to renew'], 'get + object + past participle (someone does it for you).'],
+    [3, 'cond', 'If the two nations had talked earlier, they ___ the problem sooner.', 'would have solved', ['will have solved', 'solved'], 'Third conditional: if + past perfect, would have + participle.'],
+    [3, 'pron', 'The two ambassadors wrote the speech ___. Nobody helped them.', 'themselves', ['theirselves', 'themself'], 'they → themselves.'],
+    [4, 'connect', '___ speaking different languages, the two nations signed the treaty.', 'In spite of', ['Although', 'Even though'], 'in spite of + -ing. Although / even though need subject + verb.'],
+    [4, 'modal', 'Why did you send the letter by post? You ___ sent it by email: it would have been faster.', 'should have', ['must have', 'should'], 'Criticism of the past → should have + participle.'],
+    [4, 'prep', 'The peace treaty came ___ force in January.', 'into', ['in', 'on'], 'come into force = start to apply.']
+  ],
+  hospital: [
+    [1, 'modal', 'You ___ use your phone in this part of the hospital. It\'s forbidden.', 'mustn\'t', ['don\'t have to', 'needn\'t'], 'Prohibition → mustn\'t.'],
+    [1, 'adverb', 'Please walk ___. The patients are sleeping.', 'quietly', ['quiet', 'quite'], 'How you walk → adverb (quiet → quietly).'],
+    [1, 'partitive', 'The nurse gave me a ___ of water.', 'glass', ['loaf', 'slice'], 'a glass of water / milk / juice.'],
+    [2, 'pres', 'The doctor ___ ten patients since this morning.', 'has seen', ['sees', 'saw'], 'since + a situation that continues now → present perfect.'],
+    [2, 'partitive', 'The doctor gave me a good piece of ___.', 'advice', ['advices', 'advise'], 'Advice is uncountable → a piece of advice. (Advise is the verb.)'],
+    [2, 'verbpat', 'You should avoid ___ too much sugar.', 'eating', ['to eat', 'eat'], 'avoid + -ing.'],
+    [3, 'passive', 'A new wing of the hospital ___ at the moment.', 'is being built', ['is building', 'has built'], 'Present continuous passive: is being + participle.'],
+    [3, 'reported', '"Don\'t eat anything before the operation." → The nurse told me ___ anything.', 'not to eat', ['don\'t eat', 'to not eating'], 'Negative orders → told me not to + verb.'],
+    [3, 'compare', 'The doctor says the more you exercise, the ___ you feel.', 'better', ['best', 'good'], 'The more…, the better… (two comparatives).'],
+    [4, 'cond', 'I\'m in hospital. If I hadn\'t broken my leg, I ___ playing football with my friends now.', 'would be', ['would have been', 'will be'], 'Mixed conditional: past condition → present result (now).'],
+    [4, 'causative', 'The doctor had the nurse ___ my temperature.', 'take', ['taken', 'to take'], 'have somebody + base verb = ask someone to do it.'],
+    [4, 'part', 'The air ambulance has ___ the patient to the city hospital.', 'flown', ['flew', 'flied'], 'fly – flew – flown.']
+  ],
+  army: [
+    [1, 'pres', 'The soldiers ___ at six o\'clock every morning.', 'get up', ['gets up', 'are getting up'], 'Routines → present simple. They → get up (no -s).'],
+    [1, 'compare', 'The new rescue helicopter is ___ than the old one.', 'faster', ['more fast', 'fastest'], 'Short adjectives: fast → faster.'],
+    [1, 'connect', 'It was very foggy, ___ the training was cancelled.', 'so', ['but', 'because'], 'so → result.'],
+    [2, 'modal', 'Visitors to the base ___ wear a uniform, but they can if they want.', 'don\'t have to', ['mustn\'t', 'can\'t'], 'No obligation → don\'t have to.'],
+    [2, 'relative', 'The officer ___ trains the new soldiers is from Valencia.', 'who', ['which', 'whose'], 'People → who (or that).'],
+    [2, 'part', 'The soldiers have ___ a new bridge over the river.', 'built', ['builded', 'build'], 'build – built – built.'],
+    [3, 'passive', 'So far, two hundred people ___ by the army during the floods.', 'have been rescued', ['have rescued', 'are rescuing'], 'Present perfect passive: have been + participle.'],
+    [3, 'prep', 'The army is responsible ___ protecting the borders.', 'for', ['of', 'about'], 'responsible for something / + -ing.'],
+    [3, 'fut', 'The exercise lasts from eight to twelve, so at ten o\'clock tomorrow the soldiers ___ through the mountains.', 'will be marching', ['will march', 'march'], 'An action in progress at a future moment → future continuous.'],
+    [4, 'verbpat', 'The soldiers practised ___ people from the water.', 'rescuing', ['to rescue', 'rescue'], 'practise + -ing.'],
+    [4, 'adverb', 'Never ___ such a fast rescue!', 'have I seen', ['I have seen', 'I saw'], 'After a negative adverb at the start → inversion: Never have I…'],
+    [4, 'cond', '___ the soldiers arrived earlier, they would have saved the old bridge from the flood.', 'Had', ['If', 'Have'], 'Had they arrived = If they had arrived (inversion, formal).']
+  ],
+  parliament: [
+    [1, 'past', 'The parliament ___ a new law yesterday.', 'passed', ['pass', 'has passed'], '"Yesterday" is finished time → past simple.'],
+    [1, 'fut', 'All the politicians are in their seats and the doors are closed. They ___ vote.', 'are going to', ['go to', 'are going'], 'A prediction based on what you can see → be going to + verb.'],
+    [1, 'aux', '___ the politicians work on Saturdays?', 'Do', ['Does', 'Are'], 'Present simple question with they → Do.'],
+    [2, 'cond', 'If I ___ president, I would build more schools.', 'were', ['am', 'will be'], 'Second conditional: if + past, would + verb. (If I were…)'],
+    [2, 'passive', 'The laws of our nation ___ in the parliament.', 'are made', ['make', 'are making'], 'Present passive: are + past participle.'],
+    [2, 'connect', '___ the debate was very long, nobody left the room.', 'Although', ['Because', 'Despite'], 'although + subject + verb. "Despite" needs a noun or -ing.'],
+    [3, 'relative', 'The President, ___ was elected last year, gave a speech in parliament.', 'who', ['that', 'whom'], 'Extra information between commas → who / which, never "that".'],
+    [3, 'aux', '"I didn\'t vote for that law." "Neither ___ I."', 'did', ['didn\'t', 'was'], 'Neither + positive auxiliary + subject.'],
+    [3, 'verbpat', 'The minister promised ___ taxes again.', 'not to raise', ['to not raising', 'not raising'], 'promise + (not) to + verb.'],
+    [4, 'reported', '"You should read the new law." → The lawyer ___ me to read the new law.', 'advised', ['said', 'suggested'], 'advise somebody to do. We can\'t say "suggested me to".'],
+    [4, 'passive', 'Every new law must ___ by all citizens.', 'be obeyed', ['obey', 'have obey'], 'Modal passive: must be + participle.'],
+    [4, 'compare', 'This is by ___ the most important law of the year.', 'far', ['much', 'more'], 'by far + superlative.']
+  ],
+  port: [
+    [1, 'partitive', 'The ship brought a ___ of oranges from Valencia.', 'box', ['loaf', 'slice'], 'a box of oranges / apples.'],
+    [1, 'prep', 'The big ship arrives ___ Monday.', 'on', ['in', 'at'], 'Days and dates → on.'],
+    [1, 'pron', 'The sailors are very tired. Let\'s help ___.', 'them', ['they', 'their'], 'After a verb → object pronoun: them.'],
+    [2, 'fut', 'I\'ll call you when the ship ___.', 'arrives', ['will arrive', 'arrived'], 'After when (future meaning) → present simple.'],
+    [2, 'adverb', 'The ship was late, so the workers worked very ___ to unload it.', 'hard', ['hardly', 'hardy'], '"Hard" is also the adverb. "Hardly" means almost not.'],
+    [2, 'reported', '"Wait here," the captain said. → The captain told us ___ there.', 'to wait', ['wait', 'waiting'], 'tell somebody + to + verb for orders.'],
+    [3, 'past', 'When we got to the port, the ship ___.', 'had already left', ['already leaves', 'has already left'], 'Something that happened before another past action → past perfect.'],
+    [3, 'causative', 'The captain got the engine ___ before the long trip.', 'repaired', ['repair', 'to repair'], 'get + object + past participle (someone else does it).'],
+    [3, 'partitive', 'The ship carried a lot of ___ from China.', 'furniture', ['furnitures', 'a furniture'], 'Furniture is uncountable: no plural, no "a".'],
+    [4, 'modal', 'The ship ___ have arrived yet: it left China only yesterday.', 'can\'t', ['mustn\'t', 'doesn\'t'], 'Impossible in the past → can\'t / couldn\'t have.'],
+    [4, 'fut', 'By the end of this year, the port ___ more than a thousand ships since it opened.', 'will have received', ['will receive', 'receives'], 'Completed before a future moment → future perfect (will have + participle).'],
+    [4, 'relative', 'The port has twenty cranes, most of ___ are very old.', 'which', ['them', 'what'], 'most of / some of / all of + which (things) or whom (people).']
+  ],
+  stadium: [
+    [1, 'part', 'Our team has ___ the cup!', 'won', ['win', 'winned'], 'win – won – won.'],
+    [1, 'compare', 'This is the ___ stadium in the country.', 'biggest', ['bigger', 'most big'], 'Superlative: big → the biggest (double the consonant).'],
+    [1, 'modal', '___ I take photos during the concert?', 'Can', ['Do', 'Am'], 'Asking for permission → Can I…? / May I…?'],
+    [2, 'verbpat', 'I\'m looking forward to ___ the concert at the stadium.', 'seeing', ['see', 'saw'], 'look forward to + -ing (the "to" is a preposition).'],
+    [2, 'aux', 'You\'re coming to the match on Saturday, ___?', 'aren\'t you', ['don\'t you', 'isn\'t it'], 'Question tags repeat the auxiliary: You are… aren\'t you?'],
+    [2, 'pres', 'Have you ever ___ to a football match?', 'been', ['went', 'go'], 'Present perfect: have + past participle (go → been / gone).'],
+    [3, 'adverb', 'I haven\'t bought the tickets for the final ___.', 'yet', ['already', 'still'], 'yet in questions and negatives, at the end.'],
+    [3, 'connect', '___ the rain, the concert continued.', 'Despite', ['Although', 'However'], 'despite + noun / -ing (despite the rain).'],
+    [3, 'cond', 'If we had scored one more goal, we ___ the match.', 'would have won', ['will have won', 'won'], 'Third conditional: if + past perfect, would have + participle.'],
+    [4, 'pron', 'After the goal, the two players looked at ___ and smiled.', 'each other', ['themself', 'theirselves'], 'each other = one to the other (reciprocal).'],
+    [4, 'prep', 'The fans insisted ___ staying until the end of the concert.', 'on', ['to', 'in'], 'insist on + -ing.'],
+    [4, 'past', 'When I was a child, I ___ go to the stadium every Sunday with my dad.', 'used to', ['use to', 'was used to'], 'Past habits → used to + base verb.']
+  ],
+  airport: [
+    [1, 'prep', 'Our flight leaves ___ 7:30 in the morning.', 'at', ['in', 'on'], 'Clock times → at.'],
+    [1, 'past', 'We ___ to London by plane last summer.', 'flew', ['fly', 'have flown'], '"Last summer" is finished time → past simple: fly → flew.'],
+    [1, 'adverb', 'Choose the correct sentence.', 'The pilot always checks the plane.', ['The pilot checks always the plane.', 'The pilot always check the plane.'], 'Frequency adverbs go before the main verb. He → checks.'],
+    [2, 'part', 'Our plane hasn\'t ___ off yet.', 'taken', ['took', 'taked'], 'take – took – taken.'],
+    [2, 'passive', 'Passports ___ at the gate.', 'are checked', ['check', 'are checking'], 'Present passive: are + past participle.'],
+    [2, 'compare', 'The train is not as fast ___ the plane.', 'as', ['than', 'like'], 'as + adjective + as.'],
+    [3, 'verbpat', 'Remember ___ your passport when you go to the airport!', 'to take', ['taking', 'take'], 'remember to do = don\'t forget to do it.'],
+    [3, 'reported', '"Where is gate 12?" → A tourist asked me where ___.', 'gate 12 was', ['was gate 12', 'is gate 12'], 'Reported questions use normal word order (subject + verb).'],
+    [3, 'modal', 'You ___ be very tired after such a long flight.', 'must', ['mustn\'t', 'have'], 'Logical deduction (I\'m almost sure) → must.'],
+    [4, 'cond', 'You can take this bag on the plane ___ it weighs less than ten kilos.', 'as long as', ['unless', 'in case'], 'as long as = only if.'],
+    [4, 'causative', 'At the airport, she had her bag ___ by security officers.', 'searched', ['search', 'to search'], 'have + object + past participle (someone else does it).'],
+    [4, 'partitive', 'I have too much ___ for this small plane.', 'luggage', ['luggages', 'baggages'], 'Luggage is uncountable: no plural.']
+  ]
+});
+TQ_PARTS.push({
+  bigben: [
+    [1, 'prep', 'The Elizabeth Tower is ___ London.', 'in', ['on', 'at'], 'Cities and countries → in.'],
+    [1, 'compare', 'The Elizabeth Tower is ___ than our school.', 'taller', ['more tall', 'tallest'], 'Short adjectives: tall → taller.'],
+    [1, 'past', 'We ___ the Elizabeth Tower last summer.', 'visited', ['visit', 'have visited'], '"Last summer" is finished time → past simple.'],
+    [2, 'passive', 'The Elizabeth Tower ___ in 1859.', 'was completed', ['completed', 'has completed'], 'Past passive: was/were + past participle.'],
+    [2, 'relative', 'Big Ben is the bell ___ hangs inside the Elizabeth Tower.', 'that', ['who', 'where'], 'Things → that / which.'],
+    [2, 'aux', 'Big Ben is the name of the bell, ___?', 'isn\'t it', ['doesn\'t it', 'is it'], 'Positive sentence with is → negative tag: isn\'t it?'],
+    [3, 'part', 'Big Ben has just ___ twelve times. It\'s midday!', 'rung', ['rang', 'ringed'], 'ring – rang – rung.'],
+    [3, 'modal', 'When the bell was new in 1859, people ___ hear it from far away.', 'could', ['can', 'must to'], 'Past ability → could.'],
+    [3, 'connect', '___ the rain, hundreds of tourists were taking photos of the tower.', 'Despite', ['Although', 'However'], 'despite + noun (despite the rain).'],
+    [4, 'causative', 'Before we went into the tower, we had our bags ___ by security.', 'checked', ['check', 'to check'], 'have + object + past participle: someone else does it.'],
+    [4, 'reported', '"Have you ever heard Big Ben?" → The guide asked us ___ we had ever heard Big Ben.', 'if', ['that', 'what'], 'Yes/no questions → ask if / whether.'],
+    [4, 'fut', 'Get your camera ready! Big Ben is ___ ring.', 'about to', ['going ring', 'due'], 'be about to + verb = very soon.']
+  ],
+  castle: [
+    [1, 'prep', 'You can hear the One o\'Clock Gun ___ one o\'clock.', 'at', ['in', 'on'], 'Clock times → at.'],
+    [1, 'pres', 'My cousin ___ in Edinburgh, near the castle.', 'lives', ['live', 'living'], 'He / she / it → verb + -s.'],
+    [1, 'pron', 'The castle is beautiful. Let\'s take a photo of ___!', 'it', ['them', 'its'], 'Object pronoun for a thing → it.'],
+    [2, 'passive', 'The One o\'Clock Gun ___ by a soldier every day except Sundays.', 'is fired', ['fires', 'is firing'], 'Present passive: is/are + past participle.'],
+    [2, 'connect', 'You can\'t go into the castle ___ you buy a ticket.', 'unless', ['if', 'although'], 'unless = if… not.'],
+    [2, 'verbpat', 'We decided ___ Edinburgh Castle on Saturday.', 'to visit', ['visiting', 'visit'], 'decide + to + verb.'],
+    [3, 'relative', 'Edinburgh Castle, ___ stands on Castle Rock, is very old.', 'which', ['that', 'what'], 'Extra information between commas → which / who, never "that".'],
+    [3, 'adverb', 'We could ___ see the castle because of the fog.', 'hardly', ['hard', 'not hardly'], 'hardly = almost not.'],
+    [3, 'cond', 'If we had arrived earlier, we ___ the One o\'Clock Gun.', 'would have heard', ['will have heard', 'heard'], 'Third conditional: if + past perfect, would have + participle.'],
+    [4, 'compare', 'The view from the castle was ___ better than I expected.', 'far', ['very', 'too'], 'far / much + comparative. Never "very better".'],
+    [4, 'aux', 'Nobody heard the gun on Sunday, ___?', 'did they', ['didn\'t they', 'did nobody'], 'Nobody is negative → positive tag with "they".'],
+    [4, 'modal', 'You heard a loud bang? It ___ have been the One o\'Clock Gun: it\'s Sunday today.', 'can\'t', ['mustn\'t', 'must'], 'Impossible in the past → can\'t have + participle.']
+  ],
+  stonehenge: [
+    [1, 'past', 'People ___ to build Stonehenge about 5,000 years ago.', 'started', ['start', 'have started'], '"5,000 years ago" is finished time → past simple.'],
+    [1, 'fut', 'Look at those black clouds over Stonehenge! It ___ rain.', 'is going to', ['goes to', 'is going'], 'A prediction based on what you can see → be going to + verb.'],
+    [1, 'partitive', 'It\'s cold at Stonehenge. Would you like a ___ of hot tea?', 'cup', ['slice', 'loaf'], 'a cup of tea / coffee.'],
+    [2, 'prep', 'We\'ve been waiting ___ an hour to see the stones.', 'for', ['since', 'during'], 'for + a period of time (an hour, two days).'],
+    [2, 'compare', 'For me, Stonehenge is ___ than any castle.', 'more interesting', ['interestinger', 'most interesting'], 'Long adjectives → more + adjective + than.'],
+    [2, 'reported', '"Stay on the path," the guide said. → The guide told us ___ on the path.', 'to stay', ['stay', 'staying'], 'tell somebody + to + verb for orders.'],
+    [3, 'passive', 'Stonehenge ___ by people for thousands of years.', 'has been visited', ['has visited', 'was visiting'], 'Present perfect passive: has been + participle.'],
+    [3, 'pres', 'This is the first time I ___ Stonehenge.', 'have seen', ['see', 'am seeing'], 'It\'s the first time + present perfect.'],
+    [3, 'pron', 'The tourists really enjoyed ___ at Stonehenge.', 'themselves', ['theirselves', 'themself'], 'enjoy yourself / themselves: they → themselves.'],
+    [4, 'cond', 'If we hadn\'t missed the bus, we ___ at Stonehenge now.', 'would be', ['would have been', 'will be'], 'Mixed conditional: past condition → present result (now).'],
+    [4, 'verbpat', 'I\'ll never forget ___ the sun rise over Stonehenge.', 'watching', ['to watch', 'watch'], 'forget / remember + -ing = a memory of the past.'],
+    [4, 'connect', '___ the weather was terrible, we really enjoyed our visit to Stonehenge.', 'Even though', ['Despite', 'In spite'], 'even though + subject + verb. Despite / in spite of need a noun or -ing.']
+  ],
+  newgrange: [
+    [1, 'compare', 'Newgrange is ___ than the pyramids in Egypt.', 'older', ['more old', 'oldest'], 'Short adjectives: old → older.'],
+    [1, 'modal', 'You ___ climb on the old stones. It\'s forbidden.', 'mustn\'t', ['don\'t have to', 'needn\'t'], 'Prohibition → mustn\'t.'],
+    [1, 'prep', 'The sun lights up the chamber ___ December.', 'in', ['on', 'at'], 'Months and years → in.'],
+    [2, 'aux', '"I loved our visit to Newgrange." "So ___ I!"', 'did', ['was', 'loved'], 'So + auxiliary + subject. Loved (past simple) → did.'],
+    [2, 'pres', 'Have you ever ___ Newgrange?', 'visited', ['visit', 'visiting'], 'Present perfect: have + past participle.'],
+    [2, 'relative', 'Newgrange is in the Boyne Valley, ___ you can see other ancient tombs.', 'where', ['which', 'who'], 'Places → where (= in which).'],
+    [3, 'part', 'The sun has ___, and light is entering the chamber!', 'risen', ['rose', 'raised'], 'rise – rose – risen. ("Raise" needs an object.)'],
+    [3, 'reported', '"Where do you come from?" → The guide asked us where ___ from.', 'we came', ['did we come', 'do we come'], 'Reported questions use normal word order (subject + verb), no do/did.'],
+    [3, 'causative', 'Before the trip to Newgrange, I had my camera ___ because it was broken.', 'repaired', ['repair', 'to repair'], 'have + object + past participle.'],
+    [4, 'passive', 'Newgrange is believed ___ more than 5,000 years ago.', 'to have been built', ['to be built', 'being built'], 'be believed / said + to have been + participle for the past.'],
+    [4, 'adverb', 'Never ___ such a magical sunrise.', 'have I seen', ['I have seen', 'I saw'], 'After a negative adverb at the start → inversion: Never have I…'],
+    [4, 'fut', 'This time tomorrow we ___ inside Newgrange, waiting for the sunrise.', 'will be standing', ['will stand', 'stand'], 'An action in progress at a future moment → future continuous.']
+  ],
+  cntower: [
+    [1, 'past', 'The CN Tower ___ in 1976.', 'opened', ['open', 'has opened'], '"In 1976" is finished time → past simple.'],
+    [1, 'adverb', 'The lift in the CN Tower goes up very ___.', 'fast', ['fastly', 'fasts'], '"Fast" is the adjective and also the adverb. "Fastly" doesn\'t exist.'],
+    [1, 'cond', 'If you look down through the glass floor, you ___ the street below.', 'will see', ['saw', 'would saw'], 'First conditional: if + present, will + verb.'],
+    [2, 'modal', 'You look scared. You ___ try the glass floor: it\'s very strong.', 'should', ['must to', 'ought'], 'Advice → should + verb (or ought to).'],
+    [2, 'verbpat', 'I\'m looking forward to ___ the EdgeWalk.', 'doing', ['do', 'did'], 'look forward to + -ing (the "to" is a preposition).'],
+    [2, 'passive', 'The CN Tower ___ by millions of tourists every year.', 'is visited', ['visits', 'is visiting'], 'Present passive: is/are + past participle.'],
+    [3, 'compare', 'The ___ you go, the better the view.', 'higher', ['highest', 'high'], 'The + comparative…, the + comparative…'],
+    [3, 'aux', 'Let\'s go up the CN Tower, ___?', 'shall we', ['will we', 'don\'t we'], 'Let\'s… shall we?'],
+    [3, 'prep', 'The view from the top depends ___ the weather.', 'on', ['of', 'from'], 'depend on (not "depend of", like in Spanish).'],
+    [4, 'reported', '"You should come back at sunset." → Our guide ___ us to come back at sunset.', 'advised', ['said', 'suggested'], 'advise somebody to do. We can\'t say "suggested us to".'],
+    [4, 'relative', 'There were twenty people on the EdgeWalk, most of ___ were tourists.', 'whom', ['who', 'them'], 'most of / some of + whom (people) or which (things).'],
+    [4, 'part', 'Oh no! The wind on the EdgeWalk has ___ my cap away!', 'blown', ['blew', 'blowed'], 'blow – blew – blown.']
+  ],
+  inukshuk: [
+    [1, 'pres', 'An inukshuk ___ like a person made of stones.', 'looks', ['look', 'is looking'], 'State verbs like "look like" are not normally continuous. It → looks.'],
+    [1, 'pron', 'Inuit people built inukshuks. ___ used them to guide travellers.', 'They', ['Them', 'Their'], 'Subject pronoun before the verb → they.'],
+    [1, 'connect', 'We followed the inukshuks ___ we didn\'t know the way.', 'because', ['so', 'but'], 'because → reason.'],
+    [2, 'passive', 'Many inukshuks ___ by Inuit people to guide travellers.', 'were built', ['built', 'are building'], 'Past passive: was/were + past participle.'],
+    [2, 'part', 'Look! Someone has ___ a small inukshuk on the beach.', 'built', ['build', 'builded'], 'build – built – built.'],
+    [2, 'fut', 'I\'ll take a photo when we ___ the inukshuk.', 'reach', ['will reach', 'am going to reach'], 'After when (future meaning) → present simple.'],
+    [3, 'relative', 'The Inuit are the people ___ ancestors built the first inukshuks.', 'whose', ['who', 'who\'s'], 'Possession → whose (their ancestors → whose ancestors).'],
+    [3, 'modal', 'This stone figure has arms and legs. It ___ be an inukshuk!', 'must', ['mustn\'t', 'can'], 'Logical deduction (I\'m almost sure) → must.'],
+    [3, 'past', 'When we reached the inukshuk, the sun ___.', 'had already set', ['already sets', 'has already set'], 'Something that happened before another past action → past perfect.'],
+    [4, 'causative', 'Our Inuit guide made us ___ our own small inukshuk.', 'build', ['to build', 'built'], 'make somebody + base verb (no "to").'],
+    [4, 'cond', 'I wish I ___ how to build an inukshuk.', 'knew', ['know', 'would know'], 'wish + past simple for present situations you want to change.'],
+    [4, 'verbpat', 'It\'s no use ___ for the path in this snow. Just follow the inukshuks.', 'looking', ['to look', 'look'], 'It\'s no use + -ing.']
+  ]
+});
+TQ_PARTS.push({
+  towerbridge: [
+    [1, 'prep', 'Tower Bridge opened ___ 1894.', 'in', ['on', 'at'], 'Months and years → in.'],
+    [1, 'pres', 'Many tourists ___ Tower Bridge every year.', 'visit', ['visits', 'visiting'], 'Routines and facts → present simple. Tourists (they) → visit.'],
+    [1, 'compare', 'Tower Bridge is ___ than the bridge in my town.', 'more famous', ['famouser', 'most famous'], 'Long adjectives → more + adjective + than.'],
+    [2, 'passive', 'Tower Bridge ___ by thousands of people every day.', 'is crossed', ['crosses', 'is crossing'], 'Present passive: is/are + past participle.'],
+    [2, 'past', 'While we ___ along the glass walkway, my sister felt dizzy.', 'were walking', ['are walking', 'walk'], 'while + past continuous for the background action.'],
+    [2, 'verbpat', 'My little brother enjoyed ___ down through the glass floor.', 'looking', ['to look', 'look'], 'enjoy + -ing.'],
+    [3, 'relative', 'Tower Bridge, ___ opened in 1894, is a symbol of London.', 'which', ['that', 'what'], 'Extra information between commas → which / who, never "that".'],
+    [3, 'cond', 'If we had arrived earlier, we ___ the bridge lift.', 'would have seen', ['will have seen', 'saw'], 'Third conditional: if + past perfect, would have + participle.'],
+    [3, 'modal', 'Look at those people walking high above the river. That ___ be the glass walkway.', 'must', ['mustn\'t', 'must to'], 'Logical deduction (I\'m almost sure) → must.'],
+    [4, 'adverb', 'Never ___ a bridge as beautiful as Tower Bridge.', 'have I seen', ['I have seen', 'I saw'], 'After a negative adverb at the start → inversion: Never have I…'],
+    [4, 'causative', 'On Tower Bridge, we had our photo ___ by a professional photographer.', 'taken', ['take', 'took'], 'have + object + past participle: someone else did it for you.'],
+    [4, 'fut', 'Hurry up! By the time we get to the bridge, the ship ___ under it.', 'will have passed', ['will pass', 'passes'], 'Completed before a future moment → future perfect (will have + participle).']
+  ],
+  hobbiton: [
+    [1, 'pron', 'The guide showed ___ the hobbit holes.', 'us', ['we', 'our'], 'After a verb → object pronoun: us.'],
+    [1, 'part', 'Have you ___ the films about the hobbits?', 'seen', ['saw', 'seed'], 'see – saw – seen.'],
+    [1, 'connect', 'It was raining in Hobbiton, ___ we took our umbrellas.', 'so', ['but', 'because'], 'so → result.'],
+    [2, 'reported', '"Stay with the group," the guide said. → The guide told us ___ with the group.', 'to stay', ['stay', 'staying'], 'tell somebody + to + verb for orders.'],
+    [2, 'pres', 'I ___ in New Zealand since 2020, but I still haven\'t visited Hobbiton.', 'have lived', ['live', 'am living'], 'since / for + a situation that continues now → present perfect.'],
+    [2, 'modal', 'The tour is in the afternoon, so we ___ get up early.', 'don\'t have to', ['mustn\'t', 'can\'t'], 'No obligation → don\'t have to.'],
+    [3, 'passive', 'Hobbiton ___ by millions of fans since the films came out.', 'has been visited', ['has visited', 'was visiting'], 'Present perfect passive: has been + participle.'],
+    [3, 'compare', 'The more films you watch, the ___ you want to visit Hobbiton.', 'more', ['most', 'much'], 'The more…, the more… (two comparatives).'],
+    [3, 'prep', 'Hobbiton is famous ___ its little round doors.', 'for', ['of', 'by'], 'famous for something.'],
+    [4, 'verbpat', 'I\'ll never forget ___ inside a real hobbit hole.', 'standing', ['to stand', 'stand'], 'forget / remember + -ing = a memory of the past.'],
+    [4, 'cond', 'If I hadn\'t seen the films, I ___ about Hobbiton now.', 'wouldn\'t know', ['wouldn\'t have known', 'won\'t know'], 'Mixed conditional: past condition → present result (now).'],
+    [4, 'aux', 'Nobody got lost on the tour, ___?', 'did they', ['didn\'t they', 'did nobody'], 'Nobody is negative → positive tag with "they".']
+  ],
+  liberty: [
+    [1, 'past', 'The Statue of Liberty ___ a gift from France.', 'was', ['were', 'be'], 'The statue (it) → was.'],
+    [1, 'fut', 'Look at that long queue for the ferry! We ___ wait a long time.', 'are going to', ['go to', 'are going'], 'A prediction based on what you can see → be going to + verb.'],
+    [1, 'adverb', 'We climbed the stairs to the crown very ___.', 'carefully', ['careful', 'care'], 'How we climbed → adverb (careful → carefully).'],
+    [2, 'relative', 'The man ___ sold us the ferry tickets was very friendly.', 'who', ['which', 'whose'], 'People → who (or that).'],
+    [2, 'passive', 'The Statue of Liberty ___ to the USA by France.', 'was given', ['gave', 'was giving'], 'Past passive: was/were + past participle.'],
+    [2, 'cond', 'If the weather is good tomorrow, we ___ the ferry to Liberty Island.', 'will take', ['took', 'would took'], 'First conditional: if + present, will + verb.'],
+    [3, 'reported', '"Where is the ferry?" → A tourist asked me where the ferry ___.', 'was', ['is it', 'was it'], 'Reported questions use normal word order (subject + verb).'],
+    [3, 'verbpat', 'Do you mind ___ a photo of us with the statue?', 'taking', ['to take', 'take'], 'mind + -ing.'],
+    [3, 'part', 'The statue has ___ in New York Harbor since 1886.', 'stood', ['stand', 'standed'], 'stand – stood – stood.'],
+    [4, 'modal', 'You ___ have bought crown tickets online: I had already bought them.', 'needn\'t', ['mustn\'t', 'couldn\'t'], 'needn\'t have + participle = you did it, but it wasn\'t necessary.'],
+    [4, 'connect', '___ being tired after the climb, we visited the museum.', 'In spite of', ['Although', 'Even though'], 'in spite of + -ing. Although / even though need subject + verb.'],
+    [4, 'compare', 'The view from the crown was ___ better than I expected.', 'far', ['very', 'more'], 'far / much + comparative. Never "very better".']
+  ],
+  whitehouse: [
+    [1, 'pres', 'The President ___ in the White House.', 'lives', ['live', 'living'], 'He / she / it → verb + -s.'],
+    [1, 'prep', 'The White House is ___ Washington, D.C.', 'in', ['on', 'at'], 'Cities and countries → in.'],
+    [1, 'partitive', 'After the tour, I bought a ___ of water.', 'bottle', ['loaf', 'slice'], 'a bottle / glass of water.'],
+    [2, 'past', 'I didn\'t ___ the President during our visit.', 'see', ['saw', 'seeing'], 'After didn\'t, use the base form.'],
+    [2, 'passive', 'The White House ___ white.', 'is painted', ['paints', 'is painting'], 'The house doesn\'t paint anything → present passive: is painted.'],
+    [2, 'reported', '"I work in the White House," she said. → She said she ___ in the White House.', 'worked', ['work', 'working'], 'Reported speech usually moves the verb one tense back: work → worked.'],
+    [3, 'relative', 'That\'s the guide ___ grandfather worked in the White House.', 'whose', ['who', 'who\'s'], 'Possession → whose (his grandfather → whose grandfather).'],
+    [3, 'aux', '"I can\'t see the President." "Neither ___ I."', 'can', ['can\'t', 'do'], 'Neither + positive auxiliary + subject.'],
+    [3, 'modal', 'Look at all those security cars. The President ___ be at home today.', 'must', ['mustn\'t', 'must to'], 'Logical deduction (I\'m almost sure) → must.'],
+    [4, 'passive', 'All visitors\' bags must ___ before they go in.', 'be checked', ['check', 'have check'], 'Modal passive: must be + participle.'],
+    [4, 'fut', 'The President ___ meet the visitors tomorrow, according to the news.', 'is to', ['is', 'will to'], 'be to + verb = official plans (formal, used in the news).'],
+    [4, 'adverb', '___ had we arrived at the White House when it started to rain.', 'Hardly', ['Never', 'Rarely'], 'Hardly had we… when… = as soon as we arrived (inversion).']
+  ],
+  goldengate: [
+    [1, 'past', 'We ___ across the Golden Gate Bridge last summer.', 'walked', ['walk', 'have walked'], '"Last summer" is finished time → past simple: walked.'],
+    [1, 'compare', 'The Golden Gate Bridge is ___ than the bridge in my town.', 'longer', ['more long', 'longest'], 'Short adjectives: long → longer.'],
+    [1, 'modal', '___ I take a photo of you in front of the bridge?', 'Can', ['Do', 'Am'], 'Asking for permission → Can I…? / May I…?'],
+    [2, 'verbpat', 'We decided ___ bikes to cross the bridge.', 'to rent', ['renting', 'rent'], 'decide + to + verb.'],
+    [2, 'connect', '___ it was foggy, we could see the tops of the towers.', 'Although', ['Because', 'Despite'], 'although + subject + verb. "Despite" needs a noun or -ing.'],
+    [2, 'partitive', 'Our guide gave us a useful piece of ___.', 'advice', ['advices', 'advise'], 'Advice is uncountable → a piece of advice. (Advise is the verb.)'],
+    [3, 'passive', 'One part of the bridge ___ at the moment, so it\'s covered.', 'is being painted', ['is painting', 'has painted'], 'Present continuous passive: is being + participle.'],
+    [3, 'cond', 'If the fog ___ earlier, we would have taken better photos.', 'had cleared', ['cleared', 'would clear'], 'Third conditional: if + had + participle.'],
+    [3, 'fut', 'This time tomorrow I ___ across the Golden Gate Bridge.', 'will be cycling', ['will cycling', 'cycle'], 'An action in progress at a future moment → future continuous.'],
+    [4, 'reported', '"You should come early to avoid the fog." → Our guide ___ us to come early.', 'advised', ['said', 'suggested'], 'advise somebody to do. We can\'t say "suggested us to".'],
+    [4, 'part', 'The strong wind had ___ my hat into the bay.', 'blown', ['blew', 'blowed'], 'blow – blew – blown.'],
+    [4, 'prep', 'I\'m not used ___ walking across such a long bridge.', 'to', ['for', 'with'], 'be used to + -ing = be accustomed to.']
+  ],
+  opera: [
+    [1, 'part', 'I have ___ an opera at the Sydney Opera House.', 'seen', ['saw', 'see'], 'see – saw – seen.'],
+    [1, 'pres', 'Look! The sun ___ on the white roofs.', 'is shining', ['shines', 'shine'], 'Happening now → present continuous.'],
+    [1, 'aux', '___ you like the Sydney Opera House?', 'Do', ['Are', 'Does'], 'Present simple question with you → Do.'],
+    [2, 'passive', 'The Sydney Opera House ___ by Jørn Utzon.', 'was designed', ['designed', 'is designing'], 'Past passive: was/were + past participle.'],
+    [2, 'relative', 'Jørn Utzon was the architect ___ designed the Opera House.', 'who', ['which', 'whose'], 'People → who (or that).'],
+    [2, 'fut', 'I\'ll send you a photo as soon as I ___ the Opera House.', 'see', ['will see', 'saw'], 'as soon as + present simple for the future.'],
+    [3, 'compare', 'Today the queue for tickets is ___ longer than yesterday.', 'much', ['very', 'more'], 'much / far / a lot + comparative. Never "very longer".'],
+    [3, 'past', 'By the time we got to the Opera House, the show ___.', 'had started', ['has started', 'starts'], 'By the time + past → past perfect for the earlier action.'],
+    [3, 'partitive', 'I bought a new ___ of shoes for the concert.', 'pair', ['piece', 'couple'], 'a pair of shoes / jeans / glasses.'],
+    [4, 'relative', 'Utzon designed many buildings, the most famous of ___ is the Sydney Opera House.', 'which', ['whom', 'them'], 'most of / the most famous of + which (things) or whom (people).'],
+    [4, 'adverb', 'Rarely ___ a building with roofs like sails.', 'do you see', ['you see', 'you do see'], 'After a negative adverb at the start → inversion: Rarely do you…'],
+    [4, 'verbpat', 'It\'s no use ___ for tickets today: they\'re sold out.', 'queuing', ['to queue', 'queue'], 'It\'s no use + -ing.']
+  ],
+  harbourbridge: [
+    [1, 'prep', 'We did the BridgeClimb ___ Saturday.', 'on', ['in', 'at'], 'Days and dates → on.'],
+    [1, 'fut', 'I think you ___ love the BridgeClimb.', 'will', ['are', 'are going'], 'I think + will for opinions about the future.'],
+    [1, 'pron', 'My parents did the BridgeClimb, and I went with ___.', 'them', ['they', 'their'], 'After a preposition → object pronoun: them.'],
+    [2, 'connect', 'You can\'t do the BridgeClimb ___ you book a ticket.', 'unless', ['if', 'although'], 'unless = if… not.'],
+    [2, 'causative', 'We had our photo ___ at the top of the bridge.', 'taken', ['take', 'to take'], 'have something done: someone else did it for you.'],
+    [2, 'adverb', 'Choose the correct sentence.', 'I have never climbed a bridge before.', ['I never have climbed a bridge before.', 'I have climbed never a bridge before.'], 'Adverb between the auxiliary and the participle: have never climbed.'],
+    [3, 'reported', '"Are you scared of heights?" → The guide asked me ___ I was scared of heights.', 'if', ['that', 'what'], 'Yes/no questions → ask if / whether.'],
+    [3, 'passive', 'For many years, the bridge ___ "the Coathanger" by the people of Sydney.', 'has been called', ['has called', 'was calling'], 'Present perfect passive: has been + participle.'],
+    [3, 'cond', 'I wouldn\'t do the climb if I ___ you: you\'re scared of heights!', 'were', ['am', 'would be'], 'Advice: If I were you…'],
+    [4, 'aux', 'I\'m brave enough to do the climb, ___?', 'aren\'t I', ['am not I', 'isn\'t I'], 'Special tag: I am… aren\'t I?'],
+    [4, 'modal', 'You ___ told me it was so windy at the top! I would have brought a jacket.', 'should have', ['must have', 'should'], 'Criticism of the past → should have + participle.'],
+    [4, 'past', 'When I lived in Sydney, I ___ walk across the bridge every Sunday.', 'would', ['will', 'was'], 'would + verb can describe repeated actions in the past.']
+  ]
+});
+TQ_PARTS.forEach(p => Object.assign(TQ, p));
+
 const CULT = {
   houses: [
     ['In Britain, rows of houses joined together in a line are called…', 'terraced houses', ['detached houses', 'bungalows'], 'Terraced houses were built for workers in the 1800s. A detached house stands alone; a bungalow has only one floor.', 'UK'],
