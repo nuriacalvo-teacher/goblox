@@ -32,7 +32,8 @@ const CONFIG = {
 };
 // ========================================
 
-const GAMES = { diner: 'Healthy Bites Diner', mall: 'Back to School Rush', er: 'A&E: Emergency!', hotel: 'Hotel Trouble', london: 'Lost in London' };
+// the order matters: it is the unlocking order (must match the order of GAMES in index.html)
+const GAMES = { diner: 'Healthy Bites Diner', mall: 'Back to School Rush', er: 'A&E: Emergency!', hotel: 'Hotel Trouble', london: 'Lost in London', airport: 'Airport Check-in', cinema: 'Movie Night', school: 'New School in Dublin', gym: 'Join the Gym' };
 const GAME_IDS = Object.keys(GAMES);
 const SHEETS = {
   students: 'Alumnos',
