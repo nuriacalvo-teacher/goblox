@@ -5080,6 +5080,317 @@ const QB = {
 };
 /* Culture: one random question after the 4 grammar questions.
    id: [[question, answer, [wrong answers], fact shown after answering, country], …] */
+/* Graded grammar bank for building tests and taxes: L[0..3] = level 1 (A2) … level 4 (B2).
+   Each test mixes different grammar points and the questions get harder (see gradedQs). */
+const GQ = {
+  prep: { label: 'Prepositions', L: [[
+    ['The museum opens ___ 9 o\'clock.', 'at', ['in', 'on'], 'Clock times → at.'],
+    ['My birthday is ___ May.', 'in', ['on', 'at'], 'Months and years → in.'],
+    ['See you ___ Monday!', 'on', ['in', 'at'], 'Days and dates → on.']
+  ], [
+    ['She has lived here ___ 2019.', 'since', ['for', 'from'], 'since + a point in time (2019, Monday, I was a child).'],
+    ['We\'ve been waiting ___ two hours.', 'for', ['since', 'during'], 'for + a period of time (two hours, a week).'],
+    ['I\'m really good ___ maths.', 'at', ['in', 'on'], 'good at / bad at something.'],
+    ['Are you interested ___ history?', 'in', ['on', 'about'], 'interested in something.']
+  ], [
+    ['It depends ___ the weather.', 'on', ['of', 'from'], 'depend on (not "depend of", like in Spanish).'],
+    ['She apologised ___ being late.', 'for', ['of', 'about'], 'apologise for + -ing.'],
+    ['The town is famous ___ its cheese.', 'for', ['of', 'by'], 'famous for something.']
+  ], [
+    ['I\'m not used ___ getting up so early.', 'to', ['for', 'with'], 'be used to + -ing = be accustomed to.'],
+    ['He insisted ___ paying for the meal.', 'on', ['to', 'in'], 'insist on + -ing.'],
+    ['She succeeded ___ passing all her exams.', 'in', ['to', 'on'], 'succeed in + -ing.'],
+    ['The new law will come ___ force next year.', 'into', ['in', 'on'], 'come into force = start to apply.']
+  ]] },
+  past: { label: 'Past tenses', L: [[
+    ['We ___ to Dublin last summer.', 'went', ['go', 'have gone'], '"Last summer" is finished time → past simple: went.'],
+    ['___ you see the match yesterday?', 'Did', ['Do', 'Were'], 'Past simple questions: Did + subject + base verb.'],
+    ['They ___ at home last night.', 'were', ['was', 'are'], 'They → were.']
+  ], [
+    ['I ___ TV when the phone rang.', 'was watching', ['watched', 'am watching'], 'A longer action interrupted by a short one → past continuous.'],
+    ['While she ___ dinner, she cut her finger.', 'was cooking', ['cooked', 'cooks'], 'while + past continuous for the background action.'],
+    ['I didn\'t ___ your email.', 'receive', ['received', 'receiving'], 'After didn\'t, use the base form.']
+  ], [
+    ['When we arrived, the film ___.', 'had already started', ['already started', 'has already started'], 'Something that happened before another past action → past perfect.'],
+    ['By the time the police arrived, the thief ___.', 'had escaped', ['has escaped', 'escapes'], 'By the time + past → past perfect for the earlier action.'],
+    ['She was exhausted because she ___ all day.', 'had been working', ['has been working', 'is working'], 'Past perfect continuous: an activity that continued up to a moment in the past.']
+  ], [
+    ['I ___ live in Madrid, but now I live in Cork.', 'used to', ['use to', 'was used to'], 'Past habits and states → used to + base verb.'],
+    ['Did you ___ have long hair?', 'use to', ['used to', 'using to'], 'Questions and negatives: did + use to (no -d).'],
+    ['When we were kids, we ___ play outside for hours.', 'would', ['will', 'were'], 'would + verb can describe repeated actions in the past.']
+  ]] },
+  pres: { label: 'Present tenses', L: [[
+    ['She ___ to school by bus every day.', 'goes', ['go', 'is going'], 'Routines → present simple. She → goes.'],
+    ['Listen! The baby ___.', 'is crying', ['cries', 'cry'], 'Happening now → present continuous.'],
+    ['He ___ like coffee.', 'doesn\'t', ['don\'t', 'isn\'t'], 'He / she / it → doesn\'t + verb.']
+  ], [
+    ['Have you ever ___ a kangaroo?', 'seen', ['saw', 'see'], 'Present perfect: have + past participle (see → seen).'],
+    ['I ___ here since 2020.', 'have lived', ['live', 'am living'], 'since / for + a situation that continues now → present perfect.'],
+    ['Sorry, she isn\'t here. She ___ out.', 'has just gone', ['just goes', 'has just went'], 'just + present perfect (go → gone).']
+  ], [
+    ['This soup ___ delicious.', 'tastes', ['is tasting', 'taste'], 'State verbs (taste, seem, know, belong) are not normally continuous.'],
+    ['I ___ for you for an hour! Where were you?', 'have been waiting', ['am waiting', 'wait'], 'An activity that started in the past and continues now → present perfect continuous.'],
+    ['This is the first time I ___ snow.', 'have seen', ['see', 'am seeing'], 'It\'s the first time + present perfect.']
+  ], [
+    ['How long ___ each other?', 'have you known', ['are you knowing', 'do you know'], 'Duration up to now with a state verb → present perfect simple.'],
+    ['She\'s always ___ her phone at dinner! It\'s so annoying.', 'checking', ['checks', 'check'], 'always + present continuous = an annoying habit.'],
+    ['I ___ about selling my car, but I haven\'t decided yet.', 'am thinking', ['think', 'thinks'], 'think = consider (an activity) → it can be continuous.']
+  ]] },
+  fut: { label: 'Future forms', L: [[
+    ['Look at those black clouds! It ___ rain.', 'is going to', ['goes to', 'is going'], 'A prediction based on what you can see → be going to + verb.'],
+    ['I think Ireland ___ win the match.', 'will', ['is', 'are going'], 'I think + will for opinions about the future.'],
+    ['___ you help me with this bag, please?', 'Will', ['Are', 'Do'], 'Will you…? for requests.']
+  ], [
+    ['I\'ve got the tickets: we ___ to the concert on Friday.', 'are going', ['go', 'will going'], 'Fixed plans and arrangements → present continuous.'],
+    ['I\'ll call you when I ___ home.', 'get', ['will get', 'am going to get'], 'After when / as soon as / before (future meaning) → present simple.'],
+    ['As soon as the film ___, we\'ll have dinner.', 'finishes', ['will finish', 'finished'], 'as soon as + present simple for the future.']
+  ], [
+    ['This time tomorrow I ___ on a beach in Sydney.', 'will be lying', ['will lie', 'lie'], 'An action in progress at a future moment → future continuous.'],
+    ['By the time you arrive, we ___ dinner.', 'will have finished', ['will finish', 'finish'], 'Completed before a future moment → future perfect (will have + participle).'],
+    ['Don\'t phone me at nine: I ___ my favourite series.', 'will be watching', ['will watch', 'watch'], 'In progress at a future time → will be + -ing.']
+  ], [
+    ['Hurry up! The film is ___ start.', 'about to', ['going start', 'due'], 'be about to + verb = very soon.'],
+    ['By next June, I ___ English for six years.', 'will have been studying', ['will study', 'am studying'], 'Duration up to a future moment → future perfect continuous.'],
+    ['The President ___ visit Canada next month, according to the news.', 'is to', ['is', 'will to'], 'be to + verb = official plans (formal, used in the news).']
+  ]] },
+  reported: { label: 'Reported speech', L: [[], [
+    ['"I like pizza," he said. → He said he ___ pizza.', 'liked', ['like', 'liking'], 'Reported speech usually moves the verb one tense back: like → liked.'],
+    ['"Sit down," the teacher said. → The teacher told us ___ down.', 'to sit', ['sit', 'sitting'], 'tell somebody + to + verb for orders.'],
+    ['He ___ me that he was from Canada.', 'told', ['said', 'spoke'], 'tell + person (told me); say + nothing (said that…).']
+  ], [
+    ['"Where do you live?" → She asked me where ___.', 'I lived', ['did I live', 'do I live'], 'Reported questions use normal word order (subject + verb), no do/did.'],
+    ['"I will help you." → He promised he ___ help me.', 'would', ['did', 'was'], 'will → would in reported speech.'],
+    ['"Don\'t touch it!" → She told me ___ it.', 'not to touch', ['don\'t touch', 'to not touching'], 'Negative orders → told me not to + verb.']
+  ], [
+    ['"Are you coming?" → He asked me ___ I was coming.', 'if', ['that', 'what'], 'Yes/no questions → ask if / whether.'],
+    ['"I saw her yesterday." → He said he had seen her ___.', 'the day before', ['tomorrow', 'the next day'], 'Time words change: yesterday → the day before / the previous day.'],
+    ['"Shall I open the window?" → She ___ to open the window.', 'offered', ['said', 'told'], 'offer + to + verb. "Say" and "tell" don\'t take this pattern.'],
+    ['"You should rest." → The doctor ___ me to rest.', 'advised', ['said', 'suggested'], 'advise somebody to do. We can\'t say "suggested me to".']
+  ]] },
+  relative: { label: 'Relative clauses', L: [[], [
+    ['The girl ___ lives next door is from Canada.', 'who', ['which', 'whose'], 'People → who (or that).'],
+    ['This is the book ___ I told you about.', 'that', ['who', 'where'], 'Things → that / which.'],
+    ['That\'s the café ___ we first met.', 'where', ['which', 'who'], 'Places → where (= in which).']
+  ], [
+    ['That\'s the man ___ car was stolen.', 'whose', ['who', 'who\'s'], 'Possession → whose (his car → whose car).'],
+    ['Dublin, ___ is the capital of Ireland, is on the coast.', 'which', ['that', 'what'], 'Extra information between commas → which / who, never "that".'],
+    ['I don\'t understand ___ you mean.', 'what', ['that', 'which'], 'what = the thing that.']
+  ], [
+    ['The people to ___ I spoke were very kind.', 'whom', ['who', 'which'], 'After a preposition, people → whom (formal).'],
+    ['She passed all her exams, ___ surprised everyone.', 'which', ['what', 'that'], 'which can refer to a whole idea (the fact that she passed).'],
+    ['There were thirty students, most of ___ were from Spain.', 'whom', ['who', 'them'], 'most of / some of / all of + whom (people) or which (things).']
+  ]] },
+  connect: { label: 'Linking words', L: [[
+    ['I like tea, ___ I don\'t like coffee.', 'but', ['because', 'so'], 'but → contrast.'],
+    ['It was raining, ___ we stayed at home.', 'so', ['but', 'because'], 'so → result.'],
+    ['I\'m hungry ___ I didn\'t have breakfast.', 'because', ['so', 'but'], 'because → reason.']
+  ], [
+    ['___ it was cold, we went to the beach.', 'Although', ['Because', 'Despite'], 'although + subject + verb. "Despite" needs a noun or -ing.'],
+    ['You won\'t pass ___ you study.', 'unless', ['if', 'although'], 'unless = if… not.'],
+    ['She studied hard. ___, she failed the exam.', 'However', ['Therefore', 'Moreover'], 'However → contrast between two sentences.']
+  ], [
+    ['___ the rain, the match continued.', 'Despite', ['Although', 'However'], 'despite + noun / -ing (despite the rain).'],
+    ['Take an umbrella ___ it rains.', 'in case', ['unless', 'so that'], 'in case = because it might happen.'],
+    ['He saved money ___ he could buy a car.', 'so that', ['in order to', 'because of'], 'so that + subject + can/could. "In order to" needs a verb directly.']
+  ], [
+    ['___ being tired, she kept on running.', 'In spite of', ['Although', 'Even though'], 'in spite of + -ing. Although / even though need subject + verb.'],
+    ['The hotel was dirty. ___, the staff were rude.', 'What\'s more', ['Nevertheless', 'Otherwise'], 'What\'s more / Moreover → adding another point.'],
+    ['You must leave now; ___, you\'ll miss the train.', 'otherwise', ['therefore', 'however'], 'otherwise = if not.'],
+    ['___ we had a map, we got lost.', 'Even though', ['Despite', 'In spite'], 'even though + subject + verb (strong contrast).']
+  ]] },
+  passive: { label: 'The passive', L: [[], [
+    ['English ___ in many countries.', 'is spoken', ['speaks', 'is speaking'], 'Present passive: is/are + past participle.'],
+    ['The Harry Potter books ___ by J.K. Rowling.', 'were written', ['wrote', 'are writing'], 'Past passive: was/were + past participle.'],
+    ['This bridge ___ in 1890.', 'was built', ['built', 'is building'], 'The bridge didn\'t build anything → passive: was built.']
+  ], [
+    ['The new hospital ___ at the moment.', 'is being built', ['is building', 'has built'], 'Present continuous passive: is being + participle.'],
+    ['My bike ___! I can\'t find it anywhere.', 'has been stolen', ['has stolen', 'was stealing'], 'Present perfect passive: has been + participle.'],
+    ['The results ___ next week.', 'will be announced', ['will announce', 'are announcing'], 'Future passive: will be + participle.']
+  ], [
+    ['The winner is going to ___ tomorrow.', 'be chosen', ['choose', 'chosen'], 'going to + be + participle.'],
+    ['He is said ___ very rich.', 'to be', ['being', 'be'], 'be said / believed / thought + to + verb.'],
+    ['The work must ___ by Friday.', 'be finished', ['finish', 'have finish'], 'Modal passive: must be + participle.'],
+    ['She hates ___ what to do.', 'being told', ['telling', 'be told'], 'Passive -ing form: being + participle.']
+  ]] },
+  cond: { label: 'Conditionals and wishes', L: [[
+    ['If you heat ice, it ___.', 'melts', ['melted', 'will melted'], 'Zero conditional (always true): if + present, present.'],
+    ['If it rains, we ___ at home.', 'will stay', ['stayed', 'would stayed'], 'First conditional: if + present, will + verb.']
+  ], [
+    ['If I ___ rich, I would travel the world.', 'were', ['am', 'will be'], 'Second conditional: if + past, would + verb. (If I were…)'],
+    ['What would you do if you ___ a ghost?', 'saw', ['see', 'will see'], 'Second conditional: if + past simple.'],
+    ['If you don\'t hurry, you ___ the bus.', 'will miss', ['missed', 'would missed'], 'First conditional: real possibility → will.']
+  ], [
+    ['If I had studied, I ___ the exam.', 'would have passed', ['will have passed', 'passed'], 'Third conditional: if + past perfect, would have + participle.'],
+    ['If she ___ the alarm, she wouldn\'t have been late.', 'had heard', ['heard', 'would hear'], 'Third conditional: if + had + participle.'],
+    ['I wouldn\'t do that if I ___ you.', 'were', ['am', 'would be'], 'Advice: If I were you…']
+  ], [
+    ['If I had taken that job, I ___ in London now.', 'would be living', ['would have lived', 'will live'], 'Mixed conditional: past condition → present result (now).'],
+    ['___ I known, I would have helped you.', 'Had', ['If', 'Have'], 'Had I known = If I had known (inversion, formal).'],
+    ['You can go out ___ you\'re back by ten.', 'as long as', ['unless', 'in case'], 'as long as = only if.'],
+    ['I wish I ___ a car. Walking everywhere is so slow!', 'had', ['have', 'would have'], 'wish + past simple for present situations you want to change.']
+  ]] },
+  adverb: { label: 'Adverbs and word order', L: [[
+    ['She drives very ___.', 'carefully', ['careful', 'care'], 'How she drives → adverb (careful → carefully).'],
+    ['He speaks English very ___.', 'well', ['good', 'goodly'], 'good (adjective) → well (adverb).'],
+    ['Choose the correct sentence.', 'She is always late.', ['She always is late.', 'Always she is late.'], 'Frequency adverbs go after "be" but before other verbs.']
+  ], [
+    ['I ___ eat meat. I\'m a vegetarian.', 'never', ['ever', 'always'], 'never = at no time.'],
+    ['He worked ___ to finish on time.', 'hard', ['hardly', 'hardy'], '"Hard" is also the adverb. "Hardly" means almost not.'],
+    ['Choose the correct sentence.', 'I have never been to Canada.', ['I never have been to Canada.', 'I have been never to Canada.'], 'Adverb between the auxiliary and the participle: have never been.']
+  ], [
+    ['I could ___ hear you: the music was so loud.', 'hardly', ['hard', 'nearly'], 'hardly = almost not.'],
+    ['Have you seen the new film ___?', 'yet', ['already', 'still'], 'yet in questions and negatives, at the end.'],
+    ['She ___ lives with her parents. She hasn\'t moved out.', 'still', ['yet', 'already'], 'still = the situation continues.']
+  ], [
+    ['___ had I arrived when it started to rain.', 'Hardly', ['Never', 'Rarely'], 'Hardly had I… when… = as soon as I arrived (inversion).'],
+    ['Never ___ such a beautiful sunset.', 'have I seen', ['I have seen', 'I saw'], 'After a negative adverb at the start → inversion: Never have I…'],
+    ['He spoke so ___ that nobody heard him.', 'quietly', ['quiet', 'quite'], 'quiet (adjective) → quietly (adverb). "Quite" means fairly.']
+  ]] },
+  part: { label: 'Irregular past participles', L: [[
+    ['I have ___ my homework.', 'done', ['did', 'do'], 'do – did – done.'],
+    ['Have you ___ my keys?', 'seen', ['saw', 'seed'], 'see – saw – seen.'],
+    ['She has ___ a letter to her friend.', 'written', ['wrote', 'writed'], 'write – wrote – written.']
+  ], [
+    ['Be careful! The glass is ___.', 'broken', ['broke', 'breaked'], 'break – broke – broken.'],
+    ['Has the film ___ yet?', 'begun', ['began', 'begin'], 'begin – began – begun.'],
+    ['We\'ve ___ a lot of water today.', 'drunk', ['drank', 'drinked'], 'drink – drank – drunk.']
+  ], [
+    ['The sun has already ___.', 'risen', ['rose', 'raised'], 'rise – rose – risen. ("Raise" needs an object: raise your hand.)'],
+    ['Has she ever ___ a horse?', 'ridden', ['rode', 'rided'], 'ride – rode – ridden.'],
+    ['Oh no! I\'ve ___ my phone on the bus!', 'left', ['leaved', 'lefted'], 'leave – left – left.']
+  ], [
+    ['The birds have ___ south for the winter.', 'flown', ['flew', 'flied'], 'fly – flew – flown.'],
+    ['The bell had already ___ when we arrived.', 'rung', ['rang', 'ringed'], 'ring – rang – rung.'],
+    ['The lake has ___ because it\'s so cold.', 'frozen', ['froze', 'freezed'], 'freeze – froze – frozen.'],
+    ['The old tree was ___ down by the storm.', 'blown', ['blew', 'blowed'], 'blow – blew – blown.'],
+    ['She has ___ in that lake every summer since she was a child.', 'swum', ['swam', 'swimmed'], 'swim – swam – swum.']
+  ]] },
+  pron: { label: 'Pronouns', L: [[
+    ['I love this song. Do you like ___?', 'it', ['them', 'its'], 'Object pronoun for a thing → it.'],
+    ['Where are Tom and Ana? I can\'t see ___.', 'them', ['they', 'their'], 'After a verb → object pronoun: them.'],
+    ['Can you help ___, please? I\'m lost.', 'me', ['I', 'my'], 'After a verb → me.']
+  ], [
+    ['This bag isn\'t mine. It\'s ___.', 'hers', ['her', 'she'], 'Possessive pronoun (no noun after it): mine, yours, hers, ours.'],
+    ['Give ___ the ball, please. We want to play.', 'us', ['we', 'our'], 'Object pronoun: us.'],
+    ['Between you and ___, I don\'t trust him.', 'me', ['I', 'mine'], 'After a preposition (between) → object pronoun: me.']
+  ], [
+    ['She taught ___ to swim when she was five.', 'herself', ['her', 'himself'], 'Same person as the subject → reflexive pronoun.'],
+    ['They hurt ___ playing rugby.', 'themselves', ['theirselves', 'themself'], 'they → themselves.'],
+    ['Ask ___: she knows the answer.', 'her', ['she', 'hers'], 'After a verb → object pronoun: her.']
+  ], [
+    ['The two friends looked at ___ and smiled.', 'each other', ['themself', 'theirselves'], 'each other = one to the other (reciprocal).'],
+    ['A friend of ___ told me the news.', 'mine', ['me', 'my'], 'a friend of mine / yours / hers.'],
+    ['It was ___ who called the police, not me.', 'him', ['his', 'himself'], 'It was him (informal) / It was he (very formal).']
+  ]] },
+  aux: { label: 'Auxiliaries, short answers and question tags', L: [[
+    ['___ you like chocolate?', 'Do', ['Are', 'Does'], 'Present simple question with you → Do.'],
+    ['She ___ speak French.', 'can\'t', ['don\'t can', 'not can'], 'Modal + not: can\'t. Never "don\'t can".']
+  ], [
+    ['You\'re from Spain, ___?', 'aren\'t you', ['don\'t you', 'isn\'t it'], 'Question tags repeat the auxiliary: You are… aren\'t you?'],
+    ['"I love pizza." "So ___ I!"', 'do', ['am', 'love'], 'So + auxiliary + subject. Love (present simple) → do.'],
+    ['He didn\'t call, ___?', 'did he', ['didn\'t he', 'does he'], 'Negative sentence → positive tag.']
+  ], [
+    ['"I can\'t swim." "Neither ___ I."', 'can', ['can\'t', 'do'], 'Neither + positive auxiliary + subject.'],
+    ['Let\'s go to the beach, ___?', 'shall we', ['will we', 'don\'t we'], 'Let\'s… shall we?'],
+    ['Who ___ the window?', 'broke', ['did break', 'did broke'], 'When "who" is the subject, don\'t use did.']
+  ], [
+    ['I\'m late, ___?', 'aren\'t I', ['am not I', 'isn\'t I'], 'Special tag: I am… aren\'t I?'],
+    ['Nobody called, ___?', 'did they', ['didn\'t they', 'did nobody'], 'Nobody is negative → positive tag with "they".'],
+    ['I ___ want to come, but I can\'t.', 'do', ['am', 'does'], 'Emphatic do: I do want = I really want.']
+  ]] },
+  modal: { label: 'Modal verbs', L: [[
+    ['You ___ wear a seatbelt in the car. It\'s the law.', 'must', ['can', 'might'], 'Obligation → must / have to.'],
+    ['___ I open the window?', 'Can', ['Do', 'Am'], 'Asking for permission → Can I…? / May I…?'],
+    ['You ___ smoke in the hospital. It\'s forbidden.', 'mustn\'t', ['don\'t have to', 'needn\'t'], 'Prohibition → mustn\'t.']
+  ], [
+    ['You look tired. You ___ go to bed.', 'should', ['must to', 'ought'], 'Advice → should + verb (or ought to).'],
+    ['It\'s Sunday. You ___ get up early.', 'don\'t have to', ['mustn\'t', 'can\'t'], 'No obligation → don\'t have to.'],
+    ['Take an umbrella; it ___ rain later.', 'might', ['must', 'should to'], 'Possibility → might / may / could.']
+  ], [
+    ['She isn\'t answering. She ___ be asleep.', 'must', ['mustn\'t', 'can'], 'Logical deduction (I\'m almost sure) → must.'],
+    ['That ___ be Tom: he\'s in Australia!', 'can\'t', ['mustn\'t', 'doesn\'t'], 'Impossible (I\'m sure it isn\'t) → can\'t.'],
+    ['When I was five, I ___ swim.', 'could', ['can', 'might'], 'Past ability → could.']
+  ], [
+    ['You ___ told me! I would have helped you.', 'should have', ['must have', 'should'], 'Criticism of the past → should have + participle.'],
+    ['The street is wet. It ___ rained.', 'must have', ['can have', 'should have'], 'Deduction about the past → must have + participle.'],
+    ['He ___ have taken the bus: there are no buses on Sundays.', 'can\'t', ['mustn\'t', 'shouldn\'t'], 'Impossible in the past → can\'t / couldn\'t have.'],
+    ['You ___ have bought milk: we already had some.', 'needn\'t', ['mustn\'t', 'couldn\'t'], 'needn\'t have + participle = you did it, but it wasn\'t necessary.']
+  ]] },
+  causative: { label: 'Have something done', L: [[], [
+    ['I ___ my hair cut yesterday.', 'had', ['did', 'made'], 'have something done: someone else did it for you.'],
+    ['We\'re having our house ___ next week.', 'painted', ['paint', 'to paint'], 'have + object + past participle.']
+  ], [
+    ['She got her phone ___ at the shop.', 'repaired', ['repair', 'to repair'], 'get + object + past participle (informal causative).'],
+    ['You should have your eyes ___.', 'tested', ['test', 'testing'], 'have + object + participle.'],
+    ['I need to ___ my car serviced.', 'get', ['make', 'do'], 'get / have something done.']
+  ], [
+    ['He had his wallet ___ on the train.', 'stolen', ['stole', 'steal'], 'have something done can also describe a bad experience.'],
+    ['The teacher made us ___ the essay again.', 'write', ['to write', 'written'], 'make somebody + base verb (no "to").'],
+    ['I\'ll have the technician ___ your computer tomorrow.', 'check', ['checked', 'to check'], 'have somebody + base verb = ask someone to do it.']
+  ]] },
+  partitive: { label: 'Partitives and uncountable nouns', L: [[
+    ['Can I have a ___ of water, please?', 'glass', ['slice', 'loaf'], 'a glass of water / milk / juice.'],
+    ['I bought a ___ of bread.', 'loaf', ['bar', 'can'], 'a loaf of bread.'],
+    ['Would you like a ___ of cake?', 'piece', ['loaf', 'bottle'], 'a piece / slice of cake.']
+  ], [
+    ['I\'d like a ___ of chocolate.', 'bar', ['loaf', 'tube'], 'a bar of chocolate / soap.'],
+    ['Let me give you a piece of ___.', 'advice', ['advices', 'advise'], 'Advice is uncountable → a piece of advice. (Advise is the verb.)'],
+    ['I need a ___ of toothpaste.', 'tube', ['bar', 'slice'], 'a tube of toothpaste.']
+  ], [
+    ['I bought a new ___ of jeans.', 'pair', ['piece', 'couple'], 'a pair of jeans / trousers / glasses.'],
+    ['We have a lot of ___ to do today.', 'homework', ['homeworks', 'homework\'s'], 'Homework is uncountable: no plural.'],
+    ['Could you buy a ___ of milk on your way home?', 'carton', ['loaf', 'slice'], 'a carton of milk / juice.']
+  ], [
+    ['a ___ of grapes', 'bunch', ['flock', 'herd'], 'a bunch of grapes / flowers / keys.'],
+    ['a ___ of bees', 'swarm', ['flock', 'pack'], 'a swarm of bees, a flock of birds, a pack of wolves.'],
+    ['I have some ___ for you: we won!', 'news', ['new', 'newses'], 'News is uncountable and takes a singular verb.'],
+    ['She gave us some very useful ___.', 'information', ['informations', 'an information'], 'Information is uncountable: some information / a piece of information.']
+  ]] },
+  compare: { label: 'Comparatives and superlatives', L: [[
+    ['Canada is ___ than Ireland.', 'bigger', ['biger', 'more big'], 'Short adjectives: big → bigger (double the consonant).'],
+    ['This is the ___ day of my life!', 'best', ['goodest', 'better'], 'good – better – the best.']
+  ], [
+    ['Maths is ___ than history for me.', 'more difficult', ['difficulter', 'most difficult'], 'Long adjectives → more + adjective + than.'],
+    ['He isn\'t as tall ___ his brother.', 'as', ['than', 'like'], 'as + adjective + as.'],
+    ['This is the ___ film I have ever seen.', 'worst', ['baddest', 'worse'], 'bad – worse – the worst.']
+  ], [
+    ['The ___ you practise, the better you get.', 'more', ['most', 'much'], 'The more…, the better… (two comparatives).'],
+    ['It\'s getting ___ and colder.', 'colder', ['more cold', 'cold'], 'Repeated comparative = it keeps changing.'],
+    ['Today is ___ hotter than yesterday.', 'much', ['very', 'more'], 'much / far / a lot + comparative. Never "very hotter".']
+  ], [
+    ['This exam was ___ easier than I expected.', 'far', ['very', 'too'], 'far / much + comparative.'],
+    ['She\'s by ___ the best player on the team.', 'far', ['much', 'more'], 'by far + superlative.'],
+    ['Your phone is twice as expensive ___ mine.', 'as', ['than', 'like'], 'twice / three times as… as.']
+  ]] },
+  verbpat: { label: 'Verb + -ing or to + verb', L: [[], [
+    ['I enjoy ___ in the sea.', 'swimming', ['to swim', 'swim'], 'enjoy + -ing.'],
+    ['She decided ___ a new phone.', 'to buy', ['buying', 'buy'], 'decide + to + verb.'],
+    ['I\'m looking forward to ___ you.', 'seeing', ['see', 'saw'], 'look forward to + -ing (the "to" is a preposition).']
+  ], [
+    ['Do you mind ___ the window?', 'opening', ['to open', 'open'], 'mind + -ing.'],
+    ['He promised ___ late again.', 'not to be', ['to not being', 'not being'], 'promise + (not) to + verb.'],
+    ['Remember ___ the door when you leave!', 'to lock', ['locking', 'lock'], 'remember to do = don\'t forget to do it.']
+  ], [
+    ['I\'ll never forget ___ the President.', 'meeting', ['to meet', 'meet'], 'forget / remember + -ing = a memory of the past.'],
+    ['It\'s no use ___ about it now.', 'worrying', ['to worry', 'worry'], 'It\'s no use + -ing.'],
+    ['She suggested ___ to the beach.', 'going', ['to go', 'go'], 'suggest + -ing (or suggest that we go).'],
+    ['I would rather ___ at home tonight.', 'stay', ['to stay', 'staying'], 'would rather + base verb.']
+  ]] }
+};
+/* n questions, each from a different grammar point, getting harder: the first one starts at level 1
+   for a young nation and climbs as the nation grows (more buildings → harder tests). */
+function gradedQs(n, built) {
+  const shift = built < 5 ? 0 : built < 12 ? 1 : 2, used = new Set(), out = [];
+  for (let k = 0; k < n; k++) {
+    const lv = Math.min(3, (n === 1 ? (Math.random() * 3 | 0) : k) + shift);
+    for (let l = lv; l >= 0; l--) {
+      const ts = Object.keys(GQ).filter(t => !used.has(t) && GQ[t].L[l].length);
+      if (!ts.length) continue;
+      const t = pick1(ts); used.add(t); out.push({ q: pick1(GQ[t].L[l]), label: GQ[t].label, level: l + 1 }); break;
+    }
+  }
+  return out;
+}
 const CULT = {
   houses: [
     ['In Britain, rows of houses joined together in a line are called…', 'terraced houses', ['detached houses', 'bungalows'], 'Terraced houses were built for workers in the 1800s. A detached house stands alone; a bungalow has only one floor.', 'UK'],
@@ -6064,16 +6375,17 @@ function foundNation() {
 /* ---------- English test ---------- */
 function runQuiz(o) {
   /* o.n grammar questions from o.topic (or 'any'), then one culture question from CULT[o.culture] */
-  const pool = o.topic === 'any' ? Object.values(QB).flatMap(t => t.qs) : QB[o.topic].qs;
-  const qs = sample(pool, Math.min(o.n || 5, pool.length)).map(q => ({ q }));
+  const built = G && G.s && G.s.state && G.s.state.nation ? Object.keys(G.s.state.nation.buildings).length : 0;
+  const pool = o.graded ? null : o.topic === 'any' ? Object.values(QB).flatMap(t => t.qs) : QB[o.topic].qs;
+  const qs = o.graded ? gradedQs(o.n || 4, built) : sample(pool, Math.min(o.n || 5, pool.length)).map(q => ({ q }));
   if (o.culture && CULT[o.culture]) qs.push({ q: pick1(CULT[o.culture]), culture: true });
   const need = Math.ceil(qs.length * 0.8);
-  const label = (o.topic === 'any' ? 'Mixed grammar' : QB[o.topic].label) + (o.culture ? ' + 🌍 culture' : '');
+  const label = (o.graded ? 'Mixed grammar, getting harder' : o.topic === 'any' ? 'Mixed grammar' : QB[o.topic].label) + (o.culture ? ' + 🌍 culture' : '');
   let i = 0, right = 0;
   const show = () => {
-    const { q: [q, a, wrong, tip, where], culture } = qs[i];
+    const { q: [q, a, wrong, tip, where], culture, label: gl, level } = qs[i];
     const box = el('div', 'quiz');
-    box.append(el('div', 'quiz-q', `<small>Question ${i + 1} of ${qs.length}${culture ? ` · <span class="q-cult">🌍 Culture${where ? ': ' + escH(where) : ''}</span>` : ''}</small>${escH(q)}`));
+    box.append(el('div', 'quiz-q', `<small>Question ${i + 1} of ${qs.length}${gl ? ` · Level ${level}: ${escH(gl)}` : ''}${culture ? ` · <span class="q-cult">🌍 Culture${where ? ': ' + escH(where) : ''}</span>` : ''}</small>${escH(q)}`));
     if (culture) {
       const look = el('a', 'q-search', '🔎 Not sure? Search it on the web');
       look.href = 'https://www.google.com/search?q=' + encodeURIComponent(q); look.target = '_blank'; look.rel = 'noopener';
@@ -6118,12 +6430,12 @@ function buildMenu(i) {
   const grid = el('div', 'bgrid');
   Object.entries(BLD).filter(([id]) => id !== 'cityhall' && fitsPlot(id, i)).forEach(([id, b]) => {
     const done = UNIQUE_B.includes(id) && have.includes(id), poor = st.goyux.total < b[2];
-    const topic = QB[b[4]].label + ' + 🌍 culture';
+    const topic = 'Mixed grammar (harder as your nation grows) + 🌍 culture';
     const c = el('div', 'bcard' + (MONUMENTS.includes(id) ? ' mon' : ''), `<div class="b-top"><span class="b-emo">${b[1]}</span><b>${escH(b[0])}</b><span class="b-cost"><i class="gx">G</i>${b[2]}</span></div>
       <p>${escH(b[5])}</p><div class="fxs">${fxChips(b[3])}</div><small>📝 ${escH(topic)}</small>`);
     const btn = el('button', 'btn ' + (done || poor ? '' : 'primary'), done ? 'Already built' : poor ? `Need ${b[2] - st.goyux.total} more GOYUX` : 'Take the test & build');
     btn.disabled = done || poor;
-    btn.onclick = () => runQuiz({ title: `Build: ${b[0]}`, topic: b[4], culture: id, n: 4, onPass: async () => {
+    btn.onclick = () => runQuiz({ title: `Build: ${b[0]}`, graded: true, culture: id, n: 4, onPass: async () => {
       try { applyNation(await NAPI.build(i, id)); notify('🏗 Built!', `${b[0]} is ready. ${N_KEYS.map((k, j) => b[3][j] ? `${N_LABEL[k]} ${b[3][j] > 0 ? '+' : ''}${b[3][j]}` : '').filter(Boolean).join(', ')}`, 'good'); }
       catch (e) { notify('⚠️ Not built', e.message, 'bad'); }
     } });
@@ -6176,7 +6488,7 @@ function collectTaxes() {
   const st = G.s.state;
   if (!st.nation) return foundNation();
   if (!st.taxReady) { notify('💰 Taxes', 'You have already collected taxes today. Come back tomorrow! To earn more GOYUX now, play a mission (🎮).'); return; }
-  runQuiz({ title: 'Collect today\'s taxes', topic: 'any', n: 1, onPass: async () => {
+  runQuiz({ title: 'Collect today\'s taxes', graded: true, n: 1, onPass: async () => {
     try { applyNation(await NAPI.tax()); notify('💰 Taxes collected', `+${st.taxAmount} GOYUX for the treasury. A stronger economy means more taxes.`, 'good'); }
     catch (e) { notify('⚠️', e.message, 'bad'); }
   } });
