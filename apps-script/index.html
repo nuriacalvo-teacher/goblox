@@ -927,9 +927,9 @@ const GAMES = [
 
 /* ---------------- difficulty ---------------- */
 const DIFF = {
-  easy: { label: 'Easy', cefr: 'A2', bad: 2, mult: 1, es: true, info: 'Three answers to choose from, Spanish translation with the ES button, a normal budget and some surprises. Bronze card: 40 GOYUX.' },
-  normal: { label: 'Normal', cefr: 'A2–B1', bad: 3, mult: 1.25, es: false, info: 'Four answers to choose from, no Spanish help, a tighter budget and more surprises. Silver card: 60 GOYUX.' },
-  hard: { label: 'Hard', cefr: 'B1+', bad: 3, mult: 1.5, es: false, info: 'Four answers to choose from, no Spanish help, just enough money and every surprise. Gold card: 80 GOYUX.' }
+  easy: { label: 'Easy', cefr: 'A2', bad: 2, rbad: 2, reg: 0, mult: 1, es: true, info: 'A2. Three answers to choose from, Spanish translation with the ES button, a normal budget and some surprises. Bronze card: 40 GOYUX.' },
+  normal: { label: 'Normal', cefr: 'B1', bad: 3, rbad: 2, reg: 1, mult: 1.25, es: false, info: 'B1. Four answers, no Spanish help, a tighter budget and more surprises. Some answers are correct English but too rude or too formal for the situation: they cost manners. Silver card: 60 GOYUX.' },
+  hard: { label: 'Hard', cefr: 'B2–C1', bad: 3, rbad: 1, reg: 2, mult: 1.5, es: false, info: 'B2–C1. Most answers are correct English: choose the one that fits the situation (polite with strangers, relaxed with friends and family). Just enough money and every surprise. Gold card: 80 GOYUX.' }
 };
 let difficulty = DIFF[store.get('difficulty', 'normal')] ? store.get('difficulty', 'normal') : 'normal';
 
@@ -1590,6 +1590,14 @@ function ask(n, text, es, phrases, done) {
     if (p.kind === 'ok' || p.kind === 'fact') {
       if (p.kind === 'ok') { G.good++; pop('✔ Natural English', 'good'); }
       updateBoard(); (p.fn || done)(p); return;
+    }
+    if (p.kind === 'stiff' || p.kind === 'blunt') {
+      // correct English, wrong register: the conversation goes on, but it costs manners (and so GOYUX)
+      const cost = p.kind === 'blunt' ? 15 : 10; G.manners = Math.max(0, G.manners - cost); G.reg = (G.reg || 0) + 1;
+      notify(p.kind === 'blunt' ? '😬 Correct, but too direct' : '🎩 Correct, but too formal', p.tip, 'warn'); pop(`Manners −${cost}`, 'bad');
+      G.mistakes.push({ said: p.t, tip: p.tip }); updateBoard();
+      if (p.react) say(n, p.react);
+      setTimeout(() => { if (G && !G.over) (p.fn || done)(p); }, p.react ? 900 : 300); return;
     }
     G.bad++;
     if (p.kind === 'rude') { G.manners = Math.max(0, G.manners - 25); notify('😬 That sounded rude', p.tip, 'bad'); pop('Manners −25', 'bad'); }
@@ -3845,6 +3853,14 @@ function buildLondon() {
 /* a question picked at random, each one with ITS OWN natural answers (so answers always fit the question).
    variants: [[question, Spanish, [ok answers]], …] */
 function askV(n, variants, bad, done, nBad) { const [q, es, ok] = pick1(variants); ask(n, q, es, phr(ok, bad, nBad), done); }
+/* Register: rphr(ok, reg, bad) mixes the natural answer with answers that are correct English but
+   'stiff' (too formal for friends and family) or 'blunt' (too direct with strangers), plus grammar mistakes.
+   Easy (A2): ok + 2 mistakes. Normal (B1): ok + 1 register + 2 mistakes. Hard (B2–C1): ok + 2 register + 1 mistake. */
+function rphr(ok, reg, bad) {
+  const d = G && DIFF[G.diff] ? DIFF[G.diff] : DIFF.normal, r = sample(reg || [], d.reg);
+  return phr(ok, [], 0).concat(r, sample(bad || [], Math.min(d.rbad + (d.reg - r.length), (bad || []).length)));
+}
+function askR(n, variants, reg, bad, done) { const [q, es, ok] = pick1(variants); ask(n, q, es, rphr(ok, reg, bad), done); }
 
 /* =====================================================================
    SCENARIO 6 — AIRPORT CHECK-IN (Dublin Airport → Madrid)
