@@ -906,9 +906,15 @@ const GAMES = [
     desc: 'It\'s the last days of your school trip to London and your passport has disappeared. Your flight home leaves in two days! Ask at the hotel, retrace your steps, call your teacher, report the loss online, read the consulate\'s requirements, book an appointment that fits your flight, get a passport photo that follows the rules and convince the consular officer to issue an emergency travel document.',
     goals: ['Explaining a problem: I\'ve lost my passport (present perfect)', 'Formal requests: Would it be possible to…? I was wondering whether…', 'Bureaucratic English: proof of identity, processing time, valid for a single journey', 'Register: formal with officials, relaxed with your teacher'],
     chips: ['🛂 Spanish consulate', '🇬🇧 London', '🎲 New surprises every game', '⏱ 10–15 min'] },
-  /* in development: sport, events, shows, art and everyday life */  { id: 'theft', soon: true, title: 'Report a Theft', emoji: '🚓', bg: 'linear-gradient(150deg,#5c6bc0,#1a237e)' },  { id: 'neighbours', soon: true, title: 'Noisy Neighbours', emoji: '🔊', bg: 'linear-gradient(150deg,#8d6e63,#4e342e)' },
-  { id: 'bank', soon: true, title: 'At the Bank', emoji: '🏦', bg: 'linear-gradient(150deg,#78909c,#263238)' },
-  { id: 'printshop', soon: true, title: 'At the Print Shop', emoji: '🖨', bg: 'linear-gradient(150deg,#90a4ae,#37474f)' },
+  { id: 'neighbours', title: 'Noisy Neighbours', emoji: '🔊', bg: 'linear-gradient(150deg,#8d6e63,#4e342e 55%,#1b0f0a)', level: 'A2–C1',
+    desc: 'You live with a host family in a condo building in Toronto. It\'s 11:30 pm on a school night and the music upstairs is very loud. Decide what to do, knock and ask politely, negotiate an end time, write a polite note, talk to the concierge and read the house rules. Then it\'s your turn to listen: your neighbour has a complaint about you!',
+    goals: ['Polite requests: Sorry to bother you, but would you mind…?', 'Negotiating and de-escalating: I totally get it, but…', 'Reading house rules: quiet hours from 11 pm to 7 am', 'Apologising and offering a solution: I had no idea. I\'ll…'],
+    chips: ['🏢 Condo life', '🍁 Toronto', '🎲 New surprises every game', '⏱ 10–15 min'] },
+  { id: 'bank', title: 'At the Bank', emoji: '🏦', bg: 'linear-gradient(150deg,#4fc3f7,#0277bd 55%,#0b2545)', level: 'A2–C1',
+    desc: 'You are starting a six-month school exchange in Sydney and you need a student bank account. Take a ticket for the right service, show your documents, compare accounts and choose the best one for a student, set a safe PIN, change your euros at the currency exchange counter (read the rates board and count your money!) and use the ATM safely outside.',
+    goals: ['Banking requests: I\'d like to open an account, please.', 'Money sense: fees, interest, exchange rates and commission', 'Security: PINs, phishing texts and ATM safety', 'Register: polite and formal with bank staff, relaxed with your host family'],
+    chips: ['🏦 Bank', '🦘 Sydney', '🎲 New surprises every game', '⏱ 10–15 min'] },
+  /* in development: sport, events, shows, art and everyday life */  { id: 'theft', soon: true, title: 'Report a Theft', emoji: '🚓', bg: 'linear-gradient(150deg,#5c6bc0,#1a237e)' },  { id: 'neighbours', soon: true, title: 'Noisy Neighbours', emoji: '🔊', bg: 'linear-gradient(150deg,#8d6e63,#4e342e)' },  { id: 'printshop', soon: true, title: 'At the Print Shop', emoji: '🖨', bg: 'linear-gradient(150deg,#90a4ae,#37474f)' },
   { id: 'date', soon: true, title: 'First Date', emoji: '💌', bg: 'linear-gradient(150deg,#f48fb1,#ad1457)' },
   { id: 'supermarket', soon: true, title: 'At the Supermarket', emoji: '🛒', bg: 'linear-gradient(150deg,#9ccc65,#33691e)' },
   { id: 'florist', soon: true, title: 'At the Florist', emoji: '💐', bg: 'linear-gradient(150deg,#f06292,#880e4f)' },
@@ -7509,6 +7515,1067 @@ function buildPassport() {
     if (!G.reg) good.push('Perfect register: formal with officials, relaxed with your teacher.'); else bad.push(`Register slips: ${G.reg}. Be formal with officials ("Would it be possible…?") and relaxed with your teacher.`);
     if (G.manners === 100) good.push('Perfect manners from the hotel to the consulate.');
     showResults({ title: 'Ready to fly home!', overall, metrics: [['Documents', doc], ['Problem solving', solve], ['English', eng], ['Manners', G.manners]], good, bad });
+  }
+}
+
+/* =====================================================================
+   SCENARIO — NOISY NEIGHBOURS (a condo building in Toronto, Canada)
+   ===================================================================== */
+SCEN.neighbours = {
+  title: 'Noisy Neighbours', cardTitle: 'Your situation',
+  vocab: [['Sorry to bother you, but…', 'Perdona que te moleste, pero…'], ['Could you turn it down, please?', '¿Podrías bajarlo, por favor?'], ['Would you mind keeping it down?', '¿Te importaría hacer menos ruido?'], ['quiet hours', 'horas de silencio (de descanso)'], ['a noise complaint', 'una queja por ruido'], ['the upstairs / downstairs neighbour', 'el vecino de arriba / de abajo'], ['condo / super / concierge', 'piso (en propiedad) / encargado de mantenimiento / conserje'], ['washroom', 'baño, aseo (en Canadá)'], ['by mistake', 'por error'], ['I had no idea. I\'m so sorry!', 'No tenía ni idea. ¡Lo siento mucho!']],
+  board() { const s = G.s; return [['Time', s.clock || '11:30 pm · Tue'], ['Diplomacy', clamp(Math.round(s.dip == null ? 100 : s.dip), 0, 100)], ['English', engPct() + '%'], ['Manners', G.manners]]; },
+  card() {
+    const s = G.s;
+    return `<div class="cs">You are <b>${escH(profile.name)}</b>, 15, an exchange student living with a host family in <b>apartment 1105</b> of a condo building in <b>Toronto</b>, Canada. Their dog is called <b>Maple</b>.</div>
+      <div class="cs">🌙 <b>Tonight:</b> it's <b>11:30 pm on Tuesday</b>, a school night, and you have a big <b>maths exam at 9 am</b> tomorrow. Your host mum is working a <b>night shift</b> at the hospital until 7 am, so you're on your own. The music from <b>1205</b>, the apartment just above you, is really LOUD.</div>
+      ${s.ev && s.ev.package ? '<div class="cs">📦 This afternoon a <b>parcel for apartment 1205</b> was left at your door by mistake. It\'s in your bag.</div>' : ''}
+      <div class="cs">🚨 Emergencies (fire, crime, someone hurt or in danger): <b>911</b>. Non-urgent police help in Toronto: <b>416-808-2222</b>.</div>
+      <div class="cs">🇨🇦 Canadians say <b>"Sorry!"</b> a lot, even when it isn't their fault, and often add <b>"eh?"</b> at the end of a sentence. An apartment you own is a <b>condo</b>, the person who fixes things in the building is the <b>super</b> (superintendent), and the toilet is the <b>washroom</b>. Difficulty: <b>${DIFF[G.diff].label}</b>.</div>`;
+  },
+  build: buildNeighbours
+};
+
+function buildNeighbours() {
+  const s = G.s = { phase: 'night1', ev: {}, dip: 100, sol: 0, solN: 0, noise: true, clock: '11:30 pm · Tue', twist: pick1(['dog', 'music']), angry: false, first: '', deal: false };
+  sample(['elderly', 'defensive', 'package', 'elevator', 'teen'], { easy: 1, normal: 2, hard: 4 }[G.diff] || 2).forEach(k => s.ev[k] = true);
+  const lv = o => o[G.diff] || o.normal;
+  const solOk = ok => { s.solN++; if (ok) s.sol++; };
+  const dipHit = n => { s.dip = clamp(s.dip - n, 0, 100); updateBoard(); };
+  // a register slip also costs a little diplomacy (the neighbour remembers how you spoke)
+  const reg = next => p => { if (p && p.kind === 'blunt') dipHit(8); if (p && p.kind === 'stiff') dipHit(4); next(p); };
+  const gN = gPick(), gT = gPick(), gC = gPick(), gR = gPick(), gO = gPick();
+  const old = !!s.ev.elderly;
+  const par = old ? (gN === 'f' ? 'grandma' : 'grandpa') : (gN === 'f' ? 'mom' : 'dad');
+  const parEs = old ? (gN === 'f' ? 'tu abuela' : 'tu abuelo') : (gN === 'f' ? 'tu madre' : 'tu padre');
+  const parEs2 = old ? (gN === 'f' ? 'mi abuela' : 'mi abuelo') : (gN === 'f' ? 'mi madre' : 'mi padre');
+  const kid = old ? (gT === 'f' ? 'granddaughter' : 'grandson') : (gT === 'f' ? 'daughter' : 'son');
+  const kidEs = old ? (gT === 'f' ? 'mi nieta' : 'mi nieto') : (gT === 'f' ? 'mi hija' : 'mi hijo');
+  const tp = (x, z, yaw, cy) => { P.pos.set(x, 0, z); P.yaw = yaw; cam.yaw = cy; P.spawn = [x, z, yaw, cy]; };
+
+  /* ---- textures */
+  const doorTex = canvasTex(128, 224, g => { g.fillStyle = '#6d4c41'; g.fillRect(0, 0, 128, 224); g.strokeStyle = '#4e342e'; g.lineWidth = 6; g.strokeRect(16, 16, 96, 86); g.strokeRect(16, 120, 96, 88); g.fillStyle = '#ffd54f'; g.beginPath(); g.arc(104, 116, 7, 0, 7); g.fill(); });
+  const liftTex = canvasTex(128, 224, g => { const gr = g.createLinearGradient(0, 0, 128, 0); gr.addColorStop(0, '#90a4ae'); gr.addColorStop(0.5, '#eceff1'); gr.addColorStop(1, '#90a4ae'); g.fillStyle = gr; g.fillRect(0, 0, 128, 224); g.fillStyle = '#455a64'; g.fillRect(62, 0, 4, 224); });
+  const stairTex = canvasTex(128, 224, g => { g.fillStyle = '#b0bec5'; g.fillRect(0, 0, 128, 224); g.fillStyle = '#37474f'; g.fillRect(12, 100, 104, 10); g.font = '900 22px Montserrat, Arial'; g.textAlign = 'center'; g.fillText('STAIRS', 64, 60); });
+  const sky = night => canvasTex(512, 220, g => {
+    g.fillStyle = night ? '#0b1a33' : '#90caf9'; g.fillRect(0, 0, 512, 220);
+    for (let k = 0; k < 14; k++) { const x = k * 37, h = 60 + (k * 53) % 110; g.fillStyle = night ? '#1c2a44' : '#78909c'; g.fillRect(x, 220 - h, 32, h); g.fillStyle = night ? '#ffe082' : '#cfd8dc'; for (let r = 0; r < h / 16 - 1; r++) for (let c = 0; c < 3; c++) if ((k + r + c) % 3) g.fillRect(x + 4 + c * 9, 226 - h + r * 16, 5, 8); }
+    g.fillStyle = night ? '#263859' : '#607d8b'; g.fillRect(300, 30, 8, 190); g.fillRect(292, 80, 24, 14); g.fillRect(302, 6, 4, 26);   // the CN Tower
+    g.fillStyle = '#ffffff'; g.font = '800 14px Montserrat, Arial'; g.fillText('Toronto', 12, 20);
+  });
+  const rulesTex = canvasTex(640, 440, g => {
+    g.fillStyle = '#fffde7'; g.fillRect(0, 0, 640, 440); g.fillStyle = '#4e342e'; g.font = '900 32px Montserrat, Arial'; g.fillText('MAPLE TOWERS · HOUSE RULES', 24, 48);
+    g.fillStyle = '#263238'; g.font = '700 21px Montserrat, Arial';
+    ['1. Quiet hours: 11 pm – 7 am, every day.', '2. Parties: tell your neighbours in advance.', '3. Pets: dogs must not bark for long periods.', '4. Noise: speak to your neighbour first. If the', '    problem continues, contact the concierge.', '5. Emergencies: call 911.'].forEach((t, k) => g.fillText(t, 24, 104 + k * 50));
+  });
+
+  /* ---- world: A. apartment 1105 (x = 0) · B. the 12th-floor hallway (x = 60) · C. the lobby (x = 120) */
+  W.bounds = { minX: -20, maxX: 142, minZ: -16, maxZ: 16 };
+  ground('#5d6d7e');
+  // A. the host family's apartment
+  room(0, 0, 26, 18, { wall: '#f3e5d8', floor: '#c8a27a', roof: '#6d4c41', door: 'x', h: 5 });
+  part(-10.5, 0, -4, 3.4, 0.9, 5.5, '#5c6bc0'); part(-10.5, 0.9, -6.2, 3, 0.3, 1, '#ffffff', { solid: false });
+  part(-5, 0, -7.9, 3.4, 1.3, 1.4, '#8d6e63'); part(-5.6, 1.3, -7.9, 0.8, 0.3, 0.6, '#e53935', { solid: false }); part(-4.5, 1.3, -7.9, 1, 0.1, 0.7, '#263238', { solid: false });
+  chair(-5, -6.4, 0, '#5d4037');
+  sign('MATHS EXAM\nTOMORROW!', -5, 2.7, -8.72, 1.8, 0.9, 0, { bg: '#fff59d', fg: '#c62828' });
+  const speaker = part(-6.3, 1.3, -7.9, 0.5, 0.7, 0.5, '#212121', { solid: false }); speaker.visible = s.twist === 'music';
+  const notes = sign('♪ ♫ ♪', -6.3, 2.5, -7.6, 1.2, 0.5, 0, { bg: '#4a148c', fg: '#fff' }); notes.visible = false;
+  const boom = sign('♪ BOOM ♫ BOOM ♪', 3, 4.2, -8.72, 6, 0.7, 0, { bg: '#311b92', fg: '#ffeb3b' });
+  part(3, 0, 1.5, 5, 0.9, 1.6, '#00897b'); part(3, 0.9, 2.2, 5, 0.8, 0.3, '#00796b', { solid: false });
+  part(3, 0, -8.2, 4, 0.8, 0.6, '#5d4037'); part(3, 0.8, -8.3, 3.6, 2, 0.15, '#111111', { solid: false });
+  part(11, 0, -5.5, 2.4, 1.3, 5, '#bcaaa4'); part(11.5, 0, -1.5, 1.6, 3.2, 1.4, '#eceff1');
+  const winN = plane(12.72, 2.6, 3, 6, 2.6, -Math.PI / 2, sky(true)), winD = plane(12.72, 2.6, 3, 6, 2.6, -Math.PI / 2, sky(false)); winD.visible = false;
+  part(-2, 0, 5.5, 2, 0.25, 1.4, '#a1887f', { solid: false });
+  part(-2.1, 0.25, 5.5, 1.2, 0.55, 0.5, '#d7a86e', { solid: false }); part(-1.35, 0.45, 5.5, 0.5, 0.5, 0.45, '#d7a86e', { solid: false }); part(-1.1, 0.55, 5.5, 0.2, 0.15, 0.2, '#3e2723', { solid: false });
+  const woof = sign('WOOF! WOOF!', -2, 2.3, 5.5, 2.4, 0.6, 0, { bg: '#ff7043', fg: '#fff' }); woof.visible = false;
+  plane(0, 1.9, 8.72, 2.2, 3.8, Math.PI, doorTex); sign('1105', 0, 4.2, 8.72, 1, 0.4, Math.PI, { bg: '#ffd54f', fg: '#3e2723' });
+  // B. the 12th-floor hallway
+  const HX = 60;
+  room(HX, 0, 40, 8, { wall: '#d7ccc8', floor: '#6d4c41', roof: '#4e342e', door: 'x', h: 5 });
+  [[45, '1201'], [53, '1203'], [61, '1205'], [69, '1207']].forEach(([x, t]) => { plane(x, 1.9, -3.72, 2.2, 3.8, 0, doorTex); sign(t, x, 4.1, -3.72, 1, 0.4, 0, { bg: '#ffd54f', fg: '#3e2723' }); });
+  [[49, '1202'], [57, '1204'], [65, '1206'], [73, '1208']].forEach(([x, t]) => { plane(x, 1.9, 3.72, 2.2, 3.8, Math.PI, doorTex); sign(t, x, 4.1, 3.72, 1, 0.4, Math.PI, { bg: '#ffd54f', fg: '#3e2723' }); });
+  const boom2 = sign('♪ ♫ ♪', 61, 4.62, -3.7, 1.6, 0.45, 0, { bg: '#311b92', fg: '#ffeb3b' });
+  plane(40.28, 1.9, -1.4, 2.2, 3.8, Math.PI / 2, liftTex); plane(40.28, 1.9, 1.4, 2.2, 3.8, Math.PI / 2, liftTex);
+  sign('FLOOR 12', 40.3, 4.3, 0, 2.4, 0.5, Math.PI / 2, { bg: '#37474f', fg: '#fff' });
+  if (s.ev.elevator) sign('OUT OF ORDER', 40.32, 3.4, -1.4, 2, 0.45, Math.PI / 2, { bg: '#c62828', fg: '#fff' });
+  plane(79.72, 1.9, 0, 2.2, 3.8, -Math.PI / 2, stairTex); sign('EXIT', 79.7, 4.3, 0, 1.4, 0.5, -Math.PI / 2, { bg: '#2e7d32', fg: '#fff' });
+  // C. the lobby
+  const LX = 120;
+  room(LX, 0, 30, 20, { wall: '#eceff1', floor: '#b0bec5', roof: '#37474f', door: 'x', h: 6 });
+  sign('MAPLE TOWERS', LX, 4.9, -9.72, 8, 0.9, 0, { bg: '#4e342e', fg: '#ffd54f' });
+  part(LX, 0, -5, 7, 1.3, 1.4, '#455a64'); sign('CONCIERGE', LX, 3.4, -9.72, 4, 0.7, 0, { bg: '#263238', fg: '#fff' });
+  plane(105.28, 3, 1, 6, 4.1, Math.PI / 2, rulesTex);
+  part(105.6, 0, -5, 0.6, 3, 4, '#90a4ae'); sign('MAIL', 105.95, 3.4, -5, 1.4, 0.4, Math.PI / 2, { bg: '#37474f', fg: '#fff' });
+  plane(128, 1.9, -9.72, 2.2, 3.8, 0, liftTex); plane(131.5, 1.9, -9.72, 2.2, 3.8, 0, liftTex);
+  if (s.ev.elevator) sign('OUT OF ORDER · PLEASE USE THE STAIRS', 129.75, 4.2, -9.7, 6, 0.5, 0, { bg: '#c62828', fg: '#fff' });
+  plane(134.72, 1.9, -4, 2.2, 3.8, -Math.PI / 2, stairTex); sign('EXIT', 134.7, 4.3, -4, 1.4, 0.5, -Math.PI / 2, { bg: '#2e7d32', fg: '#fff' });
+  plane(LX, 2, 9.72, 6, 4, Math.PI, canvasTex(64, 64, g => { g.fillStyle = '#b3e5fc'; g.fillRect(0, 0, 64, 64); g.fillStyle = '#546e7a'; g.fillRect(31, 0, 2, 64); }));
+  part(113, 0, 5, 4, 0.9, 1.5, '#6d4c41'); part(127, 0, 6, 1, 1, 1, '#6d4c41'); part(127, 1, 6, 1.4, 1.6, 1.4, '#2e7d32', { solid: false });
+  W.walk = (x, z) => (x > -12.4 && x < 12.4 && z > -8.4 && z < 8.4) || (x > 40.7 && x < 79.3 && z > -3.3 && z < 3.3) || (x > 105.7 && x < 134.3 && z > -9.3 && z < 9.3);
+  const setSky = night => { const c = new THREE.Color(night ? '#0b1a33' : '#a8dcff'); W.scene.background = c; if (W.scene.fog) W.scene.fog.color = c; winN.visible = night; winD.visible = !night; };
+  setSky(true);
+  W.update = () => { const on = s.noise && (W.t % 0.9) < 0.6; boom.visible = on; boom2.visible = on; };
+
+  /* ---- people */
+  const nb = staff('Upstairs neighbour', gN, old ? { hair: '#e0e0e0', shirt: '#8e24aa', pants: '#5d4037' } : { shirt: '#e53935', pants: '#212121' }, 61, -2.9, 0, '#6d4c41');
+  nb.av.visible = false;
+  const teen = staff(`Neighbour's ${kid}`, gT, { shirt: '#00acc1', pants: '#1565c0', cap: '#212121' }, 59.8, -2.9, 0, '#00838f');
+  teen.av.visible = false;
+  const res = staff('Neighbour, 1207', gR, { shirt: '#43a047' }, 76, 1.8, -Math.PI / 2, '#2e7d32');
+  const bag = part(76.2, 0, 2.7, 0.8, 1.2, 0.5, '#1565c0', { solid: false });
+  res.av.visible = bag.visible = false;
+  const conc = staff('Concierge', gC, { shirt: '#263238', tie: '#b71c1c' }, LX, -6.6, 0, '#263238');
+  npc('Resident', { skin: pick1(SKINS), shirt: pick1(SHIRTS), pants: '#37474f', hair: '#3e2723', shoes: true }, 113, 3.4, Math.PI);
+  const op = { name: '', color: '#90caf9', voice: NPC_VOICE[gO], gender: gO, badge: '#1a237e' };   // on the phone: no avatar
+
+  spawnPlayer(-5, -4.6, Math.PI, 0);
+  G.obj = [{ id: 'decide', text: 'Decide what to do about the loud music' }];
+  if (s.ev.elevator) G.obj.push({ id: 'elevator', secret: true, text: 'Help a neighbour on the stairs' });
+  if (s.ev.teen) G.obj.push({ id: 'teen', secret: true, text: 'Talk to the teenager who opens the door' });
+  if (s.ev.package) G.obj.push({ id: 'package', secret: true, text: 'Give your neighbour their parcel' });
+  G.obj.push({ id: 'talk', text: 'Ask your upstairs neighbour to turn the music down' });
+  if (s.ev.elderly) G.obj.push({ id: 'elderly', secret: true, text: 'Speak clearly to an elderly neighbour' });
+  if (s.ev.defensive) G.obj.push({ id: 'defensive', secret: true, text: 'Calm the situation down' });
+  G.obj.push({ id: 'deal', text: 'Agree a time for the party to end' }, { id: 'note', text: 'Write a polite note' }, { id: 'super', text: 'Talk to the concierge and read the house rules' },
+    { id: 'twist', secret: true, text: 'Listen to your neighbour\'s complaint and apologise' }, { id: 'solve', text: 'Agree a solution and end on good terms' });
+  if (s.ev.package) { G.inv = [{ emoji: '📦', label: 'Parcel for 1205', info: () => 'A parcel for apartment 1205. It was left at your door by mistake.' }]; renderHotbar(); }
+  setMarker(-5, 3.2, -5.8);
+  notify('🔊 BOOM, BOOM, BOOM!', 'It\'s 11:30 pm and the music upstairs is really loud. Go to your desk and decide what to do.', 'warn');
+
+  const upAt = () => s.ev.elevator ? { x: 78, y: 0, z: 0 } : { x: 42, y: 0, z: 0 };
+  const lobbyUpAt = () => s.ev.elevator ? { x: 133, y: 0, z: -4 } : { x: 129.75, y: 0, z: -7.8 };
+  inter({ obj: 'Your desk', label: 'Listen…', at: () => ({ x: -5, y: 0, z: -5.6 }), r: 2.6, when: () => s.phase === 'night1', act: decide });
+  inter({ obj: 'Your desk', label: 'Write a note', at: () => ({ x: -5, y: 0, z: -5.6 }), r: 2.6, when: () => s.phase === 'night2', act: writeNote });
+  inter({ obj: 'Front door (1105)', get label() { return s.phase === 'up2' ? 'Take the note upstairs' : 'Go up to 1205'; }, at: () => ({ x: 0, y: 0, z: 7.2 }), r: 2.4, when: () => s.phase === 'up1' || s.phase === 'up2', act: goUp });
+  inter({ obj: 'Apartment 1205', get label() { return s.phase === 'hall2' ? 'Slide the note under the door' : 'Knock'; }, at: () => ({ x: 61, y: 0, z: -2 }), r: 2.4, when: () => s.phase === 'hall1' || s.phase === 'hall2', act: () => s.phase === 'hall1' ? knock() : slideNote() });
+  inter({ get obj() { return s.ev.elevator ? 'Stairs' : 'Elevator'; }, label: 'Go back down to 1105', at: upAt, r: 2.4, when: () => s.phase === 'home1', act: homeNight });
+  inter({ obj: conc.name, label: 'Talk', at: () => ({ x: LX, y: 0, z: -3.3 }), r: 3, when: () => s.phase === 'lobby', act: concierge });
+  inter({ obj: 'House rules', label: 'Read', at: () => ({ x: 107.2, y: 0, z: 1 }), r: 2.6, when: () => s.phase === 'rules', act: readRules });
+  inter({ get obj() { return s.ev.elevator ? 'Stairs' : 'Elevator'; }, label: 'Go back up to 1105', at: lobbyUpAt, r: 2.6, when: () => s.phase === 'home2', act: homeAfternoon });
+  inter({ obj: nb.name, label: 'Open the door', at: () => ({ x: 0, y: 0, z: 6 }), r: 3, when: () => s.phase === 'twist', act: twistTalk });
+
+  /* ---- 1. night 1: what do you do? */
+  function decide() {
+    hideMarker(); s.phase = 'deciding';
+    choice(null, 'BOOM, BOOM, BOOM! The music from 1205, the apartment just above you, is so loud that your desk is shaking. It\'s 11:30 pm, you have a maths exam at 9 tomorrow, and your host mum is at work until 7 am. What do you do?', '¡BUM, BUM, BUM! La música del 1205, el piso de justo encima, está tan alta que tiembla la mesa. Son las 23:30, mañana tienes un examen de mates a las 9 y tu madre de acogida trabaja hasta las 7. ¿Qué haces?', shuffle([
+      { t: 'Go upstairs, knock on their door and ask politely.', say: false, fn: () => { s.first = 'knock'; solOk(true); complete('decide'); line(null, 'Good thinking. Talking to your neighbour face to face, politely, is the best first step.', 'Bien pensado. Hablar con el vecino cara a cara y con educación es el mejor primer paso.', toUp, 'Go upstairs'); } },
+      { t: 'Bang on the ceiling with a broom and shout "SHUT UP!"', say: false, fn: bang },
+      { t: 'Call the police.', say: false, fn: () => { s.first = 'police'; solOk(false); dipHit(20); complete('decide', true); callPolice(); } }
+    ]));
+  }
+  function toUp() { s.phase = 'up1'; setMarker(0, 3.2, 7.2); notify('🚪 Upstairs', 'Go to your front door and go up to apartment 1205.'); }
+  function bang() {
+    s.first = 'bang'; s.angry = true; solOk(false); dipHit(30); G.manners = Math.max(0, G.manners - 10); pop('Manners −10', 'bad');
+    G.mistakes.push({ said: '(banging on the ceiling) SHUT UP!', tip: 'Banging and shouting only make neighbours angry. Go up and ask politely first.' });
+    complete('decide', true); updateBoard();
+    line(null, 'BANG, BANG! "SHUT UP!" … The music stops for a second… then it comes back even LOUDER. That didn\'t work. Time to go upstairs and talk to them.', '¡PUM, PUM! «¡CALLAOS!» … La música para un segundo… y vuelve aún MÁS ALTA. No ha funcionado. Toca subir y hablar con ellos.', toUp, 'Sigh…');
+  }
+  function callPolice() {
+    choice(null, 'You pick up your phone. Which number do you call?', 'Coges el móvil. ¿A qué número llamas?', shuffle([
+      { t: '911', say: false, fn: () => { dipHit(15); s.n911 = true; G.mistakes.push({ said: 'I called 911 about loud music.', tip: '911 is only for emergencies: a fire, a crime, or someone hurt or in danger.' }); notify('🚨 911 is for emergencies', 'Loud music is not an emergency. In Toronto, the police non-emergency line is 416-808-2222.', 'bad'); policeCall(true); } },
+      { t: '416-808-2222 (Toronto Police non-emergency line)', say: false, fn: () => policeCall(false) }
+    ]));
+  }
+  function policeCall(em) {
+    op.name = `${NPC_NAME[gO]} (${em ? '911 operator' : 'Police non-emergency line'})`;
+    askV(op, [
+      [em ? '911, what is your emergency?' : 'Toronto Police, non-emergency line. How can I help you?', em ? '911, ¿cuál es su emergencia?' : 'Policía de Toronto, línea no urgente. ¿En qué puedo ayudarle?', ['Hi. I\'d like to report loud music from the apartment upstairs.', 'Hello. My neighbours upstairs are playing very loud music and I can\'t sleep.']]
+    ], [
+      { t: 'I want to denounce my neighbours.', kind: 'grammar', tip: '"Denunciar" = report: "I\'d like to report a noise problem."' },
+      { t: 'My neighbours are making a party very loud.', kind: 'grammar', tip: '"Hacer una fiesta" = have a party: "My neighbours are having a loud party."' },
+      { t: 'Come now and arrest them.', kind: 'rude', tip: 'Way too much! Explain calmly: "I\'d like to report loud music."' }
+    ], () => line(op, em
+      ? 'Is anyone hurt or in danger? … No? Then this is not an emergency. Please keep 911 free for fires, crimes and people in danger. For noise, talk to your neighbour first. If that doesn\'t work, call the non-emergency line, 416-808-2222, or 311 for the City of Toronto.'
+      : 'Is anyone hurt or in danger? … No? OK. For a first noise problem, the best first step is to talk to your neighbour politely. If that doesn\'t work, speak to your building management, or call 311 for the City of Toronto.',
+      em ? '¿Hay alguien herido o en peligro? … ¿No? Entonces no es una emergencia. Deja el 911 libre para incendios, delitos y personas en peligro. Por el ruido, habla primero con tu vecino. Si no funciona, llama a la línea no urgente, 416-808-2222, o al 311 del Ayuntamiento de Toronto.'
+        : '¿Hay alguien herido o en peligro? … ¿No? Vale. Para un primer problema de ruido, lo mejor es hablar con tu vecino con educación. Si no funciona, habla con la administración del edificio o llama al 311 del Ayuntamiento de Toronto.',
+      () => line(null, 'You feel a bit silly. OK… time to go upstairs and talk to them.', 'Te sientes un poco tonto/a. Vale… toca subir y hablar con ellos.', toUp, 'Go upstairs'), 'OK, thank you'));
+  }
+
+  /* ---- 2. upstairs: the stairs, the door and the negotiation */
+  function goUp() {
+    hideMarker(); const second = s.phase === 'up2';
+    s.phase = second ? 'hall2' : 'hall1';
+    if (s.ev.elevator) tp(77.5, 0, -Math.PI / 2, Math.PI / 2); else tp(42.5, 0, Math.PI / 2, -Math.PI / 2);
+    if (s.ev.elevator && !second) {
+      s.phase = 'stairs'; reveal('elevator'); res.av.visible = bag.visible = true;
+      notify('🛗 Out of order', 'The elevator isn\'t working, so you take the stairs. On the 12th floor you meet a neighbour with a huge suitcase.', 'warn');
+      later(0.6, stairsTalk);
+    } else setMarker(61, 3.2, -2);
+  }
+  function stairsTalk() {
+    askR(res, lv({
+      easy: [['Phew! The elevator is broken again, and my suitcase is so heavy!', '¡Uf! El ascensor está roto otra vez, ¡y mi maleta pesa muchísimo!', ['Oh no! Can I help you with your suitcase?', 'Oh no! Do you want some help with your suitcase?']]],
+      normal: [['Ugh, the elevator\'s out of order again, eh? And I\'ve just come back from the airport with this huge suitcase!', 'Uf, el ascensor está estropeado otra vez, ¿eh? ¡Y acabo de volver del aeropuerto con esta maleta enorme!', ['Oh no! Would you like a hand with your suitcase?', 'That\'s terrible! Can I help you carry it to your door?']]],
+      hard: [['Would you believe it? The elevator\'s on the fritz again, and I\'ve just lugged this monster of a suitcase up twelve flights!', '¿Te lo puedes creer? El ascensor se ha vuelto a estropear, y acabo de subir esta maleta enorme doce pisos a cuestas.', ['Oh no, that\'s the worst! Here, let me give you a hand with that.', 'Oh, you poor thing! Would you like a hand getting it to your door?']]]
+    }), [
+      { t: 'Give me the suitcase.', kind: 'blunt', tip: 'Offer, don\'t order: "Can I help you with your suitcase?"', react: 'Er… OK?' },
+      { t: 'Yeah. Use the stairs.', kind: 'blunt', tip: 'Too short and cold with a neighbour. Show some sympathy: "Oh no! Can I help?"', react: 'I am using the stairs…' },
+      { t: 'You should travel with less luggage.', kind: 'blunt', tip: 'Advice like this sounds rude. Offer help instead: "Would you like a hand?"', react: 'Well, thanks for that.' }
+    ], [
+      { t: 'Do you want that I help you?', kind: 'grammar', tip: '"¿Quieres que te ayude?" = "Do you want me to help you?"' },
+      { t: 'Can I to help you with the suitcase?', kind: 'grammar', tip: 'After "can", no "to": "Can I help you?"' },
+      { t: 'Not my problem.', kind: 'rude', tip: 'Be kind to your neighbours: "Can I help you with that?"' }
+    ], reg(() => {
+      complete('elevator'); solOk(true);
+      line(res, 'Aw, thanks, you\'re a sweetheart! Sorry, sorry, I\'m so out of breath. The super says it\'ll be fixed tomorrow. Have a good night!', '¡Ay, gracias, eres un cielo! Perdona, perdona, estoy sin aliento. El encargado dice que lo arreglan mañana. ¡Buenas noches!', () => {
+        walkTo(res, [[69, 2.6], [69, 5]], () => { res.av.visible = bag.visible = false; });
+        bag.visible = false; s.phase = 'hall1'; setMarker(61, 3.2, -2);
+      }, 'Good night!');
+    }));
+  }
+  function knock() {
+    hideMarker(); s.phase = 'door';
+    line(null, lv({ easy: 'You knock on the door of 1205. Knock, knock! You can hear music and people laughing.', normal: 'You knock on the door of 1205. Knock, knock! The bass is so loud the door is vibrating.', hard: 'You knock on the door of 1205. Knock, knock… nothing. You knock harder. The bass is so loud the door is practically vibrating.' }), 'Llamas a la puerta del 1205. ¡Toc, toc! Se oye la música y gente riéndose.', () => s.ev.teen ? teenTalk() : openDoor(), 'Wait…');
+  }
+  function teenTalk() {
+    reveal('teen'); teen.av.visible = true; faceTo(teen, P.pos.x, P.pos.z);
+    askR(teen, lv({
+      easy: [['Hi! What\'s up?', '¡Hola! ¿Qué pasa?', [`Hi! The music is very loud. Is your ${par} at home?`, `Hi! Sorry, the music is very loud. Can I talk to your ${par}?`]]],
+      normal: [['Yo! What\'s up? Are you here for the party?', '¡Ey! ¿Qué pasa? ¿Vienes a la fiesta?', [`Hey! No, I live downstairs. The music's really loud. Is your ${par} home?`, `Hi! No, sorry, I'm from downstairs. Could I talk to your ${par}?`]]],
+      hard: [['Hey! \'Sup? You looking for someone?', '¡Ey! ¿Qué hay? ¿Buscas a alguien?', [`Hey! Yeah, sorry, I'm from downstairs. The music's kinda loud. Is your ${par} around?`, `Hi! Sorry, I live right below you. Any chance I could talk to your ${par}?`]]]
+    }), [
+      { t: 'Good evening. I would be grateful if you could reduce the volume of your musical entertainment.', kind: 'stiff', tip: 'With a teenager, keep it relaxed: "Hey, could you turn it down a bit?"', react: 'Uh… OK, whatever that means.' },
+      { t: 'Good evening, young person. I wish to speak to the owner of this residence.', kind: 'stiff', tip: `Way too formal with someone your age. Try: "Hi! Is your ${par} home?"`, react: 'Young person? Haha, OK…' },
+      { t: 'I must formally request that you lower the volume immediately.', kind: 'stiff', tip: 'That sounds like a letter from a lawyer! With a teen: "Could you turn it down a bit?"', react: 'Whoa, chill…' },
+      { t: 'Pardon me. Might I have a word with the adults of the household?', kind: 'stiff', tip: `Too formal with a teen. Say: "Hey, is your ${par} around?"`, react: 'Might you…? Uh, sure.' }
+    ], [
+      { t: `Hi! Is your ${par} in home?`, kind: 'grammar', tip: `"At home", or just "home": "Is your ${par} home?"` },
+      { t: 'Hey, the music sounds very strong.', kind: 'grammar', tip: 'Music is "loud", not "strong": "The music is really loud."' },
+      { t: 'Get your parents, kid.', kind: 'rude', tip: `Even with a kid, be friendly: "Hey, is your ${par} home?"` }
+    ], reg(() => {
+      complete('teen'); solOk(true); s.teenDone = true;
+      line(teen, `Oh, my bad! Hang on, I'll get my ${par}. ${par.toUpperCase()}! Someone's at the door!`, `¡Uy, perdona! Espera, voy a buscar a ${parEs2}. ¡${parEs2.split(' ')[1].toUpperCase()}! ¡Llaman a la puerta!`, () => { teen.av.visible = false; openDoor(); }, 'Thanks!');
+    }));
+  }
+  // the first thing the neighbour says depends on what happened before
+  function opener() {
+    if (s.angry) return { q: [['Hi… Was that you banging on our floor a minute ago?', 'Hola… ¿Eras tú el que daba golpes en nuestro suelo hace un momento?']], pre: 'Yes, sorry about that. ' };
+    if (s.teenDone) return { q: [[`Hi! My ${kid} says you wanted to talk to me?`, `¡Hola! ${cap(kidEs)} dice que querías hablar conmigo.`]], pre: 'Yes, hi! ' };
+    if (old) return { q: [['Hello, dear! What can I do for you?', '¡Hola, cielo! ¿Qué puedo hacer por ti?']], pre: 'Hello! ' };
+    return { q: lv({ easy: [['Hi! Can I help you?', '¡Hola! ¿Te puedo ayudar?']], normal: [['Oh, hi there! What can I do for you?', '¡Hola! ¿Qué puedo hacer por ti?']], hard: [['Hey! Sorry, it\'s a bit of a zoo in here. What can I do for you?', '¡Hola! Perdona, esto es un zoo. ¿Qué puedo hacer por ti?']] }), pre: 'Hi! ' };
+  }
+  function openDoor() {
+    nb.av.visible = true; faceTo(nb, P.pos.x, P.pos.z);
+    s.ev.package ? parcel() : request();
+  }
+  function parcel() {
+    reveal('package'); const o = opener();
+    askR(nb, o.q.map(([q, es]) => [q, es, lv({
+      easy: ['I\'m from 1105, downstairs. This parcel is for you. It came to our door.', 'I live downstairs, in 1105. This parcel is yours. It was at our door.'],
+      normal: ['I\'m from downstairs, 1105. I think this parcel is yours. It was delivered to us by mistake.', 'I live just below you, in 1105. This parcel was delivered to our door by mistake.'],
+      hard: ['I\'m your neighbour from 1105, just below you. This parcel was delivered to us by mistake, so I thought I\'d bring it up.', 'I live right below you, in 1105. I think this is yours: the courier left it at our door by mistake.']
+    }).map(t => o.pre + t)]), [
+      { t: 'Here. This is yours.', kind: 'blunt', tip: 'A bit cold for a first meeting. Introduce yourself: "Hi! I\'m from downstairs…"', react: 'Oh… thanks?' },
+      { t: 'You should check your address. This came to my place.', kind: 'blunt', tip: 'It wasn\'t their fault! Just explain: "It was delivered to us by mistake."', react: 'Er… sorry?' },
+      { t: 'Take your parcel.', kind: 'blunt', tip: 'Sounds like an order. Try: "I think this parcel is yours."', react: 'OK…' }
+    ], [
+      { t: 'This package is for you, they delivered it in my house for error.', kind: 'grammar', tip: '"Por error" = by mistake: "It was delivered to us by mistake."' },
+      { t: 'I bring you a package what is yours.', kind: 'grammar', tip: '"Que es tuyo" = that\'s yours: "I think this parcel is yours."' }
+    ], reg(() => {
+      complete('package'); solOk(true); s.pkg = true; s.dip = clamp(s.dip + 10, 0, 100); G.inv = []; renderHotbar(); updateBoard();
+      line(nb, old ? 'Oh, how lovely! My new hearing aid batteries! Thank you so much, dear, that\'s very kind of you.' : 'Oh, amazing, my new headphones! Thanks so much, that\'s really kind of you!', old ? '¡Qué bien! ¡Las pilas nuevas de mi audífono! Muchísimas gracias, cielo, qué amable.' : '¡Genial, mis cascos nuevos! ¡Muchas gracias, qué amable!', request, 'You\'re welcome!');
+    }));
+  }
+  function request() {
+    const o = s.pkg ? { q: [[old ? 'Thank you again, dear. Now, was there something else?' : 'Thanks again! So, was there something else?', old ? 'Gracias otra vez, cielo. ¿Querías algo más?' : '¡Gracias otra vez! ¿Querías algo más?']], pre: 'Yes, actually. ' } : opener();
+    const ok = lv({
+      easy: ['Excuse me, the music is very loud. Could you turn it down, please?', 'Sorry, the music is very loud. Can you turn it down, please?'],
+      normal: ['Sorry to bother you, but would you mind turning the music down a bit?', 'Sorry to bother you, but the music is really loud downstairs. Would you mind turning it down?'],
+      hard: ['I hate to be a pain, but I was wondering if you could possibly keep it down a bit? I live just below you.', 'I totally get that you\'re having fun, but would you mind turning it down a little? I\'ve got an exam tomorrow.']
+    }).map(t => o.pre + t);
+    askR(nb, o.q.map(([q, es]) => [q, es, ok]), [
+      { t: 'Turn the music down.', kind: 'blunt', tip: 'With a neighbour you don\'t know, an order sounds rude. Ask: "Could you turn it down, please?"', react: 'Um… OK. No need to be so bossy.' },
+      { t: 'Your music is terrible.', kind: 'blunt', tip: 'Criticising their taste starts a fight. Talk about the volume, not the music: "It\'s a bit loud."', react: 'Wow. Well, I like it.' },
+      { t: 'Stop the noise. Some people have to sleep.', kind: 'blunt', tip: 'Too direct. Soften it: "Sorry to bother you, but would you mind…?"', react: 'Oh. Right…' },
+      { t: 'I want silence now.', kind: 'blunt', tip: '"I want…" sounds demanding. Use "Could you…?" or "Would you mind…?"', react: 'Excuse me?' }
+    ], [
+      { t: 'Could you turn down it, please?', kind: 'grammar', tip: 'With a pronoun, "it" goes in the middle: "turn it down".' },
+      { t: 'Would you mind to turn the music down?', kind: 'grammar', tip: '"Would you mind" + -ing: "Would you mind turning it down?"' },
+      { t: 'Sorry for molest you, the music is very strong.', kind: 'grammar', tip: '"Molestar" = bother: "Sorry to bother you." And music is "loud", not "strong".' },
+      { t: 'Shut up up there!', kind: 'rude', tip: 'Very rude! Ask politely: "Could you turn it down, please?"' }
+    ], reg(() => {
+      complete('talk');
+      if (s.ev.elderly) deaf(); else if (s.ev.defensive) defensive(); else explain();
+    }));
+  }
+  function deaf() {
+    reveal('elderly');
+    const ok = ['(slowly and clearly) Of course. The MUSIC is very LOUD. Could you turn it DOWN, please?', '(clearly) Sorry! I live DOWNSTAIRS. The music is too LOUD. Could you turn it DOWN, please?'];
+    askR(nb, lv({
+      easy: [['Pardon? I can\'t hear you, dear. Can you say it again?', '¿Perdón? No te oigo, cielo. ¿Lo puedes repetir?', ok]],
+      normal: [['Pardon, dear? You\'ll have to speak up. My ears aren\'t what they used to be!', '¿Perdón, cielo? Tendrás que hablar más alto. ¡Mis oídos ya no son lo que eran!', ok]],
+      hard: [['Sorry, love, I didn\'t catch a word of that. My hearing\'s not what it was. Could you say it again, a bit more clearly?', 'Perdona, cielo, no he pillado ni una palabra. Ya no oigo como antes. ¿Me lo repites un poco más claro?', ok]]
+    }), [
+      { t: 'Never mind. Forget it.', kind: 'blunt', tip: 'Don\'t give up! Repeat slowly and clearly: "The music is very LOUD."', react: 'Forget what, dear?' },
+      { t: 'I SAID THE MUSIC IS TOO LOUD!', kind: 'blunt', tip: 'Speak clearly and a bit louder, but don\'t shout angrily.', react: 'Oh! There\'s no need to shout at me.' },
+      { t: 'Just turn it down.', kind: 'blunt', tip: 'Too direct, and they still didn\'t hear you. Repeat your polite request clearly.', react: 'Turn what down, dear?' }
+    ], [
+      { t: 'ARE YOU DEAF?', kind: 'rude', tip: 'Very rude! Be patient and repeat clearly: "The music is very loud."' },
+      { t: 'I repeat: the music is too much loud.', kind: 'grammar', tip: '"Too loud" (no "much").' },
+      { t: 'The music is very loud. Can you low it?', kind: 'grammar', tip: '"Bajar" the volume = turn it down: "Can you turn it down?"' }
+    ], reg(() => {
+      complete('elderly'); solOk(true);
+      const t = 'Oh! The music! Is it too loud? It\'s my eightieth birthday, dear, and my grandchildren chose the music.';
+      const es = '¡Ah! ¡La música! ¿Está muy alta? Es mi ochenta cumpleaños, cielo, y la música la han elegido mis nietos.';
+      if (s.ev.defensive) line(nb, t, es, defensive, 'Happy birthday!');
+      else line(nb, t + ' Goodness, I\'m sorry!', es + ' ¡Madre mía, lo siento!', negotiate, 'Happy birthday!');
+    }));
+  }
+  function defensive() {
+    reveal('defensive'); setFace(nb.av, 'sad');
+    askR(nb, lv({
+      easy: [['Excuse me? It\'s not midnight! It\'s my home, and I can have a party!', '¿Perdona? ¡No es medianoche! ¡Es mi casa y puedo hacer una fiesta!', ['I understand, sorry. But I have an exam tomorrow and I can\'t sleep.', 'Sorry, I understand. But I have an exam tomorrow and I need to sleep.']]],
+      normal: [['Excuse me? It\'s not even midnight! This is my home, and I can have a party if I want to.', '¿Perdona? ¡Ni siquiera es medianoche! Es mi casa y puedo hacer una fiesta si quiero.', ['Sorry, I understand. It\'s just that I\'ve got an exam tomorrow and I really need to sleep.', 'I know, and I\'m sorry to bother you. It\'s just that I\'ve got an exam tomorrow morning.']]],
+      hard: [['Seriously? It\'s barely half eleven! I\'m entitled to have a few friends over in my own home, you know.', '¿En serio? ¡Apenas son las once y media! Tengo derecho a invitar a unos amigos a mi propia casa, ¿sabes?', ['I totally get it, and I\'m really sorry to bother you. It\'s just that I\'ve got an exam tomorrow, and I can\'t get to sleep.', 'Of course, and I\'m not trying to spoil your fun. It\'s just that I\'ve got a big exam in the morning, so I\'d really appreciate it.']]]
+    }), [
+      { t: 'Actually, you can\'t. It\'s against the rules.', kind: 'blunt', tip: 'Arguing about rules makes things worse. Show you understand first: "I totally get it, but…"', react: 'Oh, so now you\'re the police?' },
+      { t: 'Calm down.', kind: 'blunt', tip: '"Calm down" makes angry people angrier! Try: "I understand. It\'s just that…"', react: 'Don\'t tell me to calm down!' },
+      { t: 'Whatever. I\'ll call the police, then.', kind: 'blunt', tip: 'Threats escalate the situation. De-escalate: "Sorry, I understand, but I\'ve got an exam."', react: 'Wow. Seriously?' },
+      { t: 'Your party is not my problem.', kind: 'blunt', tip: 'Too aggressive. Explain your situation calmly instead.', react: 'Excuse me?!' }
+    ], [
+      { t: 'I am agree, but I have exam tomorrow.', kind: 'grammar', tip: '"Estoy de acuerdo" = I agree (no "am"). And "an exam".' },
+      { t: 'Sorry, but I have an exam tomorrow and I can\'t to sleep.', kind: 'grammar', tip: 'After "can\'t", no "to": "I can\'t sleep."' }
+    ], reg(() => {
+      complete('defensive'); solOk(true); setFace(nb.av, 'smile');
+      line(nb, lv({ easy: 'Oh… an exam? Sorry. I\'m a bit stressed today.', normal: 'Oh… an exam? Sorry, I didn\'t mean to snap at you. It\'s been a long week.', hard: 'Oh… an exam? Sorry, I didn\'t mean to bite your head off. It\'s been one of those weeks.' }), lv({ easy: 'Ah… ¿un examen? Perdona. Hoy estoy un poco estresado/a.', normal: 'Ah… ¿un examen? Perdona, no quería hablarte mal. Ha sido una semana muy larga.', hard: 'Ah… ¿un examen? Perdona, no quería saltarte a la yugular. Ha sido una de esas semanas.' }), negotiate, 'That\'s OK');
+    }));
+  }
+  function explain() {
+    line(nb, lv({ easy: 'Oh no! Is it very loud downstairs? Sorry! It\'s my sister\'s birthday.', normal: 'Oh no, is it really that loud down there? Sorry! It\'s my sister\'s birthday and we got a bit carried away.', hard: 'Oh gosh, is it really that bad down there? Sorry! It\'s my sister\'s birthday and we got a bit carried away.' }), lv({ easy: '¡Oh, no! ¿Se oye mucho abajo? ¡Perdona! Es el cumpleaños de mi hermana.', normal: '¡Oh, no! ¿De verdad se oye tanto abajo? ¡Perdona! Es el cumpleaños de mi hermana y nos hemos venido arriba.', hard: '¡Madre mía! ¿De verdad es tan horrible abajo? ¡Perdona! Es el cumpleaños de mi hermana y nos hemos venido arriba.' }), negotiate, 'No problem');
+  }
+  function negotiate() {
+    const [q, es, ok] = pick1(lv({
+      easy: [['OK, we can turn it down now. Can the party go on until one o\'clock?', 'Vale, podemos bajarla ahora. ¿La fiesta puede seguir hasta la una?', ['Could you finish at midnight, please? I have to get up early.', 'Thank you! Can you finish at twelve, please? I have an exam.']]],
+      normal: [['Sure, we\'ll turn it down right now. Is it OK if the party goes on until one?', 'Claro, la bajamos ahora mismo. ¿Te parece bien si la fiesta sigue hasta la una?', ['Thanks! Would you mind finishing at midnight? I have to get up at seven.', 'Thank you! Would midnight be OK? I\'ve got an exam at nine.']]],
+      hard: [['Fair enough, we\'ll turn it down right away. Would it be OK if we kept going until one-ish, though?', 'Vale, la bajamos ahora mismo. Pero, ¿te importaría que siguiéramos hasta la una o así?', ['I totally get it, but I\'ve got an exam tomorrow. Could you possibly wrap it up by midnight?', 'Thanks, I really appreciate it. Would you mind calling it a night at midnight, though? I\'ve got an early start.']]]
+    }));
+    const fact = { t: 'Sure, one o\'clock is fine.', kind: 'fact', fn: () => { s.deal = false; solOk(false); afterDeal(); } };
+    ask(nb, q, es, rphr(ok, [
+      { t: 'No. Stop the party now.', kind: 'blunt', tip: 'They\'ve already agreed to turn it down. Negotiate: "Would midnight be OK?"', react: 'Wow, OK…' },
+      { t: 'One? Are you crazy?', kind: 'blunt', tip: 'Insulting them won\'t help. Make a polite counter-offer: "Could you finish at midnight?"', react: 'Hey, there\'s no need for that.' },
+      { t: 'Midnight. Final answer.', kind: 'blunt', tip: 'Sounds like an order. Ask: "Would you mind finishing at midnight?"', react: 'Er… OK, boss.' },
+      { t: 'No way. That\'s ridiculous.', kind: 'blunt', tip: 'Too aggressive. Soften it: "I totally get it, but could you possibly…?"', react: 'Ridiculous? OK…' }
+    ], [
+      { t: 'Can you finish at the midnight?', kind: 'grammar', tip: 'No "the": "at midnight".' },
+      { t: 'Is possible to finish at twelve?', kind: 'grammar', tip: 'English needs a subject: "Is it possible to finish at twelve?"' }
+    ]).concat([fact]), reg(() => { s.deal = true; solOk(true); afterDeal(); }));
+  }
+  function afterDeal() {
+    s.noise = false; complete('deal', !s.deal);
+    const t = s.deal ? (old ? 'Midnight it is, dear. We\'ll turn it down right now. Good luck with your exam!' : 'Midnight it is. Deal! Sorry again, eh? Good luck with your exam!') : 'Great, thanks! We\'ll keep it a bit quieter, promise. Good night!';
+    const es = s.deal ? 'Hasta medianoche, pues. La bajamos ahora mismo. ¡Suerte con el examen!' : '¡Genial, gracias! La pondremos un poco más baja, prometido. ¡Buenas noches!';
+    line(nb, t, es, () => { nb.av.visible = false; teen.av.visible = false; s.phase = 'home1'; const a = upAt(); setMarker(a.x, 3.2, a.z); notify('🛏 Bedtime', `Go back down to 1105 (${s.ev.elevator ? 'by the stairs' : 'in the elevator'}).`); }, 'Good night!');
+  }
+
+  /* ---- 3. two nights later: a polite note, the concierge and the house rules */
+  function homeNight() {
+    hideMarker(); tp(-5, -4.6, Math.PI, 0); s.phase = 'story';
+    line(null, s.deal ? 'The music stops at midnight. You sleep well and your exam goes fine. 😊' : 'The party goes on until one. You sleep badly and the exam is really hard. 😩', s.deal ? 'La música para a medianoche. Duermes bien y el examen te sale bien.' : 'La fiesta sigue hasta la una. Duermes fatal y el examen te sale muy difícil.', () => {
+      s.noise = true; s.clock = '11:45 pm · Thu'; updateBoard();
+      line(null, 'Two nights later, on Thursday at 11:45 pm… BOOM, BOOM, BOOM! The music is back! You don\'t want another argument at midnight, so you decide to write a polite note.', 'Dos noches después, el jueves a las 23:45… ¡BUM, BUM, BUM! ¡La música ha vuelto! No quieres otra discusión a medianoche, así que decides escribir una nota educada.', () => { s.phase = 'night2'; setMarker(-5, 3.2, -5.6); }, 'Oh no…');
+    }, 'Next…');
+  }
+  function writeNote() {
+    hideMarker(); s.phase = 'writing';
+    paperQuiz('A NOTE FOR APARTMENT 1205', 'Write a polite note. Choose the best sentence for each part.', '<i>Short, friendly and clear: say who you are, explain the problem, ask politely and finish in a friendly way.</i>', [
+      ['1. Start: say who you are.', 'Hi! I\'m your neighbour from apartment 1105, just below you.', ['To the noisy people in 1205:', 'Hello. I am the person of down.']],
+      ['2. Explain the problem.', lv({ easy: 'The music was very loud last night after 11 pm.', normal: 'Sorry to bother you again, but the music was quite loud last night after eleven.', hard: 'I hate to be a pain, but the music was quite loud again last night, well after eleven.' }), ['Your music is terrible and you have no respect.', 'Last night your music sounded very strong in the night.']],
+      ['3. Ask for something.', lv({ easy: 'Could you please turn it down after 11 pm?', normal: 'Would you mind keeping the music down after 11 pm?', hard: 'I was wondering if you could possibly keep it down a bit after eleven on school nights?' }), ['Stop the music after 11 or I\'ll call the police.', 'Would you mind to put the music more low?']],
+      ['4. Finish in a friendly way.', 'Thanks so much, and sorry for the trouble! 😊', ['This is your last warning.', 'Thank you for your comprehension.']]
+    ], right => {
+      for (let k = 0; k < 4; k++) solOk(k < right);
+      s.noteRight = right; complete('note', right < 3);
+      if (right < 4) notify('✏️ About your note', 'A good note is friendly: who you are, the problem, a polite request (Could you…? / Would you mind…?) and "Thanks so much!". ("Comprehension" ≠ comprensión: say "understanding".)', 'warn');
+      line(null, 'You fold the note. Now take it upstairs and slide it under the door of 1205.', 'Doblas la nota. Ahora súbela y pásala por debajo de la puerta del 1205.', () => { s.phase = 'up2'; setMarker(0, 3.2, 7.2); }, 'OK');
+    }, 'Write it');
+  }
+  function slideNote() {
+    hideMarker(); s.phase = 'story';
+    line(null, 'You slide the note under the door of 1205 and go back to bed. The music gets a bit quieter… but only a bit. The next morning, before school, you go down to the lobby to talk to the concierge.', 'Pasas la nota por debajo de la puerta del 1205 y vuelves a la cama. La música baja un poco… pero solo un poco. A la mañana siguiente, antes de clase, bajas al vestíbulo para hablar con el/la conserje.', () => {
+      tp(124, 2, Math.PI, 0); setSky(false); s.noise = false; s.clock = '8:00 am · Fri'; updateBoard();
+      s.phase = 'lobby'; setMarker(LX, 3.4, -3.3);
+    }, 'Next morning…');
+  }
+  function concierge() {
+    hideMarker(); s.phase = 'lobbyTalk';
+    askR(conc, lv({
+      easy: [['Good morning! How can I help you?', '¡Buenos días! ¿En qué puedo ayudarte?', ['Good morning. I\'d like to report a noise problem, please.', 'Hello. I have a problem with noise from apartment 1205.']]],
+      normal: [['Good morning! What can I do for you today?', '¡Buenos días! ¿Qué puedo hacer por ti hoy?', ['Good morning. Sorry to bother you, but I\'d like to make a noise complaint.', 'Hi. I\'m sorry to bother you, but I have a problem with noise from 1205.']]],
+      hard: [['Morning! You look a little tired. What can I do for you?', '¡Buenos días! Pareces un poco cansado/a. ¿Qué puedo hacer por ti?', ['Good morning. Sorry to trouble you, but I was hoping you could help me with a noise issue.', 'Morning! I\'m afraid I\'ve got a bit of a problem with noise from the apartment above us.']]]
+    }), [
+      { t: 'The people in 1205 are too noisy. Do something.', kind: 'blunt', tip: 'With the concierge, be polite and a bit formal: "I\'d like to report a noise problem."', react: 'I\'ll see what I can do…' },
+      { t: 'I want to complain. Now.', kind: 'blunt', tip: 'Too demanding. Try: "Sorry to bother you, but I\'d like to make a complaint."', react: 'Of course. There\'s no need to rush.' },
+      { t: 'Your building is too noisy.', kind: 'blunt', tip: 'It\'s not the concierge\'s fault! Explain politely: "I have a problem with noise from 1205."', react: 'Our building? Well…' },
+      { t: 'Listen, 1205 is a big problem.', kind: 'blunt', tip: 'Start politely: "Good morning. Sorry to bother you, but…"', react: 'I\'m listening…' }
+    ], [
+      { t: 'I want to make a complaint of noise.', kind: 'grammar', tip: 'Say "a noise complaint": "I\'d like to make a noise complaint."' },
+      { t: 'I come to complain for the noise.', kind: 'grammar', tip: '"Vengo a quejarme del ruido" = I\'m here to complain about the noise.' },
+      { t: 'Tell 1205 to shut up.', kind: 'rude', tip: 'Very rude. "I\'d like to report a noise problem, please."' }
+    ], reg(() => askV(conc, lv({
+      easy: [['Oh, I\'m sorry. Did you talk to them?', 'Vaya, lo siento. ¿Hablaste con ellos?', ['Yes, I talked to them on Tuesday, and I left a note last night.', 'Yes. I knocked on their door on Tuesday and I wrote a note last night.']]],
+      normal: [['I\'m sorry to hear that. Have you spoken to them about it?', 'Siento oír eso. ¿Has hablado con ellos?', ['Yes, I knocked on their door on Tuesday, and last night I left them a note.', 'Yes. I talked to them on Tuesday and I left a note under their door last night.']]],
+      hard: [['Oh dear. Have you had a word with them yourself?', 'Vaya. ¿Has hablado tú con ellos?', ['Yes, I went up on Tuesday and they were quite nice about it, and last night I left them a note.', 'I have, yes. I knocked on Tuesday, and when it happened again last night, I slipped a note under their door.']]]
+    }), [
+      { t: 'Yes, I have knocked their door on Tuesday.', kind: 'grammar', tip: 'A finished time (on Tuesday) → past simple. And knock ON a door: "I knocked on their door on Tuesday."' },
+      { t: 'Yes, I talked them two times.', kind: 'grammar', tip: 'Talk TO someone, and "two times" → "twice".' },
+      { t: 'Yes, I wrote them a note in the last night.', kind: 'grammar', tip: 'No "in the": "last night".' }
+    ], () => line(conc, lv({ easy: 'Good! That was the right thing to do. Our house rules are on the board next to the mailboxes. Please read them. I\'ll talk to 1205 about quiet hours.', normal: 'You did exactly the right thing. Our house rules are on the board by the mailboxes. Have a look, and I\'ll send 1205 a friendly reminder about quiet hours.', hard: 'You\'ve handled it exactly right. Have a look at our house rules on the board by the mailboxes, and I\'ll drop 1205 a friendly reminder about quiet hours.' }), lv({ easy: '¡Bien! Eso era lo correcto. Las normas del edificio están en el tablón junto a los buzones. Léelas, por favor. Hablaré con el 1205 sobre las horas de silencio.', normal: 'Hiciste exactamente lo correcto. Las normas están en el tablón junto a los buzones. Échales un vistazo, y yo le mandaré al 1205 un recordatorio amable sobre las horas de silencio.', hard: 'Lo has hecho perfecto. Échale un vistazo a las normas del tablón junto a los buzones, y yo le dejaré al 1205 un recordatorio amable sobre las horas de silencio.' }), () => { s.phase = 'rules'; setMarker(107.2, 3.2, 1); }, 'OK, thanks!'))));
+  }
+  function readRules() {
+    hideMarker(); s.phase = 'reading';
+    const qs = [
+      ['When are the quiet hours?', 'From 11 pm to 7 am', ['From 10 pm to 8 am', 'From midnight to 7 am']],
+      ['What should you do first if a neighbour is noisy?', 'Speak to the neighbour', ['Call 911', 'Contact the concierge']],
+      ['What does the rule say about dogs?', 'They must not bark for long periods', ['Dogs are not allowed', 'They must stay in the apartment']]
+    ];
+    if (G.diff !== 'easy') qs.push(['Before a party, residents should…', 'tell their neighbours in advance', ['finish by 7 am', 'call the concierge']]);
+    paperQuiz('MAPLE TOWERS · HOUSE RULES', 'Read the board in the lobby.', '<b>1.</b> Quiet hours: 11 pm – 7 am, every day.<br><b>2.</b> Parties: tell your neighbours in advance.<br><b>3.</b> Pets: dogs must not bark for long periods.<br><b>4.</b> Noise: speak to your neighbour first. If the problem continues, contact the concierge.<br><b>5.</b> Emergencies: call 911.', qs, right => {
+      qs.forEach((q, k) => solOk(k < right)); s.rulesRight = right; s.rulesN = qs.length;
+      if (right < qs.length) notify('📋 House rules', 'Quiet hours: 11 pm – 7 am. Speak to your neighbour first; if it continues, contact the concierge.', 'warn');
+      askR(conc, lv({
+        easy: [['Can I help you with anything else?', '¿Te ayudo con algo más?', ['No, that\'s everything, thank you. Have a nice day!', 'No, that\'s all. Thank you very much!']]],
+        normal: [['All clear? Is there anything else I can help you with?', '¿Todo claro? ¿Te puedo ayudar con algo más?', ['No, that\'s all, thanks. Thanks so much for your help!', 'No, that\'s everything. Thank you, I really appreciate it.']]],
+        hard: [['Does that all make sense? Anything else I can help you with while you\'re here?', '¿Tiene todo sentido? ¿Algo más en lo que te pueda ayudar ya que estás aquí?', ['That\'s really helpful, thanks. That\'s everything for now. I really appreciate it.', 'It does, thanks. That\'s all for now, but thank you so much for sorting it out.']]]
+      }), [
+        { t: 'No.', kind: 'blunt', tip: 'One word sounds cold. Add a thank-you: "No, that\'s all. Thanks so much for your help!"', react: '…OK. Have a nice day.' },
+        { t: 'Just make sure they stop.', kind: 'blunt', tip: 'Sounds like an order. Thank them instead: "Thanks so much for your help."', react: 'I\'ll do my best.' },
+        { t: 'That\'s all. Bye.', kind: 'blunt', tip: 'A bit abrupt. Say thank you: "That\'s all, thanks. Have a nice day!"', react: 'Er… bye, then.' },
+        { t: 'Do your job and talk to them.', kind: 'blunt', tip: 'Very bossy with someone who is helping you. "Thank you for your help."', react: 'That\'s what I said I\'d do.' }
+      ], [
+        { t: 'No, thank you for all, you are very amable.', kind: 'grammar', tip: '"Amable" = kind: "Thanks for everything, you\'re very kind."' },
+        { t: 'No, it\'s all. Thanks.', kind: 'grammar', tip: 'Say "That\'s all" or "That\'s everything".' }
+      ], reg(() => {
+        complete('super', right < 2);
+        line(conc, `My pleasure! ${s.ev.elevator ? 'And sorry about the elevator: the super is fixing it this morning. ' : ''}Oh, and if your host family ever wants to have a party, you can book our party room on the ground floor. The washrooms are right next to it.`, `¡Un placer! ${s.ev.elevator ? 'Y perdona lo del ascensor: el encargado lo está arreglando esta mañana. ' : ''}Ah, y si tu familia de acogida quiere hacer una fiesta, podéis reservar la sala de fiestas de la planta baja. Los baños están justo al lado.`, () => {
+          s.phase = 'home2'; const a = lobbyUpAt(); setMarker(a.x, 3.2, a.z); notify('🏫 Off to school!', `Go back up to 1105 (${s.ev.elevator ? 'by the stairs' : 'in the elevator'}).`);
+        }, 'Thanks, bye!');
+      }));
+    }, 'Done');
+  }
+
+  /* ---- 4. the twist: now it's YOUR turn to listen */
+  function homeAfternoon() {
+    hideMarker(); tp(-4, 0, Math.PI, 0); s.phase = 'story'; s.clock = '4:00 pm · Sat'; updateBoard();
+    if (s.twist === 'dog') woof.visible = true; else notes.visible = true;
+    line(null, s.twist === 'dog' ? 'Saturday afternoon. Your host family is out, and Maple has been barking a lot today. Knock, knock! Someone\'s at the door. It\'s your neighbour from 1205!' : 'Saturday afternoon. You\'ve been listening to music on your speaker for hours… quite loudly. Knock, knock! Someone\'s at the door. It\'s your neighbour from 1205!', s.twist === 'dog' ? 'Sábado por la tarde. Tu familia de acogida ha salido y Maple ha ladrado mucho hoy. ¡Toc, toc! Llaman a la puerta. ¡Es tu vecino/a del 1205!' : 'Sábado por la tarde. Llevas horas escuchando música en el altavoz… bastante alta. ¡Toc, toc! Llaman a la puerta. ¡Es tu vecino/a del 1205!', () => {
+      notes.visible = false;
+      nb.pos.set(0, 0, 7.3); nb.av.rotation.y = Math.PI; nb.av.visible = true; reveal('twist');
+      s.phase = 'twist'; setMarker(0, 3.4, 7.3);
+    }, 'Open the door');
+  }
+  function twistTalk() {
+    hideMarker(); s.phase = 'twistTalk';
+    const dog = s.twist === 'dog';
+    const why = dog
+      ? (old ? lv({ easy: ['I can\'t sleep in the afternoon', 'No puedo dormir por la tarde'], normal: ['I can\'t have my afternoon nap', 'No puedo echarme la siesta'], hard: ['I haven\'t had a decent afternoon nap all week', 'No he podido echarme una siesta decente en toda la semana'] })
+        : lv({ easy: ['I work at home, and I can\'t concentrate', 'Trabajo en casa y no me puedo concentrar'], normal: ['I work from home, and it\'s really hard to concentrate', 'Trabajo desde casa y me cuesta mucho concentrarme'], hard: ['I work from home, and it\'s driving me up the wall', 'Trabajo desde casa y me está volviendo loco/a'] }))
+      : (old ? lv({ easy: ['I had a video call with my grandson', 'Tenía una videollamada con mi nieto'], normal: ['I was on a video call with my grandchildren in Vancouver', 'Estaba en una videollamada con mis nietos de Vancouver'], hard: ['I couldn\'t hear a word my grandchildren said on our video call', 'No oía ni una palabra de lo que decían mis nietos en la videollamada'] })
+        : lv({ easy: ['I had a video call for work', 'Tenía una videollamada de trabajo'], normal: ['I had an important video call for work', 'Tenía una videollamada importante de trabajo'], hard: ['I was in the middle of a job interview on video', 'Estaba en plena entrevista de trabajo por vídeo'] }));
+    const q = dog
+      ? lv({ easy: [`Hi! Sorry, but your dog barks all day when you are out. ${why[0]}.`, `¡Hola! Perdona, pero vuestro perro ladra todo el día cuando no estáis. ${why[1]}.`], normal: [`Hi! Sorry to bother you, eh, but your dog barks all day when you're out. ${why[0]}.`, `¡Hola! Perdona que te moleste, pero vuestro perro ladra todo el día cuando no estáis. ${why[1]}.`], hard: [`Hi! Look, I hate to bring this up after last week, but your dog barks pretty much all day while you're out. ${why[0]}.`, `¡Hola! Mira, me sabe fatal sacar esto después de lo de la semana pasada, pero vuestro perro ladra prácticamente todo el día cuando no estáis. ${why[1]}.`] })
+      : lv({ easy: [`Hi! Sorry, but your music was very loud this afternoon. ${why[0]}.`, `¡Hola! Perdona, pero tu música estaba muy alta esta tarde. ${why[1]}.`], normal: [`Hi! Sorry to bother you, eh, but your music was really loud this afternoon. ${why[0]}.`, `¡Hola! Perdona que te moleste, pero tu música estaba muy alta esta tarde. ${why[1]}.`], hard: [`Hi! Awkward timing after last week, I know, but your music was blasting this afternoon. ${why[0]}!`, `¡Hola! Ya sé que es un poco incómodo después de lo de la semana pasada, pero tu música estaba a todo volumen esta tarde. ${why[1]}.`] });
+    const ok = lv({ easy: ['Oh no, I\'m so sorry! I didn\'t know.', 'I\'m really sorry! I didn\'t know.'], normal: ['Oh, I\'m really sorry! I had no idea.', 'Oh no, sorry! I didn\'t realise it was that bad.'], hard: ['Oh gosh, I\'m so sorry. I honestly had no idea. That must be really annoying.', 'Oh no, I\'m really sorry. I didn\'t realise, and after last week too! That must be so frustrating.'] });
+    askR(nb, [[q[0], q[1], ok]], [
+      { t: 'Well, now you know how it feels.', kind: 'blunt', tip: 'Turn-taking: you complained, now it\'s your turn to listen. Apologise first: "I\'m so sorry, I had no idea."', react: 'Ouch. OK… maybe I deserved that.' },
+      { t: 'That\'s not my problem.', kind: 'blunt', tip: 'Too direct, and it starts a fight. Say: "I\'m really sorry. I didn\'t realise."', react: 'It kind of is, though.' },
+      { t: 'So what? You had a party.', kind: 'blunt', tip: 'Don\'t answer a complaint with a complaint. Apologise and look for a solution.', react: 'That\'s not really the point, is it?' },
+      dog ? { t: 'Dogs bark. That\'s normal.', kind: 'blunt', tip: 'Show you understand: "Oh no, I\'m so sorry! I didn\'t know."', react: 'Not all day, they don\'t.' }
+        : { t: 'It was the afternoon. I can play music if I want.', kind: 'blunt', tip: 'Maybe, but it disturbed them. Apologise: "I\'m really sorry, I had no idea."', react: 'Sure, but not that loud.' }
+    ], [
+      { t: 'Sorry, I didn\'t knew it.', kind: 'grammar', tip: 'After "didn\'t", use the base form: "I didn\'t know."' },
+      { t: 'Sorry for molest you.', kind: 'grammar', tip: '"Molestar" = bother or disturb: "Sorry to bother you." ("Molest" means something very different!)' },
+      { t: 'Whatever. Go away.', kind: 'rude', tip: 'Very rude. "I\'m so sorry, I had no idea."' }
+    ], reg(() => { complete('twist'); solution(); }));
+  }
+  function solution() {
+    const dog = s.twist === 'dog';
+    const [q, es] = lv({ easy: ['That\'s OK. What can you do about it?', 'No pasa nada. ¿Qué puedes hacer?'], normal: ['Don\'t worry about it. Is there anything you can do?', 'No te preocupes. ¿Hay algo que puedas hacer?'], hard: ['No harm done. Do you think there\'s anything you could do about it?', 'No pasa nada. ¿Crees que podrías hacer algo al respecto?'] });
+    const ok = dog ? ['I\'ll talk to my host family. Maybe I can walk Maple before school, so she\'s calmer.', 'I\'ll ask my host family about a dog walker at lunchtime. Would that help?']
+      : ['From now on I\'ll use headphones. I promise!', 'I\'ll keep the volume down and use headphones in the afternoons. Is that OK?'];
+    const bad = [{ t: 'I will speak with my host family for find a solution.', kind: 'grammar', tip: '"Para" + verb = "to": "to find a solution".' }].concat(dog
+      ? [{ t: 'I will take out the dog for walk more.', kind: 'grammar', tip: '"Take the dog for a walk": "I\'ll take Maple for more walks."' }, { t: 'I will to walk the dog before the school.', kind: 'grammar', tip: 'No "to" after "will", and no "the": "I\'ll walk the dog before school."' }]
+      : [{ t: 'I will put the headphones every afternoon.', kind: 'grammar', tip: '"Put ON headphones", or "use headphones".' }, { t: 'I will low the volume.', kind: 'grammar', tip: '"Bajar el volumen" = turn the volume down.' }]);
+    const fact = { t: 'Not really. Maybe you could buy some earplugs?', kind: 'fact', fn: () => {
+      dipHit(25); solOk(false); complete('solve', true);
+      G.mistakes.push({ said: 'Not really. Maybe you could buy some earplugs?', tip: 'When someone complains politely, offer a solution: "I\'ll use headphones" / "I\'ll walk the dog before school."' });
+      notify('😕 Not very neighbourly', 'You asked them to solve YOUR problem. Offer a solution instead.', 'bad');
+      line(nb, 'Earplugs? Wow. OK… Well, let\'s both try a bit harder, I guess. Bye.', '¿Tapones? Vaya. Vale… Bueno, intentemos esforzarnos los dos un poco más, supongo. Adiós.', finish, 'Bye…');
+    } };
+    ask(nb, q, es, phr(ok, bad).concat([fact]), () => { solOk(true); invite(); });
+  }
+  function invite() {
+    const dog = s.twist === 'dog';
+    askR(nb, lv({
+      easy: [['Thank you! Oh, and we\'re having a party next month. Do you want to come? We\'ll finish at eleven, I promise!', '¡Gracias! Ah, y el mes que viene hacemos una fiesta. ¿Quieres venir? ¡Terminaremos a las once, prometido!', ['Yes, I\'d love to! Thank you!', 'Yes, please! Thank you for inviting me!']]],
+      normal: [['Thanks, that\'s really kind of you. Hey, we\'re having another party next month. Do you want to come? We\'ll finish by eleven, promise!', 'Gracias, qué amable. Oye, el mes que viene hacemos otra fiesta. ¿Quieres venir? ¡Acabaremos a las once, prometido!', ['I\'d love to! Thanks for inviting me.', 'That sounds great! Thanks for inviting me, and sorry again!']]],
+      hard: [['That\'s really decent of you, thanks. Listen, we\'re throwing another party next month. Why don\'t you come up? And this time we\'ll wrap it up by eleven, cross my heart!', 'Te lo agradezco mucho. Oye, el mes que viene montamos otra fiesta. ¿Por qué no subes? Y esta vez acabamos a las once, palabra.', ['Aw, that\'s so kind of you. I\'d love to come! And sorry again!', 'I\'d love to, thanks! Sorry again about all this, and I\'ll make sure it doesn\'t happen again.']]]
+    }), [
+      { t: 'OK. If the music is better.', kind: 'blunt', tip: 'A cheeky joke can sound rude to a neighbour you don\'t know well. Just say: "I\'d love to! Thanks!"', react: 'Ha… cheeky!' },
+      { t: 'Maybe. If I have nothing better to do.', kind: 'blunt', tip: 'That sounds unfriendly. Accept warmly: "I\'d love to come!"', react: 'Oh… right.' },
+      { t: 'Fine. But eleven means eleven.', kind: 'blunt', tip: 'Too direct after you\'ve just made peace. "Thanks for inviting me!"', react: 'Er, yes, boss.' }
+    ], [
+      { t: 'I would like to assist to your party.', kind: 'grammar', tip: '"Asistir" = go / come / attend: "I\'d love to come to your party."' },
+      { t: 'Yes! Thank you for invite me.', kind: 'grammar', tip: 'After "for", use -ing: "Thank you for inviting me."' }
+    ], reg(() => {
+      complete('solve'); s.invited = true;
+      line(nb, dog ? 'Awesome! See you then, neighbour! And give Maple a cuddle from me.' : 'Awesome! See you then, neighbour! Bring your playlist. With the volume down, eh!', dog ? '¡Genial! ¡Nos vemos, vecino/a! Y dale un achuchón a Maple de mi parte.' : '¡Genial! ¡Nos vemos, vecino/a! Trae tu lista de canciones. ¡Con el volumen bajo, eh!', finish, 'See you!');
+    }));
+  }
+
+  /* ---- results */
+  function finish() {
+    const dip = clamp(Math.round(s.dip), 0, 100), solved = s.solN ? Math.round(100 * s.sol / s.solN) : 100, eng = engPct();
+    const overall = 0.25 * dip + 0.2 * solved + 0.3 * eng + 0.25 * G.manners;
+    const good = [], bad = [];
+    if (s.first === 'knock') good.push('You went upstairs and asked politely: the best first step.');
+    else if (s.first === 'bang') bad.push('Banging on the ceiling and shouting only made things worse. Go up and ask politely first.');
+    else bad.push(`Calling the police about a first-time noise problem is too much. Talk to your neighbour first.${s.n911 ? ' And 911 is only for emergencies: in Toronto the non-emergency line is 416-808-2222.' : ''}`);
+    if (s.deal) good.push('You negotiated a fair end time: midnight.'); else bad.push('You accepted a party until 1 am on a school night. A polite counter-offer ("Would midnight be OK?") works better.');
+    if (s.noteRight === 4) good.push('Your note was friendly, clear and polite.'); else bad.push('Your note could be friendlier: who you are, the problem, "Would you mind…?" and "Thanks so much!".');
+    if (s.rulesRight === s.rulesN) good.push('You know the house rules: quiet hours are from 11 pm to 7 am.'); else bad.push('Check the house rules again: quiet hours are from 11 pm to 7 am.');
+    if (s.invited) good.push('When it was your turn, you apologised, offered a solution and ended on good terms.');
+    else bad.push('When your neighbour complained, you didn\'t offer a solution. Turn-taking: listen, apologise and fix it.');
+    if (s.ev.elderly) good.push('You were patient with an elderly neighbour and spoke slowly and clearly.');
+    if (s.ev.defensive) good.push('Your neighbour got defensive, but you calmed things down.');
+    if (s.ev.package) good.push('You gave your neighbour their parcel: a great way to break the ice.');
+    if (s.ev.elevator) good.push('You helped a neighbour on the stairs.');
+    if (s.ev.teen) good.push('You talked to the teenager in a relaxed, friendly way.');
+    if (!G.reg) good.push('Perfect register: polite with your neighbours and the concierge, relaxed with teenagers.');
+    if (G.manners === 100) good.push('Perfect manners. Very Canadian! Sorry, eh? 🍁');
+    showResults({ title: s.invited ? 'Peace in the building!' : 'A noisy week in Toronto', overall, metrics: [['Diplomacy', dip], ['Problem solved', solved], ['English', eng], ['Manners', G.manners]], good, bad });
+  }
+}
+
+/* =====================================================================
+   SCENARIO — AT THE BANK (a bank branch in Sydney, Australia)
+   ===================================================================== */
+const BANK_RATE = { buy: 1.58, sell: 1.70, kiosk: 1.65, kioskFee: 5 };
+SCEN.bank = {
+  title: 'At the Bank', cardTitle: 'Your exchange file',
+  vocab: [['I\'d like to open an account, please.', 'Quisiera abrir una cuenta, por favor.'], ['Are there any monthly fees?', '¿Hay alguna comisión mensual?'], ['proof of address', 'justificante de domicilio'], ['a PIN (personal identification number)', 'un PIN (número secreto)'], ['exchange rate / commission-free', 'tipo de cambio / sin comisión'], ['We buy / We sell', 'Compramos / Vendemos'], ['a statement / a direct debit', 'un extracto / una domiciliación'], ['an overdraft / a transaction fee', 'un descubierto / una comisión por operación'], ['The ATM has swallowed my card.', 'El cajero se ha tragado mi tarjeta.'], ['to withdraw cash', 'sacar dinero'], ['Could you clarify whether…?', '¿Podría aclararme si…?']],
+  board() { const s = G.s; return [['Cash', `€${s.eur} · A$${s.audTxt()}`], ['English', engPct() + '%'], ['Manners', G.manners]]; },
+  card() {
+    const s = G.s;
+    return `<div class="cs">You are <b>${escH(profile.name)}</b>, 15, from Spain. You've just arrived in <b>Sydney</b>, Australia, for a <b>six-month school exchange</b> at Harbourside High School. You live with a host family, and you need a <b>student bank account</b>.</div>
+      <div class="cs">📂 <b>In your folder:</b> your passport${s.ev.doc && s.missing === 'address' ? '' : ', a letter from your host family confirming your address'}${s.ev.doc && s.missing === 'consent' ? '' : ', a consent form signed by your parents (you\'re under 18)'}. You haven't got an Australian tax file number.${s.ev.doc ? ' Hmm… is everything there?' : ''}</div>
+      <div class="cs">💶 <b>Money:</b> <b>€${s.eur}</b> in cash to change into Australian dollars. Your parents have also sent <b>A$400</b> by bank transfer: it arrives when your account is open. On Friday you need <b>A$60 in cash</b> for a school excursion.</div>
+      <div class="cs">🇦🇺 Australian notes are <b>polymer</b> (a kind of plastic): they're waterproof and very hard to copy. Most people <b>tap</b> their card to pay, even for a coffee. And you'll hear "<b>No worries!</b>" (no problem) everywhere.</div>
+      <div class="cs">🔒 Remember: a real bank will <b>never</b> ask for your PIN. Emergency number in Australia: <b>000</b>. Difficulty: <b>${DIFF[G.diff].label}</b>.</div>`;
+  },
+  build: buildBank
+};
+
+function buildBank() {
+  const eur = pick1({ easy: [200, 300], normal: [200, 300], hard: [300, 200] }[G.diff] || [200]);
+  const s = G.s = { budget: eur, eur, aud: 0, phase: 'enter', ev: {}, ms: 0, msN: 0, sec: 100, acct: null, missing: pick1(['address', 'consent']), tk: 'A0' + (20 + (Math.random() * 70 | 0)), replied: false };
+  s.audTxt = () => Number.isInteger(s.aud) ? String(s.aud) : s.aud.toFixed(2);
+  sample(['queue', 'doc', 'phish', 'wrong', 'swallow'], { easy: 1, normal: 2, hard: 4 }[G.diff] || 2).forEach(k => s.ev[k] = true);
+  const lv = o => o[G.diff] || o.normal;
+  const mOk = ok => { s.msN++; if (ok) s.ms++; };
+  const A = n => 'A$' + (Number.isInteger(n) ? n : n.toFixed(2));
+  const fair = Math.round(eur * BANK_RATE.buy), kiosk = Math.round(eur * BANK_RATE.kiosk * (100 - BANK_RATE.kioskFee)) / 100;
+  const given = s.ev.wrong ? fair - 50 : fair;
+  G.money = 0;
+
+  /* ---- world: the street (z > 11) and the bank hall (36 × 22) */
+  W.bounds = { minX: -26, maxX: 26, minZ: -14, maxZ: 26 };
+  ground('#7cb342'); part(0, 0, 17, 52, 0.05, 12, '#bdbdbd', { solid: false }); part(0, 0, 24.5, 52, 0.06, 3, '#455a64', { solid: false });
+  room(0, 0, 36, 22, { wall: '#eceff1', floor: '#cfd8dc', roof: '#0b2545', door: 's', gap: 4, h: 6 });
+  sign('HARBOUR BANK', 0, 7.2, 11.3, 10, 1.2, 0, { bg: '#0277bd', fg: '#fff' });
+  sign('Open Mon–Fri 9:30–4 · Sat 9–12', -6, 3.6, 11.3, 5, 0.6, 0, { bg: '#fff', fg: '#0b2545' });
+  // the ATM outside, built into the front wall
+  part(9, 0, 11.6, 1.8, 2.5, 0.7, '#37474f'); sign('ATM', 9, 3, 11.97, 1.4, 0.5, 0, { bg: '#0277bd', fg: '#fff' });
+  plane(9, 1.95, 11.96, 1.1, 0.7, 0, canvasTex(220, 140, g => { g.fillStyle = '#01579b'; g.fillRect(0, 0, 220, 140); g.fillStyle = '#fff'; g.font = '700 22px Montserrat, Arial'; g.fillText('Welcome!', 20, 45); g.font = '600 16px Montserrat, Arial'; g.fillText('Insert or tap your card', 20, 85); g.fillText('Cover your PIN', 20, 115); }));
+  part(9, 1.15, 12.1, 0.8, 0.08, 0.35, '#212121', { solid: false });
+  // street furniture
+  part(-14, 0, 22, 0.3, 3, 0.3, '#424242'); sign('BUS', -14, 3.3, 22, 1, 0.5, 0, { bg: '#ffeb3b', fg: '#212121' });
+  [[-20, 14], [20, 14]].forEach(([x, z]) => { part(x, 0, z, 0.5, 2.2, 0.5, '#6d4c41'); part(x, 2.2, z, 2.4, 2, 2.4, '#43a047', { solid: false }); });
+  // ticket machine and queue screen
+  part(-3.5, 0, 8.6, 1, 1.7, 0.7, '#0277bd'); sign('TAKE A TICKET', -3.5, 2.2, 8.2, 2, 0.45, 0, { bg: '#fff', fg: '#0277bd' });
+  plane(0, 4.2, -10.7, 6, 1.6, 0, canvasTex(600, 160, g => { g.fillStyle = '#0b2545'; g.fillRect(0, 0, 600, 160); g.fillStyle = '#ffeb3b'; g.font = '900 40px Montserrat, Arial'; g.fillText('NOW SERVING', 30, 60); g.fillStyle = '#fff'; g.font = '700 34px Montserrat, Arial'; g.fillText('A · Accounts    B · Tellers    C · FX', 30, 120); }));
+  // teller counter (north wall)
+  part(-6, 0, -8, 12, 1.2, 1.2, '#5d4037'); part(-6, 1.2, -8, 12, 1.4, 0.08, '#b3e5fc', { solid: false }); sign('TELLERS', -6, 4.6, -10.7, 4, 0.7, 0, { bg: '#0277bd', fg: '#fff' });
+  // customer service desk (west wall)
+  part(-13.5, 0, 2, 1.4, 1.1, 3.2, '#455a64'); sign('CUSTOMER SERVICE', -17.7, 3.8, 2, 5, 0.7, Math.PI / 2, { bg: '#0277bd', fg: '#fff' });
+  chair(-11.6, 2, -Math.PI / 2, '#0277bd');
+  // currency exchange counter (east wall) and the rates board
+  part(13.5, 0, -3, 1.4, 1.2, 4, '#00695c'); sign('FOREIGN EXCHANGE', 17.7, 5.2, -3, 5, 0.6, -Math.PI / 2, { bg: '#00695c', fg: '#fff' });
+  const rates = canvasTex(640, 400, g => {
+    g.fillStyle = '#102027'; g.fillRect(0, 0, 640, 400); g.fillStyle = '#ffeb3b'; g.font = '900 32px Montserrat, Arial'; g.fillText('EXCHANGE RATES · 1 unit = A$', 24, 48);
+    g.fillStyle = '#80deea'; g.font = '700 24px Montserrat, Arial'; g.fillText('CURRENCY      WE BUY      WE SELL', 24, 100);
+    g.fillStyle = '#fff'; g.font = '700 26px Montserrat, Arial';
+    [['EUR €', BANK_RATE.buy, BANK_RATE.sell], ['GBP £', 1.86, 2.01], ['USD $', 1.45, 1.57], ['NZD $', 0.88, 0.97]].forEach(([c, b, sl], k) => { g.fillText(c, 24, 150 + k * 46); g.fillText(b.toFixed(2), 245, 150 + k * 46); g.fillText(sl.toFixed(2), 440, 150 + k * 46); });
+    g.fillStyle = '#69f0ae'; g.font = '900 26px Montserrat, Arial'; g.fillText('COMMISSION-FREE', 24, 375);
+  });
+  plane(17.7, 3.1, -3, 5, 3.1, -Math.PI / 2, rates);
+  // waiting area and plants
+  for (let k = 0; k < 5; k++) chair(-1 + k * 1.4, 2.5, Math.PI, '#90a4ae');
+  [[-16.5, 9.5], [16.5, 9.5]].forEach(([x, z]) => { part(x, 0, z, 0.8, 0.8, 0.8, '#8d6e63'); part(x, 0.8, z, 1, 1.4, 1, '#2e7d32', { solid: false }); });
+  sign('Harbour Bank will NEVER ask for your PIN by phone, text or email.', 6, 3.2, 10.7, 9, 0.5, Math.PI, { bg: '#fff3e0', fg: '#bf360c' });
+  W.walk = (x, z) => (x > -17.6 && x < 17.6 && z > -10.6 && z < 24) || (x > -25 && x < 25 && z > 11.6 && z < 24);
+
+  /* ---- people */
+  const og = gPick(), officer = staff('Customer service', og, { shirt: '#0277bd', pants: '#263238' }, -15.4, 2, Math.PI / 2, '#0277bd');
+  const teller = staff('Teller', gPick(), { shirt: '#4fc3f7', pants: '#263238' }, -4, -9.6, 0, '#0277bd');
+  const fg = gPick(), fx = staff('Foreign exchange', fg, { shirt: '#26a69a', pants: '#37474f' }, 15.4, -3, -Math.PI / 2, '#00695c');
+  const cg = gPick(), cust = npc(`${NPC_NAME[cg]} (Customer)`, Object.assign({ shirt: pick1(['#8e24aa', '#ef6c00', '#00838f']), pants: '#37474f', sleeves: true, shoes: true }, pick1(STAFF_LOOKS[cg])), 1.8, 2.5, Math.PI, { color: '#ffcc80', voice: NPC_VOICE[cg] });
+  cust.gender = cg; cust.badge = '#6d4c41'; sitAv(cust.av, 1.8, 2.5, Math.PI);
+  const sg = gPick(), stranger = npc(`${NPC_NAME[sg]} (Stranger)`, { skin: pick1(SKINS), shirt: '#424242', pants: '#212121', hair: '#3e2723', sleeves: true, shoes: true }, 16, 19, -Math.PI / 2, { color: '#b0bec5', voice: NPC_VOICE[sg], speed: 3 });
+  stranger.gender = sg; stranger.badge = '#424242';
+  [[-4, -6.6], [-8, -6.6]].forEach(([x, z]) => npc('Customer', { skin: pick1(SKINS), shirt: pick1(SHIRTS), pants: '#37474f', hair: '#3e2723', sleeves: true, shoes: true }, x, z, Math.PI));
+  if (s.ev.queue) [[-1, 2.5], [4.6, 2.5], [0.4, 2.5]].forEach(([x, z]) => { const c = npc('Customer', { skin: pick1(SKINS), shirt: pick1(SHIRTS), pants: '#455a64', hair: '#212121', sleeves: true, shoes: true }, x, z, Math.PI); sitAv(c.av, x, z, Math.PI); });
+  const hg = gPick(), host = { name: `${NPC_NAME[hg]} (Host ${hg === 'f' ? 'mum' : 'dad'}) 📱`, badge: '#ef6c00', gender: hg, color: '#ffcc80', voice: NPC_VOICE[hg] };
+  const sirMa = g => g === 'f' ? 'madam' : 'sir';
+
+  G.inv = [{ emoji: '🛂', label: 'Passport', info: () => `${profile.name} · Spain` }, { emoji: '💶', label: 'Euros', info: () => `€${s.eur} in cash` }];
+  if (!(s.ev.doc && s.missing === 'address')) G.inv.push({ emoji: '✉️', label: 'Letter from your host family', info: () => 'Confirms that you live with them in Coogee, Sydney, for six months.' });
+  if (!(s.ev.doc && s.missing === 'consent')) G.inv.push({ emoji: '📝', label: 'Parental consent form', info: () => 'Signed by your parents: you may open a youth account.' });
+  renderHotbar();
+
+  spawnPlayer(0, 19, Math.PI, 0);
+  G.obj = [{ id: 'ticket', text: 'Take a ticket for the right service' }];
+  if (s.ev.queue) G.obj.push({ id: 'queue', secret: true, text: 'Wait your turn in a long queue' });
+  G.obj.push({ id: 'open', text: 'Open a student account with the right documents' });
+  if (s.ev.doc) G.obj.push({ id: 'doc', secret: true, text: 'Solve the problem with a missing document' });
+  G.obj.push({ id: 'acct', text: 'Choose the best account for a student' }, { id: 'pin', text: 'Choose a safe PIN and sign' });
+  if (s.ev.phish) G.obj.push({ id: 'phish', secret: true, text: 'Deal with a suspicious text message' });
+  G.obj.push({ id: 'fx', text: 'Change your euros at the best rate' }, { id: 'count', text: 'Count your money' });
+  if (s.ev.wrong) G.obj.push({ id: 'wrong', secret: true, text: 'Point out a mistake politely' });
+  G.obj.push({ id: 'atm', text: 'Withdraw A$60 safely at the ATM' });
+  if (s.ev.swallow) G.obj.push({ id: 'swallow', secret: true, text: 'Get your card back from the teller' });
+  setMarker(-3.5, 3.2, 7.4);
+
+  inter({ obj: 'Ticket machine', label: 'Take a ticket', at: () => ({ x: -3.5, y: 0, z: 7.4 }), r: 2.2, when: () => s.phase === 'enter', act: ticket });
+  inter({ obj: cust.name, label: 'Talk', at: () => ({ x: 1.8, y: 0, z: 4 }), r: 2.4, when: () => s.phase === 'queueTalk', act: queueTalk });
+  inter({ obj: officer.name, label: 'Talk', at: () => ({ x: -11.2, y: 0, z: 2 }), r: 2.6, when: () => s.phase === 'service', act: greet });
+  inter({ obj: teller.name, label: 'Talk', at: () => ({ x: -4, y: 0, z: -6.4 }), r: 2.6, when: () => s.phase === 'phish' || s.phase === 'swallow', act: () => s.phase === 'phish' ? phishTalk() : swallowTalk() });
+  inter({ obj: fx.name, label: 'Change money', at: () => ({ x: 11.4, y: 0, z: -3 }), r: 2.6, when: () => s.phase === 'fx', act: fxTalk });
+  inter({ obj: 'ATM', label: 'Use the ATM', at: () => ({ x: 9, y: 0, z: 13.3 }), r: 2.2, when: () => s.phase === 'atm', act: atm });
+
+  /* ---- 1. the ticket machine and the queue */
+  function ticket() {
+    hideMarker(); s.phase = 'ticketing';
+    paperQuiz('TAKE A TICKET', 'Touch the screen. Choose the right service.', '<b>A</b> · Open an account / New customers<br><b>B</b> · Deposits &amp; withdrawals<br><b>C</b> · Foreign exchange (cash &amp; travel money)<br><b>D</b> · Home loans &amp; business banking', [
+      ['You want to open a student account. Which button do you press?', 'A · Open an account', ['B · Deposits & withdrawals', 'D · Home loans & business banking']],
+      ['Later, you want to change euros into Australian dollars. Which service is that?', 'C · Foreign exchange', ['B · Deposits & withdrawals', 'A · Open an account']]
+    ], (right, n, ans) => {
+      mOk(ans[0] === 'A · Open an account'); mOk(ans[1] === 'C · Foreign exchange');
+      complete('ticket', ans[0] !== 'A · Open an account');
+      if (ans[0] !== 'A · Open an account') notify('🎫 Oops', 'That was the wrong service. You go back and press A · Open an account.', 'warn');
+      G.inv.push({ emoji: '🎫', label: `Ticket ${s.tk}`, info: () => `${s.tk} · Accounts · Customer service` }); renderHotbar();
+      if (s.ev.queue) return queue();
+      s.phase = 'service'; setMarker(-11.2, 3.2, 2);
+      notify('🎫 Ticket ' + s.tk, 'Your number is on the screen: go to Customer Service.');
+    }, 'Print ticket');
+  }
+  function queue() {
+    reveal('queue');
+    choice(null, `The screen says NOW SERVING A0${+s.tk.slice(2) - 9}. Your ticket is ${s.tk}: there are nine people in front of you!`, `La pantalla dice: ATENDIENDO AL A0${+s.tk.slice(2) - 9}. Tu número es ${s.tk}: ¡hay nueve personas delante!`, [
+      { t: 'Take a seat and wait for my number.', say: false, fn: () => { s.phase = 'queueTalk'; setMarker(1.8, 3.2, 4); notify('🪑 Waiting…', 'Sit down and chat to the customer next to you.'); } },
+      { t: 'Go straight to the desk: I\'m in a hurry!', say: false, fn: () => { G.manners = Math.max(0, G.manners - 10); pop('Manners −10', 'bad'); G.mistakes.push({ said: 'I went straight to the desk.', tip: 'In a bank, take a ticket and wait for your number. Everybody is in a hurry!' }); line(officer, 'Sorry, I\'m with another customer. Could you take a seat and wait for your number to come up, please?', 'Perdona, estoy con otro cliente. ¿Puedes sentarte y esperar a que salga tu número, por favor?', () => { s.phase = 'queueTalk'; setMarker(1.8, 3.2, 4); }, 'Sorry…'); } }
+    ]);
+  }
+  function queueTalk() {
+    hideMarker(); s.phase = 'queueing';
+    askR(cust, lv({
+      easy: [['Hi! Are you waiting too?', '¡Hola! ¿Tú también estás esperando?', ['Yes. Do you know how long the wait is?', 'Yes, I am. How long does it take, more or less?']]],
+      normal: [['Busy today, isn\'t it?', 'Hay mucha gente hoy, ¿verdad?', ['It really is! Do you know how long it usually takes?', 'Yes! How long does it take to get served, usually?']]],
+      hard: [['Packed today, isn\'t it? Must be the end of the month.', 'Está a tope hoy, ¿eh? Debe de ser fin de mes.', ['Tell me about it! Do you have any idea how long it tends to take?', 'It certainly is. Have you got any idea how long the wait usually is?']]]
+    }), [
+      { t: 'How long is this going to take?', kind: 'blunt', tip: 'With a stranger, soften it: "Do you know how long it usually takes?"', react: 'Er… I don\'t work here, mate.' },
+      { t: 'This bank is so slow. Why?', kind: 'blunt', tip: 'Complaining to a stranger sounds rude. Ask: "Do you know how long the wait is?"', react: 'Er… no idea.' },
+      { t: 'Tell me how long I have to wait.', kind: 'blunt', tip: 'An order to a stranger is too direct. "Do you know how long…?" is polite.', react: 'Um… OK?' }
+    ], [
+      { t: 'How much time it takes?', kind: 'grammar', tip: 'Question word order: "How long does it take?"' },
+      { t: 'How long I must to wait?', kind: 'grammar', tip: '"How long do I have to wait?" (no "to" after "must").' },
+      { t: 'Is very full, no?', kind: 'grammar', tip: 'English needs a subject: "It\'s really busy, isn\'t it?"' }
+    ], () => line(cust, 'Usually about ten minutes. Just relax: they\'re quick here. No worries!', 'Normalmente unos diez minutos. Tranquilo/a, aquí van rápido. ¡Sin problema!', () => {
+      notify('⏳ Waiting…', 'You wait patiently. Watch the screen!');
+      later(3, () => { complete('queue'); notify('📢 Ding!', `Ticket ${s.tk}, please go to Customer Service.`); s.phase = 'service'; setMarker(-11.2, 3.2, 2); });
+    }, 'Thanks!'));
+  }
+
+  /* ---- 2. customer service: opening the account */
+  function greet() {
+    hideMarker(); s.phase = 'opening';
+    askR(officer, lv({
+      easy: [[`Hello! Ticket ${s.tk}? Please sit down. How can I help you?`, `¡Hola! ¿Número ${s.tk}? Siéntate, por favor. ¿En qué te puedo ayudar?`, ['Hello. I\'d like to open an account, please.', 'Hi! I\'d like to open a bank account, please.']]],
+      normal: [['Good morning! Have a seat. What can I do for you today?', '¡Buenos días! Siéntate. ¿Qué puedo hacer por ti hoy?', ['Good morning. I\'d like to open a student account, please.', 'Hi. I\'d like to open an account for students, please.']]],
+      hard: [['Good morning, take a seat. What brings you in today?', 'Buenos días, siéntate. ¿Qué te trae por aquí hoy?', ['Good morning. I\'m hoping to open a student account, if that\'s possible.', 'Hi. I was wondering whether I could open a student account.']]]
+    }), [
+      { t: 'Open me an account.', kind: 'blunt', tip: 'With bank staff, ask politely: "I\'d like to open an account, please."', react: 'Right… certainly.' },
+      { t: 'I need an account. Be quick, please.', kind: 'blunt', tip: 'Don\'t rush the staff. "I\'d like to open an account, please" is enough.', react: 'I\'ll do my best.' },
+      { t: 'I want an account, and I want it today.', kind: 'blunt', tip: '"I want…" sounds demanding. Use "I\'d like…" or "I was wondering whether…".', react: 'Let\'s see what we can do.' },
+      { t: 'Give me a bank account.', kind: 'blunt', tip: 'Too direct. "Could I open an account, please?"', react: 'Er… OK.' }
+    ], [
+      { t: 'I would like to open a count.', kind: 'grammar', tip: '"Cuenta" (bank) = account: "I\'d like to open an account."' },
+      { t: 'I want to make an account of student.', kind: 'grammar', tip: '"Open a student account" (the noun "student" goes first).' },
+      { t: 'I would like opening an account.', kind: 'grammar', tip: '"Would like" + to: "I\'d like to open…"' }
+    ], student);
+  }
+  function student() {
+    askV(officer, lv({
+      easy: [['No problem. Are you a student here?', 'Sin problema. ¿Eres estudiante aquí?', ['Yes, I\'m an exchange student. I\'m here for six months.', 'Yes. I\'m on a school exchange for six months.']]],
+      normal: [['Sure. So, are you studying here in Sydney?', 'Claro. ¿Estudias aquí en Sídney?', ['Yes, I\'m on a six-month exchange at Harbourside High School.', 'That\'s right. I\'m an exchange student here for six months.']]],
+      hard: [['Certainly. And what brings you to Sydney, if you don\'t mind me asking?', 'Por supuesto. ¿Y qué te trae a Sídney, si no es indiscreción?', ['I\'m on a six-month school exchange, so I need an account for my everyday expenses.', 'Not at all. I\'m doing a six-month exchange at Harbourside High, so I\'ll need an account while I\'m here.']]]
+    }), [
+      { t: 'I\'m student of exchange for six months.', kind: 'grammar', tip: '"I\'m an exchange student" (article + noun first).' },
+      { t: 'I am here since two weeks.', kind: 'grammar', tip: '"I\'ve been here for two weeks." (present perfect + for).' },
+      { t: 'Yes, I study in an interchange.', kind: 'grammar', tip: '"Intercambio" = exchange: "I\'m on a school exchange."' }
+    ], docs);
+  }
+  function docs() {
+    const need = lv({
+      easy: ['OK! I need your passport, a paper with your address, and a form from your parents, because you are under 18. Have you got them?', '¡Vale! Necesito tu pasaporte, un papel con tu dirección y una autorización de tus padres, porque eres menor de 18. ¿Los tienes?'],
+      normal: ['Great. I\'ll need some ID, like your passport, proof of your address in Sydney and, as you\'re under 18, a parent\'s or guardian\'s consent. Have you brought those?', 'Genial. Necesitaré un documento de identidad, como tu pasaporte, un justificante de tu dirección en Sídney y, como eres menor de 18, una autorización de tu padre, madre o tutor. ¿Los has traído?'],
+      hard: ['Lovely. For the application I\'ll need photo ID (your passport will do), proof of your residential address here and, since you\'re a minor, written consent from a parent or legal guardian. Have you got all of that on you?', 'Estupendo. Para la solicitud necesitaré un documento con foto (vale el pasaporte), un justificante de tu domicilio aquí y, como eres menor, una autorización por escrito de tu padre, madre o tutor legal. ¿Lo llevas todo encima?']
+    });
+    const blunt = [
+      { t: 'Here. Take them.', kind: 'blunt', tip: 'Hand documents over politely: "Here you are" or "Here\'s my passport."', react: 'Thank you…' },
+      { t: 'Do you really need all that? Just open the account.', kind: 'blunt', tip: 'Banks must check ID by law. Don\'t argue: "Yes, here you are."', react: 'I\'m afraid we do. It\'s the law.' },
+      { t: 'Yes. Hurry up, please.', kind: 'blunt', tip: '"Hurry up" sounds bossy with staff.', react: 'I\'m going as fast as I can.' }
+    ];
+    if (!s.ev.doc) return askR(officer, [[need[0], need[1], ['Yes. Here\'s my passport, a letter from my host family and my parents\' consent form.', 'Yes, here you are: my passport, a letter from my host family with my address, and my parents\' consent form.']]], blunt, [
+      { t: 'I have brought the documentations.', kind: 'grammar', tip: '"Documentation" has no plural. "I\'ve brought the documents."' },
+      { t: 'Here you have my passport and the letter of my host family.', kind: 'grammar', tip: '"Here you are" / "Here\'s…", and "my host family\'s letter" or "a letter from my host family".' },
+      { t: 'Yes, I have them all of them.', kind: 'grammar', tip: '"Yes, I\'ve got all of them."' }
+    ], () => { complete('open'); tfn(); });
+    reveal('doc');
+    const what = s.missing === 'address' ? 'the letter from your host family (your proof of address)' : 'the consent form from your parents';
+    notify('😳 Where is it?', `You look in your folder… ${cap(what)} isn't there! You left it on the kitchen table.`, 'warn');
+    const doc = s.missing === 'address' ? 'the letter from my host family' : 'my parents\' consent form';
+    askR(officer, [[need[0], need[1], lv({
+      easy: [`I've got my passport, but I'm sorry, I haven't got ${doc}. It's at home.`],
+      normal: [`Here's my passport, but I'm afraid I've left ${doc} at home. Is there another way?`],
+      hard: [`Here's my passport. I'm afraid I've left ${doc} at home, though. Is there any way around that?`, `I've got my passport, but embarrassingly I've left ${doc} at home. Could you clarify whether there's another option?`]
+    })]], blunt, [
+      { t: 'I have forgotten it in my house yesterday.', kind: 'grammar', tip: 'With "yesterday" use the past simple: "I left it at home yesterday."' },
+      { t: 'I don\'t have it, but it doesn\'t matter, no?', kind: 'grammar', tip: 'The tag "no?" is Spanish. And it does matter! "Is there another way?"' },
+      { t: 'I have left the paper in home.', kind: 'grammar', tip: '"At home", not "in home".' }
+    ], () => {
+      const fix = s.missing === 'address'
+        ? ['No worries, it happens! Your school can confirm your address for us. I\'ll email the international office now… Oh, look: they\'ve already replied. Problem solved!', '¡Tranquilo/a, pasa a menudo! Tu instituto nos puede confirmar la dirección. Escribo ahora a la oficina internacional… Mira, ya han respondido. ¡Solucionado!']
+        : ['No worries, it happens! I can send the form to your parents by email and they can sign it on their phone. … Oh, it\'s back already! Your mum must be a night owl: it\'s 1 am in Spain!', '¡Tranquilo/a, pasa a menudo! Puedo mandar la autorización a tus padres por email y la firman con el móvil. … ¡Ya ha vuelto! Tu madre debe de ser noctámbula: ¡es la una de la mañana en España!'];
+      line(officer, fix[0], fix[1], () => { complete('doc'); complete('open'); tfn(); }, 'Thank you so much!');
+    });
+  }
+  function tfn() {
+    askR(officer, lv({
+      easy: [['Do you have a tax file number? It is a number from the tax office.', '¿Tienes un número de identificación fiscal? Es un número de Hacienda.', ['No, I don\'t. I\'m a student. Is that OK?', 'No, sorry. I\'m an exchange student. Do I need one?']]],
+      normal: [['Have you got a tax file number? It\'s a number from the Australian Tax Office.', '¿Tienes número de identificación fiscal? Lo da la Agencia Tributaria australiana.', ['No, I haven\'t. I\'m only here for six months and I won\'t be working. Do I need one?', 'Not yet. I\'m an exchange student. Is it necessary?']]],
+      hard: [['And do you happen to have a tax file number? It\'s not compulsory, strictly speaking.', '¿Y tienes por casualidad número de identificación fiscal? En sentido estricto no es obligatorio.', ['I don\'t, I\'m afraid. I was under the impression it was optional for students. Could you clarify whether I need one?', 'Not at the moment. Could you clarify what happens if I don\'t provide one?']]]
+    }), [
+      { t: 'No. Why do you need to know that?', kind: 'blunt', tip: 'Sounds suspicious and rude. Explain politely: "No, I don\'t. I\'m an exchange student."', react: 'It\'s a standard question.' },
+      { t: 'No. Next question.', kind: 'blunt', tip: 'Too short and cold with bank staff. Add a reason and "Is that OK?"', react: 'Right…' },
+      { t: 'I don\'t have one and I\'m not getting one.', kind: 'blunt', tip: 'Too confrontational. "I don\'t have one. Do I need it?"', react: 'That\'s… fine.' }
+    ], [
+      { t: 'No, I don\'t have none.', kind: 'grammar', tip: 'No double negatives: "I don\'t have one."' },
+      { t: 'I have not a tax number.', kind: 'grammar', tip: '"I haven\'t got one" / "I don\'t have one."' },
+      { t: 'What is a tax file number? I not know.', kind: 'grammar', tip: '"I don\'t know."' }
+    ], () => line(officer, lv({
+      easy: 'That\'s OK. It is not necessary for students. Next, let\'s choose an account.',
+      normal: 'That\'s fine, it\'s optional. Without one, the bank may keep a little tax from your interest, but on a student account it\'s next to nothing.',
+      hard: 'It\'s entirely optional. Without one, we\'re required to withhold some tax from any interest you earn, but on a modest student balance it\'s negligible.'
+    }), lv({ easy: 'No pasa nada. No es necesario para estudiantes. Ahora, elijamos una cuenta.', normal: 'No pasa nada, es opcional. Sin él, el banco puede quedarse un poco de impuesto de tus intereses, pero en una cuenta de estudiante es casi nada.', hard: 'Es totalmente opcional. Sin él, estamos obligados a retener algo de impuesto de los intereses que ganes, pero con un saldo modesto de estudiante es insignificante.' }), fees, 'Great'));
+  }
+  function fees() {
+    askR(officer, lv({
+      easy: [['We have three accounts. Do you have any questions?', 'Tenemos tres cuentas. ¿Tienes alguna pregunta?', ['Yes. Are there any monthly fees?', 'Yes, please. How much does the account cost every month?']]],
+      normal: [['Before we choose an account, is there anything you\'d like to ask?', 'Antes de elegir una cuenta, ¿quieres preguntar algo?', ['Yes: are there any monthly fees? And do I have to pay to use ATMs?', 'Yes. Are there any monthly fees?']]],
+      hard: [['Before we go through the options, is there anything you\'d like me to clarify?', 'Antes de repasar las opciones, ¿quieres que te aclare algo?', ['Could you clarify whether there are any monthly account-keeping fees or transaction fees?', 'I\'d like to keep costs to a minimum, so could you tell me whether there are any fees I should be aware of?']]]
+    }), [
+      { t: 'Why is your bank so expensive?', kind: 'blunt', tip: 'Accusing sounds rude. Ask a neutral question: "Are there any monthly fees?"', react: 'Well, let\'s look at the options first.' },
+      { t: 'Just give me the cheapest one.', kind: 'blunt', tip: 'Too direct. "Which account is the cheapest for a student?"', react: 'Let\'s compare them together.' },
+      { t: 'I\'m not paying any fees, OK?', kind: 'blunt', tip: 'Sounds aggressive. "I\'d like an account without fees, if possible."', react: 'Understood…' },
+      { t: 'Tell me the fees. Quickly.', kind: 'blunt', tip: 'An order. Try "Could you tell me about the fees, please?"', react: 'Of course.' }
+    ], [
+      { t: 'Are there any fees mensual?', kind: 'grammar', tip: '"Mensual" = monthly, and it goes before the noun: "monthly fees".' },
+      { t: 'How much costs the account every month?', kind: 'grammar', tip: 'Question word order: "How much does the account cost?"' },
+      { t: 'Do I must pay every month?', kind: 'grammar', tip: '"Do I have to pay every month?"' }
+    ], () => line(officer, 'Let\'s have a look at this brochure: it compares our three personal accounts, fees included.', 'Echemos un vistazo a este folleto: compara nuestras tres cuentas personales, comisiones incluidas.', brochure, 'Read it'));
+  }
+  function brochure() {
+    paperQuiz('HARBOUR BANK · PERSONAL ACCOUNTS', 'You have very little money and you need a card to tap and pay. Read carefully.',
+      '<b>EVERYDAY PLUS</b> · Monthly fee: A$5 (no fee if you deposit A$2,000 or more every month) · Debit card · ATM fees: A$0 at Harbour Bank ATMs, A$2.50 at others · Interest: 0% · Overdraft available (over 18s only)<br><br>' +
+      '<b>YOUTH SAVER</b> (ages 12–24) · Monthly fee: A$0 · Debit card with tap &amp; pay · ATM fees: A$0 at Harbour Bank ATMs · Interest: 0.5% · No overdraft<br><br>' +
+      '<b>BONUS SAVER</b> · Monthly fee: A$0 · No card (savings only, online transfers) · Interest: 4.5% if you deposit A$500 every month and make no withdrawals; otherwise 0.1%', [
+        ['Which account is the best for you?', 'Youth Saver', ['Everyday Plus', 'Bonus Saver']],
+        ['With Everyday Plus, how much would you pay in monthly fees in six months?', 'A$30', ['A$5', 'A$0']],
+        ['Bonus Saver pays the most interest. What is the problem for you?', 'It has no card, and you must deposit A$500 every month', ['It has a monthly fee of A$5', 'It is only for people over 25']]
+      ], (right, n, ans) => {
+        mOk(ans[0] === 'Youth Saver'); mOk(ans[1] === 'A$30'); mOk(ans[2] === 'It has no card, and you must deposit A$500 every month');
+        s.acct = ans[0]; complete('acct', s.acct !== 'Youth Saver');
+        if (s.acct !== 'Youth Saver') return line(officer, s.acct === 'Everyday Plus' ? 'Are you sure? Everyday Plus has an A$5 monthly fee unless you deposit A$2,000 a month. For a student, the Youth Saver is free. Shall we go with that one instead?' : 'Are you sure? The Bonus Saver has no card, so you couldn\'t tap and pay. For a student, the Youth Saver is better. Shall we go with that one instead?', s.acct === 'Everyday Plus' ? '¿Seguro/a? Everyday Plus cobra 5 A$ al mes salvo que ingreses 2.000 A$ al mes. Para un estudiante, Youth Saver es gratis. ¿Elegimos esa?' : '¿Seguro/a? Bonus Saver no tiene tarjeta, así que no podrías pagar con el móvil o la tarjeta. Para un estudiante, Youth Saver es mejor. ¿Elegimos esa?', () => { s.acct = 'Youth Saver'; more(); }, 'Yes, please');
+        more();
+      }, 'Choose');
+  }
+  function more() {
+    askR(officer, lv({
+      easy: [['The Youth Saver is a great choice! Any other questions?', '¡Youth Saver es una gran elección! ¿Alguna otra pregunta?', ['Yes. How long does it take to get the card?', 'Just one: when can I have the card?']]],
+      normal: [['Good choice. Anything else you\'d like to know?', 'Buena elección. ¿Quieres saber algo más?', ['How long does it take to get the card?', 'Yes: can I use the card to tap and pay in shops?']]],
+      hard: [['Excellent. Is there anything else you\'d like to know before we set it up?', 'Excelente. ¿Quieres saber algo más antes de abrirla?', ['Could you clarify whether I\'d be charged a transaction fee if I used the card overseas?', 'Just one thing: does it come with an overdraft? I\'d rather not be able to spend money I don\'t have.', 'Will I get paper statements, or are they online only?']]]
+    }), [
+      { t: 'Hurry up, I haven\'t got all day.', kind: 'blunt', tip: 'Very impatient. Ask your question politely or say "No, that\'s all, thanks."', react: 'Nearly done…' },
+      { t: 'Just give me the card now.', kind: 'blunt', tip: 'Too direct. "When will I get the card?"', react: 'One step at a time!' },
+      { t: 'Is that it? Can I go now?', kind: 'blunt', tip: 'Sounds bored and impatient. "Is there anything else you need from me?"', react: 'Almost.' }
+    ], [
+      { t: 'How long does it take for have the card?', kind: 'grammar', tip: '"How long does it take to get the card?"' },
+      { t: 'How much time it takes the card?', kind: 'grammar', tip: '"How long does it take to get the card?"' },
+      { t: 'Can I pay touching with the card?', kind: 'grammar', tip: 'In English you "tap" a card: "Can I tap and pay?"' }
+    ], p => {
+      const t = p.t;
+      const r = /overseas/.test(t) ? ['There\'s a 3% international transaction fee, so it\'s best for spending here in Australia. Use the card in shops or online: tapping is free.', 'Hay una comisión del 3% por operaciones en el extranjero, así que es mejor para gastar aquí en Australia. Usa la tarjeta en tiendas o en internet: pagar con ella es gratis.']
+        : /overdraft/.test(t) ? ['No, it doesn\'t: youth accounts have no overdraft, so you can never go into the red. Very sensible question!', 'No: las cuentas juveniles no tienen descubierto, así que nunca te quedarás en números rojos. ¡Muy buena pregunta!']
+        : /statements/.test(t) ? ['They\'re online by default, in the app, but I can post you a paper statement every month if you prefer. You can also set up a direct debit for your phone bill in the app.', 'Por defecto son online, en la app, pero te puedo enviar un extracto en papel cada mes si lo prefieres. También puedes domiciliar la factura del móvil en la app.']
+        : /tap/.test(t) ? ['Yes! You can tap it almost everywhere in Australia, even for a coffee. No worries.', '¡Sí! La puedes acercar para pagar casi en cualquier sitio de Australia, hasta para un café. Sin problema.']
+        : ['We print it here, so you\'ll have it in five minutes! You can tap it in any shop.', 'La imprimimos aquí, ¡así que la tendrás en cinco minutos! Puedes pagar acercándola en cualquier tienda.'];
+      line(officer, r[0], r[1], pin, 'Great');
+    });
+  }
+  function pin() {
+    line(officer, 'Now, your card. Please choose a four-digit PIN on this keypad. I\'ll look away.', 'Ahora, tu tarjeta. Elige un PIN de cuatro cifras en este teclado. Yo miro hacia otro lado.', () => paperQuiz('CHOOSE YOUR PIN', 'Think about security.', '', [
+      ['Which PIN is the safest?', 'A random number only you know (e.g. 7 3 9 5)', ['1 2 3 4', 'Your date of birth']],
+      ['Who should know your PIN?', 'Nobody: not the bank, not your friends, not your family', ['The bank, if they phone you and ask', 'Your best friend, just in case']],
+      ['Where should you keep your PIN?', 'In your head: memorise it', ['Written on the back of your card', 'In a note on your phone called "PIN"']]
+    ], right => {
+      s.sec -= (3 - right) * 15; complete('pin', right < 3);
+      if (right < 3) notify('🔒 Careful!', 'A safe PIN is random, secret and memorised. Never write it down or tell anyone.', 'warn');
+      sign_();
+    }, 'Set PIN'), 'OK');
+  }
+  function sign_() {
+    askR(officer, lv({
+      easy: [['Good. Now please sign here.', 'Bien. Ahora firma aquí, por favor.', ['OK. Where do I sign?', 'Sure. Here?']]],
+      normal: [['Lastly, could you sign here, please?', 'Por último, ¿puedes firmar aquí, por favor?', ['Of course. Where exactly do I sign?', 'Sure. Next to the cross?']]],
+      hard: [['Last of all, I\'ll just need your signature at the bottom, next to the cross.', 'Por último, solo necesito tu firma abajo, junto a la cruz.', ['Of course. Should I sign with my full name or just my usual signature?', 'Certainly. Is it all right if I use my usual signature?']]]
+    }), [
+      { t: 'Fine. Give me the pen.', kind: 'blunt', tip: 'Sounds annoyed. "Of course. Could I borrow a pen?"', react: 'Here you go.' },
+      { t: 'Whatever. Where?', kind: 'blunt', tip: '"Whatever" sounds rude with staff. "Sure, where do I sign?"', react: 'Just here.' },
+      { t: 'Just show me where.', kind: 'blunt', tip: 'Too bossy. "Could you show me where to sign, please?"', react: 'Right here.' }
+    ], [
+      { t: 'Where do I have to firm?', kind: 'grammar', tip: 'False friend! "Firmar" = sign: "Where do I sign?"' },
+      { t: 'Where I must to sign?', kind: 'grammar', tip: '"Where do I sign?" / "Where should I sign?"' },
+      { t: 'I sign where?', kind: 'grammar', tip: 'Question word order: "Where do I sign?"' }
+    ], () => {
+      s.aud = 0; G.inv.push({ emoji: '💳', label: 'Debit card', info: () => `Harbour Bank · ${s.acct} · balance A$400 (your parents' transfer)` }); renderHotbar();
+      line(officer, lv({
+        easy: 'Perfect! Here is your new card. Your parents\' A$400 is in your account. Remember: the bank never asks for your PIN!',
+        normal: 'All done! Here\'s your new debit card, and your parents\' transfer of A$400 has just arrived. Remember: we will never ask for your PIN, not by phone, text or email.',
+        hard: 'That\'s everything. Here\'s your debit card, and your parents\' A$400 transfer has already cleared. One last thing: we will never, ever ask for your PIN, whether by phone, text or email.'
+      }), lv({ easy: '¡Perfecto! Aquí tienes tu tarjeta. Los 400 A$ de tus padres ya están en la cuenta. Recuerda: ¡el banco nunca te pide el PIN!', normal: '¡Listo! Aquí tienes tu tarjeta de débito, y la transferencia de 400 A$ de tus padres acaba de llegar. Recuerda: nunca te pediremos el PIN, ni por teléfono, ni por SMS, ni por email.', hard: 'Eso es todo. Aquí tienes tu tarjeta de débito, y la transferencia de 400 A$ de tus padres ya está disponible. Una última cosa: jamás te pediremos el PIN, ni por teléfono, ni por SMS, ni por email.' }), hostCall, 'Thank you!');
+    });
+  }
+
+  /* ---- the host family on the phone (relaxed register!) and the phishing text */
+  function hostCall() {
+    notify('📱 Your phone is ringing', `It's your host ${hg === 'f' ? 'mum' : 'dad'}.`, 'warn');
+    askR(host, lv({
+      easy: [['Hi, love! How\'s it going at the bank?', '¡Hola, cariño! ¿Qué tal en el banco?', ['Good, thanks! I\'ve got my account and my card!', 'Great! The account is open. Now I\'m going to change some money.']]],
+      normal: [['G\'day! Just checking in. How did it go with the account?', '¡Buenas! Solo llamaba para ver qué tal. ¿Cómo ha ido lo de la cuenta?', ['Really well, thanks! The account\'s open and I\'ve already got my card.', 'Great, thanks! It\'s all done. Now I\'m changing my euros.']]],
+      hard: [['Hey! Did the bank give you any grief about the paperwork?', '¡Hola! ¿Te han puesto pegas en el banco con el papeleo?', ['Not really, it was pretty easy! I\'ve got my card already.', 'Nah, it was fine! The account\'s sorted and I\'ve got my card.']]]
+    }), [
+      { t: `I am most obliged to you for your kind assistance, ${sirMa(hg)}.`, kind: 'stiff', tip: 'With your host family, keep it relaxed: "Really well, thanks!"', react: `Ha! "${cap(sirMa(hg))}"? Since when are you so formal?` },
+      { t: 'I wish to inform you that the procedure has been completed satisfactorily.', kind: 'stiff', tip: 'That sounds like a business letter! At home just say: "It went really well!"', react: 'Er… good to hear, I think!' },
+      { t: 'Thank you for your enquiry. The account has been duly opened.', kind: 'stiff', tip: 'Too formal for family. "All done, thanks!"', react: 'Ha ha! You sound like the bank manager!' },
+      { t: 'Kindly be advised that I shall return home in due course.', kind: 'stiff', tip: 'Way too formal on the phone with your host family. "I\'ll be home soon!"', react: 'Righto… see you soon, then!' }
+    ], [
+      { t: 'Is going very well, I have opened a count.', kind: 'grammar', tip: '"It\'s going really well. I\'ve opened an account."' },
+      { t: 'Good! I have already the card.', kind: 'grammar', tip: '"Already" goes before the main verb: "I\'ve already got my card."' },
+      { t: 'Very well! The account is opened since ten minutes.', kind: 'grammar', tip: '"The account has been open for ten minutes."' }
+    ], () => line(host, 'Awesome! Don\'t forget to change your euros. See you at dinner!', '¡Genial! No te olvides de cambiar tus euros. ¡Nos vemos en la cena!', () => s.ev.phish ? later(1.5, phish) : toFx(), 'Bye!'));
+  }
+  function phish() {
+    reveal('phish');
+    const sms = 'HarbourBank: Your new card has been BLOCKED. Reply with your PIN to unlock it or log in at hb-secure-login.co';
+    choice(null, `📱 A text message arrives: "${sms}"`, `📱 Te llega un SMS: "HarbourBank: Tu nueva tarjeta ha sido BLOQUEADA. Responde con tu PIN para desbloquearla o entra en hb-secure-login.co"`, [
+      { t: 'Reply with my PIN: I need my card!', say: false, fn: () => { s.sec -= 40; s.replied = true; complete('phish', true); G.mistakes.push({ said: 'I replied to the text with my PIN.', tip: 'That was phishing (a scam). Never send your PIN to anyone. Tell the bank immediately.' }); notify('🚨 Oh no!', 'That was a scam (phishing)! Tell the bank staff right now.', 'bad'); s.phase = 'phish'; setMarker(-4, 3.2, -6.4); } },
+      { t: 'Click the link and log in to check.', say: false, fn: () => { s.sec -= 30; s.replied = true; complete('phish', true); G.mistakes.push({ said: 'I clicked the link in the text.', tip: 'Never click links in texts about your bank. Use the official app or go to the branch.' }); notify('🚨 Careful!', 'That was a fake website (phishing)! Tell the bank staff right now.', 'bad'); s.phase = 'phish'; setMarker(-4, 3.2, -6.4); } },
+      { t: 'Don\'t reply. Show it to the teller.', say: false, fn: () => { s.phase = 'phish'; setMarker(-4, 3.2, -6.4); notify('🔒 Good thinking', 'Never reply. Show the text to the teller.'); } }
+    ]);
+  }
+  function phishTalk() {
+    hideMarker(); s.phase = 'phishing';
+    askR(teller, lv({
+      easy: [['Hi! How can I help?', '¡Hola! ¿En qué te puedo ayudar?', ['Hi. I got a strange text. It says it\'s from the bank and it asks for my PIN.', 'Hello. Look, this text message asks for my PIN. Is it from you?']]],
+      normal: [['Hello! What can I do for you?', '¡Hola! ¿Qué puedo hacer por ti?', ['I\'ve just received a suspicious text. It says it\'s from the bank and it wants my PIN.', 'Hi. I\'ve got a strange text message about my card. Is it really from the bank?']]],
+      hard: [['Good afternoon. What can I do for you?', 'Buenas tardes. ¿Qué puedo hacer por ti?', ['I\'d like to report a text message that claims to be from the bank. It\'s asking for my PIN, which seems rather suspicious.', 'I\'ve just had a text claiming to be from you and asking for my PIN. Could you clarify whether it\'s genuine?']]]
+    }), [
+      { t: 'Your bank sent me a stupid message. Explain.', kind: 'blunt', tip: 'Don\'t blame the staff. "I\'ve received a suspicious text…"', react: 'Let me have a look…' },
+      { t: 'Look at this. Fix it.', kind: 'blunt', tip: 'An order. "Could you have a look at this text, please?"', react: 'OK… let me see.' },
+      { t: 'Why are you sending me spam?', kind: 'blunt', tip: 'Accusing sounds rude. "Is this text really from you?"', react: 'It wasn\'t us, I promise.' }
+    ], [
+      { t: 'I have received a message sospechous.', kind: 'grammar', tip: '"Sospechoso" = suspicious, and the adjective goes first: "a suspicious message".' },
+      { t: 'A message ask me my PIN.', kind: 'grammar', tip: 'Third person -s and "for": "A text asks me for my PIN."' },
+      { t: 'Somebody wants to steal me the PIN.', kind: 'grammar', tip: '"Steal something FROM someone": "Somebody wants to steal my PIN."' }
+    ], () => {
+      if (!s.replied) complete('phish');
+      line(teller, s.replied ? 'Thanks for telling us straight away. That\'s phishing: a scam. I\'ve blocked the card and you can set a new PIN right here. Remember: never share your PIN!' : 'Good on you for not replying! That\'s phishing: a scam. We\'ll never ask for your PIN. Just delete it and block the number. I\'ll report it to our security team.', s.replied ? 'Gracias por avisarnos enseguida. Es phishing: una estafa. He bloqueado la tarjeta y puedes poner un PIN nuevo aquí mismo. ¡Recuerda: nunca compartas tu PIN!' : '¡Muy bien por no responder! Es phishing: una estafa. Nunca te pediremos el PIN. Bórralo y bloquea el número. Lo comunicaré a nuestro equipo de seguridad.', toFx, 'Thanks!');
+    });
+  }
+  function toFx() { s.phase = 'fx'; setMarker(11.4, 3.2, -3); notify('💱 Foreign exchange', 'Now change your euros at the currency exchange counter. Read the rates board!'); }
+
+  /* ---- 3. currency exchange: the rates board, counting the money, a wrong amount */
+  function fxTalk() {
+    hideMarker(); s.phase = 'fxing';
+    askR(fx, lv({
+      easy: [['Hey! What can I do for you?', '¡Hola! ¿Qué puedo hacer por ti?', [`Hi! I'd like to change ${eur} euros into Australian dollars, please.`, 'Hi! Can I change some euros into Australian dollars, please?']]],
+      normal: [['G\'day! How can I help?', '¡Buenas! ¿En qué te ayudo?', [`Hi! I'd like to change €${eur} into Australian dollars, please. What's the rate today?`, `Hi there! Could I change ${eur} euros into Aussie dollars, please?`]]],
+      hard: [['Hey there! Changing some money?', '¡Hola! ¿Vienes a cambiar dinero?', [`Yes, please. I'd like to change €${eur} into Australian dollars. Is it commission-free?`, 'That\'s right. Could you tell me what the exchange rate for euros is today, and whether there\'s any commission?']]]
+    }), [
+      { t: 'Give me dollars for these euros.', kind: 'blunt', tip: 'Even with a friendly clerk, ask: "Could I change these euros, please?"', react: 'Er… sure thing.' },
+      { t: 'Change my money. Fast.', kind: 'blunt', tip: 'An order. "I\'d like to change some money, please."', react: 'I\'ll do my best, mate.' },
+      { t: 'I want dollars. How much?', kind: 'blunt', tip: 'Too abrupt. "What\'s the rate today, please?"', react: 'Righto…' }
+    ], [
+      { t: 'I want to change euros in dollars australians.', kind: 'grammar', tip: '"Change euros INTO Australian dollars" (adjectives have no plural).' },
+      { t: 'Which is the change today?', kind: 'grammar', tip: 'False friend! "El cambio" = the exchange rate: "What\'s the exchange rate today?"' },
+      { t: 'Can you cambiate my euros?', kind: 'grammar', tip: '"Could you change my euros?"' }
+    ], () => line(fx, 'Sure thing! Have a squiz at the rates board behind me first. That means "have a look"!', '¡Claro! Échale un vistazo primero al panel de cambio detrás de mí. "Have a squiz" significa "echa un vistazo".', ratesQuiz, 'Read the board'));
+  }
+  function ratesQuiz() {
+    paperQuiz('EXCHANGE RATES · 1 unit = A$', `You are changing €${eur} into Australian dollars.`, `<b>EUR €</b> · We buy <b>${BANK_RATE.buy.toFixed(2)}</b> · We sell <b>${BANK_RATE.sell.toFixed(2)}</b> · Commission-free<br><br>Remember: when YOU sell euros, the bank BUYS them.<br><br>Another option: the kiosk at the train station buys euros at <b>${BANK_RATE.kiosk.toFixed(2)}</b>, with a <b>${BANK_RATE.kioskFee}% commission</b>.`, [
+      ['You give the bank euros. Which rate does it use?', `We buy: ${BANK_RATE.buy.toFixed(2)}`, [`We sell: ${BANK_RATE.sell.toFixed(2)}`, 'The kiosk rate']],
+      [`How many Australian dollars should you get for €${eur} here?`, A(fair), [A(Math.round(eur * BANK_RATE.sell)), A(eur)]],
+      ['Which is the better deal?', `Harbour Bank: ${A(fair)} (the kiosk gives ${A(kiosk)} after commission)`, [`The kiosk: its rate is higher, so you get ${A(Math.round(eur * BANK_RATE.kiosk))}`, 'They are exactly the same']]
+    ], (right, n, ans) => {
+      mOk(ans[0] === `We buy: ${BANK_RATE.buy.toFixed(2)}`); mOk(ans[1] === A(fair)); mOk(/^Harbour/.test(ans[2]));
+      complete('fx', right < 2);
+      if (/kiosk/.test(ans[2]) && !/^Harbour/.test(ans[2])) notify('💱 Watch the commission!', `The kiosk's rate looks better, but after the ${BANK_RATE.kioskFee}% commission you'd get only ${A(kiosk)}.`, 'warn');
+      s.eur = 0; s.aud = given; G.money = given; updateBoard();
+      G.inv = G.inv.filter(i => i.label !== 'Euros'); G.inv.push({ emoji: '💵', label: 'Australian dollars', info: () => `A$${s.audTxt()} in polymer notes` }); renderHotbar();
+      line(fx, `Here you go: ${A(given)}. Feel the notes: they're polymer, a kind of plastic. You can even put them through the washing machine!`, `Aquí tienes: ${A(given)}. Toca los billetes: son de polímero, una especie de plástico. ¡Hasta los puedes meter en la lavadora!`, count, 'Count the money');
+    }, 'Change');
+  }
+  function notes(v) {
+    const out = []; [[100, 'note'], [50, 'note'], [20, 'note'], [10, 'note'], [5, 'note'], [2, 'coin'], [1, 'coin']].forEach(([d, k]) => { const c = Math.floor(v / d); if (c) { out.push(`${c} × $${d} ${k}${c > 1 ? 's' : ''}`); v -= c * d; } });
+    return out.join(' · ');
+  }
+  function count() {
+    paperQuiz('COUNT YOUR MONEY', `You changed €${eur} at ${BANK_RATE.buy.toFixed(2)}, commission-free.`, `💵 ${notes(given)}`, [
+      ['How much money did the clerk give you?', A(given), s.ev.wrong ? [A(fair), A(given + 20)] : [A(given + 50), A(given - 20)]],
+      ['Is it the right amount?', s.ev.wrong ? 'No: it\'s A$50 short' : 'Yes, it\'s exactly right', s.ev.wrong ? ['Yes, it\'s exactly right', 'No: it\'s A$50 too much'] : ['No: it\'s A$50 short', 'No: it\'s A$50 too much']]
+    ], right => {
+      mOk(right >= 1); mOk(right === 2); complete('count', right < 2);
+      if (!s.ev.wrong) { if (right < 2) notify('🧮 Check again', `It was right: €${eur} × ${BANK_RATE.buy.toFixed(2)} = ${A(fair)}.`, 'warn'); return thanks(); }
+      reveal('wrong');
+      if (right < 2) {
+        complete('wrong', true); G.mistakes.push({ said: 'I didn\'t notice the wrong amount.', tip: 'Always count your money at the counter. Then say politely: "Sorry, I think there\'s a mistake."' });
+        notify('💸 Too late!', `Later you notice you only got ${A(given)} instead of ${A(fair)}. Always count your money before you leave the counter!`, 'bad');
+        return thanks();
+      }
+      wrongTalk();
+    }, 'Check');
+  }
+  function wrongTalk() {
+    askR(fx, lv({
+      easy: [['Is everything OK?', '¿Todo bien?', [`Sorry, I think there's a mistake. I've got ${A(given)}. It should be ${A(fair)}.`]]],
+      normal: [['Everything OK there?', '¿Todo bien por ahí?', [`Excuse me, I think there's a mistake. I've counted ${A(given)}, but it should be ${A(fair)}.`]]],
+      hard: [['Everything all right there?', '¿Todo en orden?', [`I'm sorry, I think there might be a slight mistake. I was under the impression I'd get ${A(fair)}, but I've only counted ${A(given)}.`, `Sorry to be a pain, but would you mind counting it again? I make it ${A(given)}, not ${A(fair)}.`]]]
+    }), [
+      { t: 'You gave me the wrong money.', kind: 'blunt', tip: 'Sounds like an accusation. "Sorry, I think there\'s a mistake."', react: 'Oh! Let me check.' },
+      { t: 'Give me my fifty dollars.', kind: 'blunt', tip: 'Too demanding. "I think I\'m fifty dollars short. Could you check, please?"', react: 'Whoa, OK, let me look.' },
+      { t: 'Count it again. You made a mistake.', kind: 'blunt', tip: 'An order. "Would you mind counting it again?"', react: 'Sure, sure…' }
+    ], [
+      { t: 'Are you trying to cheat me?', kind: 'rude', tip: 'Mistakes happen! Be polite: "Sorry, I think there\'s a mistake."' },
+      { t: 'You have given me less money that I must have.', kind: 'grammar', tip: '"Less money THAN I should get."' },
+      { t: 'Is missing fifty dollars, no?', kind: 'grammar', tip: '"Fifty dollars are missing" or "I\'m fifty dollars short."' }
+    ], () => { complete('wrong'); s.aud = fair; G.money = fair; updateBoard(); line(fx, 'Oh, you\'re right! Sorry about that: here\'s another fifty. My bad!', '¡Uy, tienes razón! Perdona: aquí tienes otros cincuenta. ¡Culpa mía!', thanks, 'Thanks!'); });
+  }
+  function thanks() {
+    askR(fx, lv({
+      easy: [['No worries, mate! Anything else?', '¡Sin problema, colega! ¿Algo más?', ['No, that\'s all. Thanks a lot!', 'That\'s it. Thanks! Bye!']]],
+      normal: [['No worries, mate! Anything else I can do for you?', '¡Sin problema, colega! ¿Algo más?', ['No, that\'s all. Thanks heaps!', 'That\'s it, thanks! Have a good one.']]],
+      hard: [['No worries, mate! Is that everything, or can I help with anything else?', '¡Sin problema, colega! ¿Eso es todo o te ayudo con algo más?', ['That\'s everything, thanks heaps! Have a good one.', 'Nah, that\'s it. Cheers for your help!']]]
+    }), [
+      { t: `I am most obliged to you for your kind assistance, ${sirMa(fg)}.`, kind: 'stiff', tip: 'The clerk is young and relaxed. Answer the same way: "Thanks heaps!"', react: `Ha! No worries… ${sirMa(fg) === 'sir' ? 'but I\'m not a "sir"!' : 'but please don\'t call me "madam"!'}` },
+      { t: 'I should like to express my sincere gratitude for your services.', kind: 'stiff', tip: 'Too formal for "No worries, mate!". Say "Cheers!" or "Thanks heaps!"', react: 'Ha, no worries… mate. Very formal!' },
+      { t: 'That will be all. I thank you most kindly for your time.', kind: 'stiff', tip: 'You sound like a king! Keep it light: "That\'s all, thanks!"', react: 'Er… you\'re welcome, Your Majesty!' }
+    ], [
+      { t: 'No, is all. Thank you very much for all.', kind: 'grammar', tip: '"No, that\'s all. Thanks for everything."' },
+      { t: 'Nothing more, thanks for attend me.', kind: 'grammar', tip: '"Atender" = serve / help: "Thanks for your help."' }
+    ], () => { s.phase = 'atm'; setMarker(9, 3.4, 13.3); notify('🏧 The ATM', 'Go outside and take out A$60 from the ATM for Friday\'s excursion.'); });
+  }
+
+  /* ---- 4. the ATM: a stranger, covering the keypad, the amount and maybe a swallowed card */
+  function atm() {
+    hideMarker(); s.phase = 'atming'; P.frozen = true;
+    walkTo(stranger, [[10.6, 14.3]], () => faceTo(stranger, 9, 13.3));
+    later(1.5, () => ask(stranger, lv({
+      easy: 'Hey! Do you need help? I can help you with the machine.',
+      normal: 'Need a hand with that, mate? These machines are tricky.',
+      hard: 'You look a bit lost. Want me to punch the numbers in for you? I know these machines inside out.'
+    }), lv({ easy: '¡Eh! ¿Necesitas ayuda? Te puedo ayudar con la máquina.', normal: '¿Te echo una mano, colega? Estas máquinas son complicadas.', hard: 'Pareces un poco perdido/a. ¿Quieres que te meta yo los números? Conozco estas máquinas al dedillo.' }), phr(lv({
+      easy: ['No, thank you. I\'m fine.', 'No, thanks. I\'m OK.'],
+      normal: ['That\'s kind, but I\'m fine, thanks.', 'No, thanks. I can do it myself.'],
+      hard: ['Thanks, but I\'m fine. Would you mind stepping back a little, please?', 'That\'s kind of you, but I\'d rather do it myself, thanks.']
+    }), [
+      { t: 'No, thanks, I can alone.', kind: 'grammar', tip: '"I can do it myself" / "I\'m fine on my own."' },
+      { t: 'Don\'t worry, I know to do it.', kind: 'grammar', tip: '"I know HOW to do it."' },
+      { t: 'Go away, you thief!', kind: 'rude', tip: 'Be firm but polite: "No, thanks. I\'m fine."' }
+    ]).concat([{ t: 'Oh, yes please! My PIN is…', kind: 'fact', fn: () => { s.sec -= 30; G.mistakes.push({ said: 'Oh, yes please! My PIN is…', tip: 'Never accept help from strangers at an ATM and never say your PIN out loud.' }); notify('🚨 Stop!', 'You stop just in time. NEVER tell anyone your PIN, and never let strangers "help" at an ATM.', 'bad'); later(0.8, cover); } }]), cover));
+  }
+  function cover() {
+    choice(null, 'The person is still standing quite close behind you, looking at the screen.', 'La persona sigue muy cerca detrás de ti, mirando la pantalla.', [
+      { t: 'Cover the keypad with my hand while I type my PIN.', say: false, fn: () => { s.covered = true; atmScreen(); } },
+      { t: 'Cancel and go inside: I\'ll use the ATM in the bank later.', say: false, fn: () => { s.covered = true; notify('🏦 Smart move', 'You go inside for a minute. When you come back, the person has gone.', 'good'); atmScreen(); } },
+      { t: 'Type my PIN quickly: they\'re probably OK.', say: false, fn: () => { s.sec -= 25; G.mistakes.push({ said: 'I typed my PIN with a stranger watching.', tip: 'Always cover the keypad, or go somewhere safer if someone stands too close.' }); notify('👀 Risky!', 'The person could see your PIN. Always cover the keypad!', 'bad'); atmScreen(); } }
+    ]);
+    walkTo(stranger, [[18, 20], [24, 21]]);
+  }
+  function atmScreen() {
+    paperQuiz('HARBOUR BANK ATM', 'You need A$60 in cash for Friday\'s school excursion.', 'Withdrawal fee: <b>A$0.00</b> for Harbour Bank cards · <b>A$2.50</b> for other banks\' cards<br>This ATM gives <b>$20</b> and <b>$50</b> notes.<br>Select an amount: A$20 · A$50 · A$60 · A$100 · Other', [
+      ['How much is the fee for you?', 'A$0.00: it\'s my bank', ['A$2.50', 'A$60']],
+      ['Which amount do you choose?', 'A$60', ['A$50', 'A$100']],
+      ['You\'ve got your cash. What do you do now?', 'Take my card and cash, put them away and walk off', ['Count the notes slowly in front of the ATM', 'Leave the receipt in the machine']]
+    ], (right, n, ans) => {
+      mOk(ans[0] === 'A$0.00: it\'s my bank'); mOk(ans[1] === 'A$60');
+      if (ans[2] !== 'Take my card and cash, put them away and walk off') s.sec -= 15;
+      const amt = +ans[1].slice(2); s.aud += amt; G.money = s.aud; updateBoard();
+      complete('atm', !s.covered || ans[1] !== 'A$60');
+      if (s.ev.swallow) {
+        reveal('swallow'); G.inv = G.inv.filter(i => i.label !== 'Debit card'); renderHotbar();
+        notify('😱 Card retained!', 'You take the cash, but before you can take your card the screen says: "CARD RETAINED. Please contact your branch." Go inside and talk to the teller.', 'warn');
+        P.frozen = false; s.phase = 'swallow'; setMarker(-4, 3.2, -6.4); return;
+      }
+      P.frozen = false; line(null, `💵 ${A(amt)} in your hand, your card safely in your wallet. Time to go home for dinner!`, `💵 ${A(amt)} en la mano y la tarjeta a salvo en la cartera. ¡Hora de volver a casa a cenar!`, finish, 'Finish');
+    }, 'Withdraw');
+  }
+  function swallowTalk() {
+    hideMarker(); s.phase = 'swallowing';
+    askR(teller, lv({
+      easy: [['Hi! Can I help you?', '¡Hola! ¿Te puedo ayudar?', ['Hi. The ATM outside has kept my card. Can you help me, please?', 'Hello. The ATM outside has my card. What can I do?']]],
+      normal: [['Hello! You look worried. What\'s wrong?', '¡Hola! Pareces preocupado/a. ¿Qué pasa?', ['The ATM outside has just swallowed my card. How long does it take to get it back?', 'Hi. The ATM outside kept my card. Can you help me get it back, please?']]],
+      hard: [['Hello. Is something the matter?', 'Hola. ¿Ocurre algo?', ['I\'m afraid the ATM outside has just retained my card. Could you clarify how I go about getting it back?', 'Sorry to bother you, but the ATM outside has swallowed my card. Is there any chance I could get it back today?']]]
+    }), [
+      { t: 'I want my card back now.', kind: 'blunt', tip: 'Too demanding. "Could you help me get my card back, please?"', react: 'I\'ll see what I can do.' },
+      { t: 'Your machine ate my card. Fix it.', kind: 'blunt', tip: 'An order. "The ATM has swallowed my card. Could you help me?"', react: 'Right…' },
+      { t: 'Open the machine and give me my card.', kind: 'blunt', tip: 'Too bossy with staff. Ask what you can do: "How can I get it back?"', react: 'It\'s not quite that simple.' }
+    ], [
+      { t: 'The cashier has eaten my card.', kind: 'grammar', tip: 'False friend! A cashier is a person. "Cajero automático" = ATM (or cash machine).' },
+      { t: 'The machine has took my card.', kind: 'grammar', tip: 'Take – took – taken: "The machine has taken my card."' },
+      { t: 'My card is stucked in the ATM.', kind: 'grammar', tip: '"Stuck" is irregular: "My card is stuck in the ATM."' }
+    ], () => line(teller, 'Oh no, sorry about that! It happens if you take too long to take your card. Can I see your passport? … Great. Here you go: I\'ve just taken it out of the machine for you.', '¡Vaya, lo siento! Pasa si tardas mucho en coger la tarjeta. ¿Me enseñas el pasaporte? … Genial. Aquí tienes: te la acabo de sacar de la máquina.', () => {
+      complete('swallow'); G.inv.push({ emoji: '💳', label: 'Debit card', info: () => `Harbour Bank · ${s.acct}` }); renderHotbar(); finish();
+    }, 'Thank you so much!'));
+  }
+
+  function finish() {
+    const ms = s.msN ? Math.round(100 * s.ms / s.msN) : 100, sec = clamp(s.sec, 0, 100), eng = engPct();
+    const overall = 0.25 * ms + 0.25 * sec + 0.25 * eng + 0.25 * G.manners;
+    const good = [], bad = [];
+    if (!obj('ticket').failed) good.push('You chose the right service at the ticket machine.'); else bad.push('Read the ticket machine carefully: "Open an account" is for new customers.');
+    if (s.ev.queue) good.push('You waited for your number in a long queue.');
+    if (s.ev.doc) good.push('A document was missing, but you asked politely and the officer found a solution.');
+    if (!obj('acct').failed) good.push('You chose the Youth Saver: no monthly fees and a card to tap and pay.'); else bad.push('For a student with little money, the Youth Saver is best: no fees and a card.');
+    if (!obj('pin').failed) good.push('Your PIN is random, secret and memorised.'); else bad.push('A safe PIN is random, memorised and never shared, not even with the bank.');
+    if (s.ev.phish) { if (!s.replied) good.push('You spotted a phishing text and reported it without replying.'); else bad.push('The text was phishing. Never reply with your PIN or click links: tell the bank.'); }
+    if (!obj('fx').failed) good.push(`You read the rates board: the bank BUYS your euros at ${BANK_RATE.buy.toFixed(2)}, commission-free.`); else bad.push('When you sell euros, look at the "We buy" rate, and always check the commission.');
+    if (s.ev.wrong) { if (!obj('wrong').failed) good.push('You counted your money and pointed out the mistake politely.'); else bad.push('You were given A$50 too little. Always count your money at the counter.'); }
+    if (s.sec >= 100) good.push('Perfect security: you never let anyone see or know your PIN.'); else if (s.sec < 70) bad.push('Security matters: cover the keypad, refuse help from strangers and never share your PIN.');
+    if (s.ev.swallow) good.push('The ATM swallowed your card, and you got it back by talking to the teller.');
+    if (!G.reg) good.push('Perfect register: polite with the bank staff, relaxed with your host family and the friendly clerk.');
+    if (G.manners === 100) good.push('Perfect manners at the bank. No worries!');
+    showResults({ title: 'Banking in Sydney: sorted!', overall, metrics: [['Money sense', ms], ['Security', sec], ['English', eng], ['Manners', G.manners]], good, bad });
   }
 }
 
