@@ -542,15 +542,15 @@ function teacherSetGuest(code, active) {
 const N_SIZE = 9, N_CAPITAL = 40, N_START = [31, 39, 40, 41, 49];
 // id: [cost, population, happiness, economy, security, culture, environment]
 const BUILD = {
-  cityhall: [0, 0, 5, 5, 5, 0, 0], houses: [40, 40, 2, 0, 0, 0, -2], farm: [45, 10, 2, 6, 0, 0, 2], park: [30, 0, 6, 0, 0, 0, 8],
-  forest: [25, 0, 3, 0, 0, 0, 10], lighthouse: [70, 0, 2, 4, 6, 6, 0], mine: [100, 5, -2, 18, 0, 0, -6],
-  market: [70, 5, 5, 9, 0, 0, 0], restaurant: [60, 5, 7, 6, 0, 2, 0], library: [80, 0, 4, 2, 0, 10, 0], school: [70, 5, 4, 4, 0, 8, 0], police: [70, 0, 3, 0, 12, 0, 0], factory: [90, 0, -3, 16, 0, 0, -10],
-  windfarm: [90, 0, 0, 8, 0, 0, 6], museum: [90, 0, 4, 3, 0, 12, 0], press: [90, 0, 3, 2, 0, 8, 0], embassy: [90, 0, 2, 2, 2, 4, 0],
-  hospital: [110, 25, 10, 0, 0, 0, 0], army: [110, 0, -2, 0, 18, 0, -2], parliament: [130, 0, 6, 4, 6, 4, 0], port: [130, 10, 0, 14, 0, 2, -4],
-  stadium: [130, 0, 12, 4, 0, 4, -2], airport: [160, 15, 2, 12, 0, 4, -6],
-  bigben: [200, 0, 6, 6, 0, 20, 0], castle: [200, 0, 6, 4, 6, 16, 0], cntower: [200, 0, 4, 8, 0, 18, 0], liberty: [240, 0, 8, 6, 0, 22, 0], opera: [240, 0, 8, 6, 0, 22, 0],
-  stonehenge: [200, 0, 4, 2, 0, 20, 2], newgrange: [200, 0, 4, 2, 0, 20, 2], inukshuk: [160, 0, 4, 0, 2, 16, 4], towerbridge: [220, 0, 6, 8, 0, 16, 0],
-  hobbiton: [220, 0, 10, 6, 0, 16, 4], whitehouse: [240, 0, 6, 6, 8, 16, 0], goldengate: [240, 0, 6, 10, 0, 18, 0], harbourbridge: [240, 0, 6, 10, 0, 18, 0]
+  cityhall: [0, 0, 5, 5, 5, 0, 0], houses: [25, 40, 2, 0, 0, 0, -2], farm: [30, 10, 2, 6, 0, 0, 2], park: [20, 0, 6, 0, 0, 0, 8],
+  forest: [15, 0, 3, 0, 0, 0, 10], lighthouse: [45, 0, 2, 4, 6, 6, 0], mine: [65, 5, -2, 18, 0, 0, -6],
+  market: [45, 5, 5, 9, 0, 0, 0], restaurant: [40, 5, 7, 6, 0, 2, 0], library: [50, 0, 4, 2, 0, 10, 0], school: [45, 5, 4, 4, 0, 8, 0], police: [45, 0, 3, 0, 12, 0, 0], factory: [60, 0, -3, 16, 0, 0, -10],
+  windfarm: [60, 0, 0, 8, 0, 0, 6], museum: [60, 0, 4, 3, 0, 12, 0], press: [60, 0, 3, 2, 0, 8, 0], embassy: [60, 0, 2, 2, 2, 4, 0],
+  hospital: [70, 25, 10, 0, 0, 0, 0], army: [70, 0, -2, 0, 18, 0, -2], parliament: [85, 0, 6, 4, 6, 4, 0], port: [85, 10, 0, 14, 0, 2, -4],
+  stadium: [85, 0, 12, 4, 0, 4, -2], airport: [105, 15, 2, 12, 0, 4, -6],
+  bigben: [130, 0, 6, 6, 0, 20, 0], castle: [130, 0, 6, 4, 6, 16, 0], cntower: [130, 0, 4, 8, 0, 18, 0], liberty: [155, 0, 8, 6, 0, 22, 0], opera: [155, 0, 8, 6, 0, 22, 0],
+  stonehenge: [130, 0, 4, 2, 0, 20, 2], newgrange: [130, 0, 4, 2, 0, 20, 2], inukshuk: [105, 0, 4, 0, 2, 16, 4], towerbridge: [145, 0, 6, 8, 0, 16, 0],
+  hobbiton: [145, 0, 10, 6, 0, 16, 4], whitehouse: [155, 0, 6, 6, 8, 16, 0], goldengate: [155, 0, 6, 10, 0, 18, 0], harbourbridge: [155, 0, 6, 10, 0, 18, 0]
 };
 const MONUMENTS = ['bigben', 'castle', 'stonehenge', 'newgrange', 'cntower', 'inukshuk', 'towerbridge', 'hobbiton', 'liberty', 'whitehouse', 'goldengate', 'opera', 'harbourbridge'];
 const UNIQUE = ['cityhall', 'parliament', 'embassy', 'port', 'stadium', 'airport', 'mine', 'lighthouse'].concat(MONUMENTS);
@@ -580,7 +580,7 @@ function nStats_(n, treaties) {
   s.score = Math.round(s.pop / 5 + s.happy + s.econ + s.secu + s.cult + s.env + Object.keys(n.buildings || {}).length * 5);
   return s;
 }
-const plotPrice_ = owned => 30 + 4 * Math.max(0, owned - N_START.length);
+const plotPrice_ = owned => 31 + 2 * Math.max(0, owned - N_START.length);   // the whole island ≈ 12,000 GOYUX of land
 const landPrice_ = (i, owned) => plotPrice_(owned) + (SITES[i] ? 20 : 0);
 const moveCost_ = id => Math.max(10, Math.round(BUILD[id][0] / 2));
 const taxAmount_ = st => Math.min(30, 5 + Math.floor(Math.max(0, st.econ) / 10));
@@ -589,7 +589,10 @@ function adjacent_(i, plots) {
   return plots.some(p => Math.abs(Math.floor(p / N_SIZE) - r) + Math.abs(p % N_SIZE - c) === 1);
 }
 const NATION_HEAD = ['Correo', 'Presidente', 'País', 'Capital', 'Lema', 'Bandera', 'Terrenos', 'Edificios', 'GOYUX gastados', 'Impuestos cobrados', 'Último impuesto', 'Población', 'Felicidad', 'Economía', 'Seguridad', 'Cultura', 'Medio ambiente', 'Puntuación', 'Actualizado'];
-const DIPLO_HEAD = ['ID', 'Fecha', 'De', 'País origen', 'Para', 'País destino', 'Tipo', 'Estado', 'Carta', 'Respuesta', 'Fecha respuesta'];
+const DIPLO_HEAD = ['ID', 'Fecha', 'De', 'País origen', 'Para', 'País destino', 'Tipo', 'Estado', 'Carta', 'Respuesta', 'Fecha respuesta', 'Cumbre aprobada (De)', 'Cumbre aprobada (Para)', 'Último intento (De)', 'Último intento (Para)', 'Premio pagado a'];
+/* A treaty is signed only when BOTH presidents pass the summit (a hard English test). Each nation then
+   gets TREATY_PRIZE GOYUX, for at most TREATY_PAID treaties (one of each kind). */
+const TREATY_PRIZE = 1000, TREATY_PAID = 3;
 function nSheet_(which) {
   const ss = ss_();
   const name = which === 'n' ? 'Países' : 'Diplomacia', head = which === 'n' ? NATION_HEAD : DIPLO_HEAD;
@@ -634,15 +637,21 @@ function saveNation_(n) {
 function diploRows_() { const sh = nSheet_('d'); const n = sh.getLastRow() - 1; return n < 1 ? [] : sh.getRange(2, 1, n, DIPLO_HEAD.length).getValues(); }
 function treatiesOf_(email) { return treatiesFrom_(diploRows_(), email); }
 function treatiesFrom_(rows, email) {
-  const out = { accepted: [], acceptedList: [], inbox: [], sent: [] };
+  const out = { accepted: [], acceptedList: [], inbox: [], sent: [], summits: [] };
   rows.forEach(v => {
-    const t = { id: String(v[0]), date: iso_(v[1]), from: String(v[2]).toLowerCase(), fromName: String(v[3]), to: String(v[4]).toLowerCase(), toName: String(v[5]), type: String(v[6]), status: String(v[7]), letter: String(v[8] || ''), reply: String(v[9] || '') };
+    const t = { id: String(v[0]), date: iso_(v[1]), from: String(v[2]).toLowerCase(), fromName: String(v[3]), to: String(v[4]).toLowerCase(), toName: String(v[5]), type: String(v[6]), status: String(v[7]), letter: String(v[8] || ''), reply: String(v[9] || ''),
+      sumFrom: !!v[11], sumTo: !!v[12], tryFrom: day_(v[13]), tryTo: day_(v[14]) };
     if (t.from !== email && t.to !== email) return;
     if (t.status === 'accepted') { out.accepted.push(t.type); out.acceptedList.push(t); }
     else if (t.status === 'pending') (t.to === email ? out.inbox : out.sent).push(t);
+    else if (t.status === 'summit') {   // accepted by both, waiting for both presidents to pass the summit
+      const mine = t.from === email;
+      out.summits.push(Object.assign(t, { meDone: mine ? t.sumFrom : t.sumTo, themDone: mine ? t.sumTo : t.sumFrom, triedToday: (mine ? t.tryFrom : t.tryTo) === today_(), otherName: mine ? t.toName : t.fromName }));
+    }
   });
   return out;
 }
+const day_ = v => v instanceof Date ? Utilities.formatDate(v, 'Europe/Madrid', 'yyyy-MM-dd') : String(v || '');
 function available_(email, n) {
   const { sh, r } = ensureStudent_(email);
   const st = readStudent_(sh, r);
@@ -656,7 +665,7 @@ function nationState_(email) {
   const { sh, r } = ensureStudent_(email);
   const st = readStudent_(sh, r);
   return {
-    nation: n, stats, treaties: tr.acceptedList, inbox: tr.inbox, sent: tr.sent,
+    nation: n, stats, treaties: tr.acceptedList, inbox: tr.inbox, sent: tr.sent, summits: tr.summits, treatyPrize: TREATY_PRIZE,
     goyux: { xp: st.xp, granted: st.granted, nationNet: n ? n.income - n.spent : 0, total: st.xp + st.granted + (n ? n.income - n.spent : 0) },
     taxReady: !!n && n.lastTax !== today_(), taxAmount: stats ? taxAmount_(stats) : 0
   };
@@ -782,10 +791,44 @@ function nationSendTreaty(to, type, letter, guestCode) {
     const sh = nSheet_('d'); const n = sh.getLastRow() - 1;
     const rows = n < 1 ? [] : sh.getRange(2, 1, n, DIPLO_HEAD.length).getValues();
     const pair = v => ((String(v[2]).toLowerCase() === u.email && String(v[4]).toLowerCase() === to) || (String(v[2]).toLowerCase() === to && String(v[4]).toLowerCase() === u.email)) && String(v[6]) === type;
-    if (rows.some(v => pair(v) && ['pending', 'accepted'].includes(String(v[7])))) throw new Error('You already have this kind of treaty (or a letter waiting) with that nation.');
+    if (rows.some(v => pair(v) && ['pending', 'summit', 'accepted'].includes(String(v[7])))) throw new Error('You already have this kind of treaty (or a letter waiting) with that nation.');
     if (rows.filter(v => String(v[2]).toLowerCase() === u.email && String(v[7]) === 'pending').length >= 5) throw new Error('Wait for answers to your letters before sending more.');
     sh.appendRow([randomCode_(6), new Date(), u.email, me.name, to, them.name, type, 'pending', String(letter || '').slice(0, 1500), '', '']);
     return nationState_(u.email);
+  });
+}
+/* The summit: each president takes it on their own (one try a day). When both have passed, the treaty is
+   signed and each nation gets TREATY_PRIZE GOYUX (only for its first TREATY_PAID treaties). */
+function nationSummit(id, passed, guestCode) {
+  const u = user_(guestCode);
+  return withLock_(() => {
+    const sh = nSheet_('d'); const n = sh.getLastRow() - 1;
+    if (n < 1) throw new Error('Summit not found.');
+    const vals = sh.getRange(2, 1, n, DIPLO_HEAD.length).getValues();
+    const i = vals.findIndex(v => String(v[0]) === String(id)), v = vals[i];
+    if (i < 0 || String(v[7]) !== 'summit') throw new Error('Summit not found.');
+    const from = String(v[2]).toLowerCase(), to = String(v[4]).toLowerCase();
+    if (u.email !== from && u.email !== to) throw new Error('Summit not found.');
+    const mine = u.email === from, sumCol = mine ? 12 : 13, tryCol = mine ? 14 : 15;
+    if (v[sumCol - 1]) throw new Error('You have already passed this summit. Wait for the other president.');
+    if (day_(v[tryCol - 1]) === today_()) throw new Error('You have already tried the summit today. Study the tips and try again tomorrow!');
+    sh.getRange(i + 2, tryCol).setNumberFormat('@').setValue(today_());
+    let signed = false, paid = [];
+    if (passed === true) {
+      sh.getRange(i + 2, sumCol).setValue(new Date());
+      const other = v[(mine ? 13 : 12) - 1];
+      if (other) {
+        signed = true; sh.getRange(i + 2, 8).setValue('accepted');
+        [from, to].forEach(e => {
+          const done = vals.filter(r => String(r[7]) === 'accepted' && String(r[15] || '').split(',').indexOf(e) >= 0).length;
+          const nn = getNation_(e);
+          if (nn && done < TREATY_PAID) { nn.income += TREATY_PRIZE; paid.push(e); }
+          if (nn) saveNation_(nn);
+        });
+        sh.getRange(i + 2, 16).setValue(paid.join(','));
+      }
+    }
+    return Object.assign(nationState_(u.email), { summit: { passed: passed === true, signed, prize: paid.indexOf(u.email) >= 0 ? TREATY_PRIZE : 0 } });
   });
 }
 function nationAnswerTreaty(id, accept, reply, guestCode) {
@@ -796,7 +839,7 @@ function nationAnswerTreaty(id, accept, reply, guestCode) {
     const vals = sh.getRange(2, 1, n, DIPLO_HEAD.length).getValues();
     const i = vals.findIndex(v => String(v[0]) === String(id));
     if (i < 0 || String(vals[i][4]).toLowerCase() !== u.email || String(vals[i][7]) !== 'pending') throw new Error('Letter not found.');
-    sh.getRange(i + 2, 8, 1, 4).setValues([[accept ? 'accepted' : 'declined', vals[i][8], String(reply || '').slice(0, 1500), new Date()]]);
+    sh.getRange(i + 2, 8, 1, 4).setValues([[accept ? 'summit' : 'declined', vals[i][8], String(reply || '').slice(0, 1500), new Date()]]);
     [u.email, String(vals[i][2]).toLowerCase()].forEach(e => { const nn = getNation_(e); if (nn) saveNation_(nn); });
     return nationState_(u.email);
   });
