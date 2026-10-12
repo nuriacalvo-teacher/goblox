@@ -602,6 +602,11 @@ a.btn{text-decoration:none;display:inline-block;color:var(--fg)}
       </div>
       <div class="tbl-wrap"><table class="tbl" id="tTable"></table></div>
       <div class="t-guests">
+        <h2>Tratados entre países</h2>
+        <p class="t-hint">Cada tratado es un proyecto: los dos presidentes superan 2 etapas en inglés (la cumbre, un test de inglés, y la misión del tratado, una misión 3D larga de nivel B2 en la que necesitan 70/100; una etapa al día) y después lo <b>presentan juntos en clase</b> (2–3 minutos en inglés). Cuando lo valides, el tratado queda firmado y cada país recibe <b>1000 GOYUX</b> (máximo 3 tratados pagados por país). Si la presentación no es suficiente, pulsa «Repetir»: tendrán que volver a hacer la última etapa y presentarlo otra vez.</p>
+        <div class="tbl-wrap"><table class="tbl" id="trTable"></table></div>
+      </div>
+      <div class="t-guests">
         <h2>Invitados sin cuenta de iesgoya.es</h2>
         <p class="t-hint">Crea un código para cada persona (por ejemplo, tu hija). Entra con el <b>enlace para invitados</b> y escribe su código; su progreso se guarda aquí como el de un alumno. Desactiva un código para cortarle el acceso.</p>
         <div class="t-tools"><label for="gName">Nombre<input id="gName" placeholder="Nombre del invitado" maxlength="30" autocomplete="off"></label><label for="gClass">Clase<select id="gClass"></select></label><button class="btn primary" id="gCreate">Crear código</button></div>
@@ -1706,6 +1711,16 @@ function showResults(o) {
   $('#resTitle').textContent = o.title;
   $('#resWho').innerHTML = `<b>${escH(profile.name)}</b>${account ? ' · ' + escH(account.guest ? 'Guest' : account.email) : ''} · ${escH(G.sc.title)} (${DIFF[G.diff] ? DIFF[G.diff].label : 'Normal'}) · ${new Date().toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}`;
   $('#resStars').innerHTML = [0, 1, 2].map(i => `<span class="${i < stars ? '' : 'off'}">★</span>`).join('');
+  if (G.treaty) {   // treaty missions: no cards, no GOYUX here; the result goes to the treaty project
+    $('#resMetrics').innerHTML = o.metrics.map(([k, v]) => `<div class="metric"><span>${k}</span><div class="bar"><i style="width:${v}%;background:${v >= 80 ? 'var(--green)' : v >= 55 ? 'var(--gold)' : 'var(--red)'}"></i></div><span>${Math.round(v)}%</span></div>`).join('');
+    $('#resGood').innerHTML = (o.good.length ? o.good : ['You finished the mission.']).map(x => `<li>${escH(x)}</li>`).join('');
+    const bad = o.bad.concat(G.mistakes.filter((m, i, a) => a.findIndex(x => x.said === m.said) === i).slice(0, 6).map(m => `“${m.said}” → ${m.tip}`));
+    $('#resBad').innerHTML = (bad.length ? bad : ['Nothing! That was excellent.']).map(x => `<li>${escH(x)}</li>`).join('');
+    $('#resVocab').innerHTML = G.sc.vocab.map(([en, es]) => `<span class="chip" title="${escH(es)}">${escH(en)}</span>`).join('');
+    G.sc.vocab.forEach(([en, es]) => { if (!profile.vocab.some(v => v.en === en)) profile.vocab.push({ en, es, g: G.sc.title }); }); store.set('profile', profile);
+    treatyResult(overall); $('#resAgain').hidden = true; $('#results').hidden = false; return;
+  }
+  $('#resAgain').hidden = false;
   const game = GAMES.find(x => x.id === G.id), had = hasCard(G.id, G.diff), win = !had && overall >= CARD_SCORE;
   const earnedLocal = had ? 0 : cardReward(G.diff, overall);
   $('#resFob').textContent = had ? `Practice: no GOYUX (you already have this card) · score ${overall}/100` : win ? `+${earnedLocal} GOYUX · score ${overall}/100` : `Score ${overall}/100 · get 65 or more to win the card and ${CARD_GOYUX[G.diff]} GOYUX`;
@@ -1745,8 +1760,9 @@ $('#resNation').onclick = () => { $('#results').hidden = true; launchNation(); }
 
 /* launch */
 async function launch(id) {
-  const g = GAMES.find(x => x.id === id);
-  if (!unlocked(id, difficulty)) { const d = firstOpen(id); if (!d) { hToast('This mission is still locked.', true); return; } difficulty = d; }
+  const tg = TREATY_GAMES.find(x => x.id === id), g = tg || GAMES.find(x => x.id === id);
+  if (!tg) TREATY_RUN = null;
+  if (!tg && !unlocked(id, difficulty)) { const d = firstOpen(id); if (!d) { hToast('This mission is still locked.', true); return; } difficulty = d; }
   $('#detail').hidden = true; $('#loading').hidden = false;
   $('#lThumb').style.background = g.bg; $('#lThumb').textContent = g.emoji; $('#lTitle').textContent = g.title; $('#lText').textContent = 'Joining server…';
   if (typeof THREE === 'undefined') { $('#lText').textContent = 'The 3D engine could not load. Check your internet connection and reload the page.'; setTimeout(() => $('#loading').hidden = true, 4000); return; }
@@ -1761,7 +1777,7 @@ async function launch(id) {
 function startScenario(id) {
   newWorld();
   const sc = SCEN[id];
-  G = { id, sc, diff: difficulty, t0: performance.now(), money: 0, good: 0, bad: 0, hints: 0, manners: 100, mistakes: [], obj: [], inv: [], over: false, s: {} };
+  G = { id, sc, diff: difficulty, t0: performance.now(), money: 0, good: 0, bad: 0, hints: 0, manners: 100, mistakes: [], obj: [], inv: [], over: false, s: {}, treaty: TREATY_RUN };
   sc.build();
   $('#msTitle').textContent = sc.title; $('#cardBtn').textContent = 'Character card';
   renderObjectives(); updateBoard(); renderHotbar();
@@ -8932,7 +8948,7 @@ const NAPI = {
   visit(email) { return apiU('nationVisit', email); },
   send(to, type, letter) { return apiU('nationSendTreaty', to, type, letter); },
   answer(id, ok, reply) { return apiU('nationAnswerTreaty', id, ok, reply); },
-  summit(id, passed) { return apiU('nationSummit', id, passed); }
+  summit(id, stage, passed) { return apiU('nationStage', id, stage, passed); }
 };
 
 /* ---------- flags ---------- */
@@ -9486,7 +9502,7 @@ function nationHud() {
     { emoji: '📜', label: 'Nation menu', act: nationMenu },
     { emoji: '💰', label: 'Collect taxes', act: collectTaxes, bad: () => !!st.taxReady },
     { emoji: '🌍', label: 'World ranking', act: worldPanel },
-    { emoji: '✉', label: 'Letters & summits', act: lettersPanel, bad: () => (st.inbox || []).length > 0 || (st.summits || []).some(t => !t.meDone && !t.triedToday) }
+    { emoji: '✉', label: 'Letters & summits', act: lettersPanel, bad: () => (st.inbox || []).length > 0 || (st.summits || []).some(t => t.status === 'project' && t.myStage < STAGE_NAME.length && !t.triedToday) }
   ];
   renderHotbar();
 }
@@ -9769,7 +9785,7 @@ const LETTER_BODY = {
   peace: ['I am writing to propose a peace treaty between our two nations.', 'Peace would make both of our countries safer and happier.', [['Peace would make both of our countries more safe.', 'safe → safer (short adjective + -er).'], ['Peace would makes our countries happier.', 'After "would" use the base verb: would make.']]]
 };
 /* the student builds a formal letter slot by slot; every slot has one correct option */
-function letterBuilder(title, sub, slots, onDone) {
+function letterBuilder(title, sub, slots, onDone, onPick) {   // onPick(ok): called once per part, with the first choice
   let k = 0; const done = [];
   const draw = () => {
     const box = el('div', 'letter-wrap');
@@ -9777,10 +9793,10 @@ function letterBuilder(title, sub, slots, onDone) {
     if (k < slots.length) {
       const sl = slots[k];
       box.append(el('div', 'quiz-q', `<small>Part ${k + 1} of ${slots.length}: ${escH(sl.label)}</small>Choose the best option for a formal letter.`));
-      const opts = el('div', 'dlg-opts'); const fb = el('div', 'quiz-fb'); fb.hidden = true;
+      const opts = el('div', 'dlg-opts'); const fb = el('div', 'quiz-fb'); fb.hidden = true; let tried = false;
       shuffle([{ t: sl.ok }].concat(sl.bad.map(([t, tip]) => ({ t, tip })))).forEach((o, j) => {
         const b = el('button', 'opt', `<span class="n">${j + 1}</span><span>${escH(o.t).replace(/\n/g, '<br>')}</span>`);
-        b.onclick = () => { if (!o.tip) { done.push(o.t); k++; draw(); } else { b.disabled = true; b.classList.add('wrong'); fb.hidden = false; fb.className = 'quiz-fb bad'; fb.textContent = '✘ ' + o.tip; } };
+        b.onclick = () => { if (!tried) { tried = true; if (onPick) onPick(!o.tip); } if (!o.tip) { done.push(o.t); k++; draw(); } else { b.disabled = true; b.classList.add('wrong'); fb.hidden = false; fb.className = 'quiz-fb bad'; fb.textContent = '✘ ' + o.tip; } };
         opts.append(b);
       });
       box.append(opts, fb);
@@ -9809,9 +9825,12 @@ function lettersPanel() {
   const box = el('div', 'letters');
   box.innerHTML = (st.inbox.length ? st.inbox.map(t => `<div class="lcard"><div class="lhead"><b>${TREATY_NAME[t.type]}</b> from <b>${escH(t.fromName)}</b><small>${new Date(t.date).toLocaleDateString('en-GB')}</small></div><div class="letter">${t.letter.split('\n\n').map(p => `<p>${escH(p).replace(/\n/g, '<br>')}</p>`).join('')}</div>
       <div class="acts"><button class="btn primary" data-a="${escH(t.id)}">Reply and accept</button><button class="btn" data-d="${escH(t.id)}">Reply and decline</button></div></div>`).join('') : '<p class="panel-p">No new letters.</p>')
-    + ((st.summits || []).length ? `<h3>🤝 Summits: sign your treaties</h3><p class="panel-p">A treaty is signed when <b>both presidents</b> pass the summit (one try a day). Each nation gets <b>${st.treatyPrize || 1000} GOYUX</b> for its first three treaties.</p>${st.summits.map(t => `<div class="lcard"><div class="lhead"><b>${TREATY_NAME[t.type]}</b> with <b>${escH(t.otherName)}</b></div>
-      <p class="panel-p">You: ${t.meDone ? '✅ passed' : t.triedToday ? '⏳ try again tomorrow' : '📝 not yet'} · ${escH(t.otherName)}: ${t.themDone ? '✅ passed' : '⏳ not yet'}</p>
-      ${!t.meDone && !t.triedToday ? `<div class="acts"><button class="btn primary" data-s="${escH(t.id)}">Go to the summit</button></div>` : ''}</div>`).join('')}` : '')
+    + ((st.summits || []).length ? `<h3>🤝 Treaty projects</h3><p class="panel-p">To sign a treaty, <b>both presidents</b> must pass ${STAGE_NAME.length} stages (one a day): ${STAGE_NAME.join(' · ')} (a long mission: ${TREATY_PASS}/100 needed). Then you <b>present the treaty in class together</b>, and when your teacher validates it, each nation gets <b>${st.treatyPrize || 1000} GOYUX</b> (for its first three treaties).</p>${st.summits.map(t => `<div class="lcard"><div class="lhead"><b>${TREATY_NAME[t.type]}</b> with <b>${escH(t.otherName)}</b></div>
+      <p class="panel-p">You: ${t.myStage}/${STAGE_NAME.length} stages · ${escH(t.otherName)}: ${t.theirStage}/${STAGE_NAME.length} stages</p>
+      ${t.status === 'present' ? '<p class="panel-p">🎤 <b>Both of you have finished!</b> Present your treaty in class together (2–3 minutes in English: what it says, why it is good for both nations, a problem you solved). Your teacher will validate it.</p>'
+        : t.myStage >= STAGE_NAME.length ? `<p class="panel-p">✅ You have finished your stages. Waiting for ${escH(t.otherName)}.</p>`
+        : t.triedToday ? '<p class="panel-p">⏳ You have done a stage today. Come back tomorrow!</p>'
+        : `<div class="acts"><button class="btn primary" data-s="${escH(t.id)}">Stage ${t.myStage + 1}: ${STAGE_NAME[t.myStage]}</button></div>`}</div>`).join('')}` : '')
     + (st.sent.length ? `<h3>Waiting for an answer</h3>${st.sent.map(t => `<p class="panel-p">${TREATY_NAME[t.type]} → ${escH(t.toName)}</p>`).join('')}` : '')
     + (st.treaties.length ? `<h3>Signed treaties</h3>${st.treaties.map(t => `<p class="panel-p">✅ ${TREATY_NAME[t.type]} with ${escH(t.from === account.email ? t.toName : t.fromName)}</p>`).join('')}` : '');
   panel('Letters', 'Answer other presidents with a formal letter.', box, [{ t: 'Close', fn: closePanel }], { cls: 'wide', onClose: () => {} });
@@ -9829,7 +9848,7 @@ function reply(t, accept) {
     { label: 'Sign-off', ok: `Yours sincerely,\n${profile.name}, President of ${me.name}`, bad: [[`Kisses,\n${profile.name}`, 'Too informal. Use "Yours sincerely,".']] }
   ], async letter => {
     closePanel();
-    try { applyNation(await NAPI.answer(t.id, accept, letter)); notify(accept ? '🤝 Proposal accepted!' : '✉ Reply sent', accept ? `Now both presidents must pass the summit to sign the ${TREATY_NAME[t.type]} (✉ Letters). Prize: 1000 GOYUX for each nation!` : 'You declined politely.', 'good'); }
+    try { applyNation(await NAPI.answer(t.id, accept, letter)); notify(accept ? '🤝 Proposal accepted!' : '✉ Reply sent', accept ? `The ${TREATY_NAME[t.type]} project starts now: both presidents must pass 4 English stages and present the treaty in class (✉ Letters). Prize: 1000 GOYUX for each nation!` : 'You declined politely.', 'good'); }
     catch (e) { notify('⚠️ Not sent', e.message, 'bad'); }
   });
 }
@@ -9871,43 +9890,141 @@ const SUMMIT = {
     ['Neither of our nations ___ to repeat the mistakes of the past.', 'wants', ['want', 'are wanting'], '"Neither of…" takes a singular verb in formal English: wants.']
   ]
 };
-function summit(t) {
-  const S = SUMMIT[t.type]; if (!S) return;
-  const qs = shuffle(S.qs.slice()).map(q => ({ q, read: true })).concat(sample(SUMMIT.talk, 4).map(q => ({ q })), sample(SUMMIT.gram, 3).map(q => ({ q })));
-  const need = 8; let i = 0, right = 0;
-  const intro = () => panel(`🤝 Summit with ${t.otherName}`, `${TREATY_NAME[t.type]} · 10 questions · you need ${need} correct · one try a day`,
-    `<p class="panel-p">Read the draft of the treaty carefully. During the summit you must understand it, speak like a diplomat and use formal English. Then ${escH(t.otherName)}'s president must pass the summit too.</p><div class="quiz-text">${escH(S.text).replace(/\n/g, '<br>')}</div>`,
-    [{ t: 'Not now', fn: closePanel }, { t: 'Start the summit', cls: 'primary', fn: show }], { onClose: () => {} });
+/* The other three stages of the treaty project, for each kind of treaty:
+   call  = listening: a minister's voice message (no text!), then questions;
+   text  = writing: build the official treaty text, choosing the correct, formal sentence for each part;
+   press = speaking: answer journalists at the press conference (formal register, reported speech). */
+const TSTAGE = {
+  trade: {
+    call: ['Good morning, this is the Minister of Trade. I\'m calling about our new agreement. The first ship with your olive oil will arrive at our port next Tuesday, not Monday, because of a storm. Please send us the list of products by Friday at the latest. Oh, and one more thing: our customs officers will need the documents in English, not in Spanish. Thank you, and have a good day.', [
+      ['When will the first ship arrive?', 'Next Tuesday', ['Next Monday', 'On Friday']],
+      ['Why is it late?', 'Because of a storm', ['Because of a strike', 'Because the port is full']],
+      ['What do they need by Friday?', 'The list of products', ['The olive oil', 'The money']],
+      ['In what language must the documents be?', 'In English', ['In Spanish', 'In both languages']],
+      ['Who is calling?', 'The Minister of Trade', ['A customs officer', 'The captain of the ship']]]],
+    text: [
+      { label: 'Title', ok: 'Trade Agreement between our two nations', bad: [['Trade Agree between our two nations', '"Agreement" is the noun.'], ['Trade Agreement between ours two nations', '"our" never takes -s.']] },
+      { label: 'Purpose', ok: 'The purpose of this agreement is to increase trade and create jobs.', bad: [['The purpose of this agreement is increase trade.', 'is TO increase.'], ['This agreement is for make more trade.', 'for + -ing, or "to make".']] },
+      { label: 'Clause 1', ok: 'Taxes on food products shall be reduced by 50%.', bad: [['Taxes on food products shall reduce by 50%.', 'Taxes don\'t reduce themselves: passive "shall be reduced".'], ['Taxes on food products shall be reduce by 50%.', 'be + past participle: reduced.']] },
+      { label: 'Clause 2', ok: 'Each nation may end the agreement by giving six months\' notice.', bad: [['Each nation may ends the agreement.', 'After "may" → base verb: end.'], ['Each nations may end the agreement.', '"each" + singular noun: each nation.']] },
+      { label: 'Clause 3', ok: 'A joint committee will meet twice a year to review prices.', bad: [['A joint committee will meets two times for year.', 'will + base verb; "twice a year".'], ['A joint committee will meet twice in the year for review prices.', '"to review" (purpose).']] },
+      { label: 'Signature', ok: 'Signed by the Presidents of both nations on this day.', bad: [['Signed for the Presidents of both nations in this day.', 'signed BY …, ON this day.'], ['Sign by the Presidents of both nations.', 'Passive: "Signed by".']] }],
+    press: [
+      ['JOURNALIST: Will prices go up because of the agreement?', 'On the contrary: food prices are expected to fall.', ['Of course not, that\'s a stupid question.', 'Prices are expect to fall.', 'I don\'t know, ask someone else.'], 'Polite and confident. Passive: "are expected to".'],
+      ['JOURNALIST: What did the other president say about cars?', 'She said that taxes on cars would stay the same for two years.', ['She said that taxes on cars will stayed the same.', 'She told that taxes on cars stay the same.', 'Cars? Who cares!'], 'Reported speech: will → would; "said that" (or "told us that").'],
+      ['JOURNALIST: Isn\'t this agreement bad for our farmers?', 'I understand the concern, but our farmers will be able to sell more abroad.', ['No. Next question.', 'I understand the concern, but our farmers will can sell more.', 'Our farmers are not my problem.'], 'Acknowledge the concern first. "will be able to" (never "will can").'],
+      ['JOURNALIST: When does the agreement come into force?', 'It comes into force on 1 January.', ['It comes in force the 1 January.', 'Whenever.', 'It come into force on 1 January.'], '"come into force ON 1 January"; it comes (-s).'],
+      ['JOURNALIST: Why did you sign it?', 'Because we believe it will benefit both our nations.', ['Because I wanted.', 'Because we believe it will benefit to both our nations.', 'Because they asked me nicely.'], '"benefit" takes no "to": it will benefit both nations.'],
+      ['JOURNALIST: One last question, President…', 'I\'m afraid that\'s all we have time for today. Thank you all.', ['Go away now.', 'No more questions, finish.', 'I\'m afraid that\'s all we have time today.'], 'Polite closing: "That\'s all we have time FOR".']] },
+  culture: {
+    call: ['Hello, this is the Minister of Culture. Good news about the student exchange! Twenty students will arrive on the fifteenth of March and stay for three weeks. They will live with host families, so we need forty families: twenty in each country. Please remember that every student needs a signed permission form from their parents. We will also organise a welcome party at the National Museum on their first Friday. Speak soon!', [
+      ['When will the students arrive?', 'On 15 March', ['On 5 March', 'On 15 May']],
+      ['How long will they stay?', 'Three weeks', ['Three months', 'Two weeks']],
+      ['How many host families are needed in total?', 'Forty', ['Twenty', 'Fifteen']],
+      ['What does every student need?', 'A permission form signed by their parents', ['A passport photo', 'A museum ticket']],
+      ['Where is the welcome party?', 'At the National Museum', ['At the airport', 'At the President\'s house']]]],
+    text: [
+      { label: 'Title', ok: 'Agreement on Cultural Exchange', bad: [['Agreement of Cultural Exchanging', '"on Cultural Exchange".'], ['Agree on Cultural Exchange', '"Agreement" is the noun.']] },
+      { label: 'Purpose', ok: 'Both nations wish to learn more about each other\'s language and traditions.', bad: [['Both nations wish learn more about each other.', 'wish TO learn.'], ['Both nations wish to learn more about the other\'s each language.', '"each other\'s language".']] },
+      { label: 'Clause 1', ok: 'Every year, twenty students from each nation will be welcomed by host families.', bad: [['Every year, twenty students of each nation will welcome by host families.', 'Passive: "will be welcomed".'], ['Every years, twenty students will be welcomed.', '"every year" (singular).']] },
+      { label: 'Clause 2', ok: 'Museums shall lend each other works of art for one exhibition a year.', bad: [['Museums shall borrow each other works of art.', 'lend = dar prestado; borrow = pedir prestado.'], ['Museums shall to lend works of art.', 'No "to" after "shall".']] },
+      { label: 'Clause 3', ok: 'Free language classes will be offered in both capitals.', bad: [['Free language classes will be offer in both capitals.', 'be + participle: offered.'], ['Free languages classes will be offered.', 'Adjective use: "language classes".']] },
+      { label: 'Signature', ok: 'Signed in friendship by the Presidents of both nations.', bad: [['Signed in friendly by the Presidents.', '"in friendship" (noun).'], ['Signed of the Presidents of both nations.', '"signed BY".']] }],
+    press: [
+      ['JOURNALIST: Why is this exchange important?', 'Because learning about other cultures makes us more open and tolerant.', ['Because yes.', 'Because learn about other cultures makes us more open.', 'Why not?'], 'Gerund as subject: "learning about… makes us…".'],
+      ['JOURNALIST: What did the students say about the plan?', 'They told us they were really excited about it.', ['They said us they were excited.', 'They told they are excited.', 'I didn\'t ask them, honestly.'], '"told us" (tell + person) / "said that" (no person). Backshift: are → were.'],
+      ['JOURNALIST: Some families say they don\'t have space for a student. What do you think?', 'That\'s completely understandable. Hosting is voluntary, and we have enough families.', ['Then they are bad families.', 'That\'s completely understandable. Hosting is voluntary, and we have enough of families.', 'Not my problem.'], 'Respect other opinions. "enough families" (no "of").'],
+      ['JOURNALIST: How much will it cost?', 'The travel costs will be shared equally by both nations.', ['The travel costs will share equally.', 'A lot, but who cares.', 'The travel costs will be shared equal.'], 'Passive + adverb: "will be shared equally".'],
+      ['JOURNALIST: Have you ever done an exchange yourself?', 'Yes, I spent a summer in Ireland when I was fifteen. It changed my life.', ['Yes, I have spent a summer in Ireland when I was fifteen.', 'That\'s personal.', 'Yes, I spended a summer in Ireland.'], 'Finished time (when I was fifteen) → past simple: spent.'],
+      ['JOURNALIST: Thank you, President.', 'Thank you. I look forward to welcoming the first students.', ['Thank you. I look forward to welcome the first students.', 'Yeah, bye.', 'Thank you. I look forward for welcoming them.'], 'look forward TO + -ing.']] },
+  peace: {
+    call: ['Hello, President. This is the Minister of Defence. I\'m calling about the peace treaty. Our soldiers will leave the two army bases near the border by the end of June. Instead, we will build a hospital and a school there. Also, we would like to organise a joint rescue exercise in September, so that our teams can practise helping people after floods. Please confirm by email. Thank you.', [
+      ['When will the soldiers leave the bases?', 'By the end of June', ['In September', 'At the beginning of June']],
+      ['What will they build instead?', 'A hospital and a school', ['A new army base', 'A bridge and a road']],
+      ['What will happen in September?', 'A joint rescue exercise', ['A football match', 'A big party']],
+      ['What will the teams practise?', 'Helping people after floods', ['Fighting fires', 'Building bridges']],
+      ['How should the President confirm?', 'By email', ['By phone', 'In person']]]],
+    text: [
+      { label: 'Title', ok: 'Treaty of Peace and Friendship', bad: [['Treaty of Peaceful and Friendship', 'Use two nouns: peace and friendship.'], ['Treat of Peace and Friendship', '"Treaty" (tratado). "Treat" is something different.']] },
+      { label: 'Purpose', ok: 'Both nations promise to solve any disagreement through dialogue.', bad: [['Both nations promise solving any disagreement.', 'promise TO + verb.'], ['Both nations promises to solve any disagreement.', 'Plural subject: promise.']] },
+      { label: 'Clause 1', ok: 'Neither nation shall build army bases within 20 km of the border.', bad: [['Neither nation shall not build army bases.', '"Neither" is already negative: no "not".'], ['Neither nations shall build army bases.', '"neither nation" (singular).']] },
+      { label: 'Clause 2', ok: 'In the event of a disaster, help will be sent within 48 hours.', bad: [['In the event of a disaster, help will send within 48 hours.', 'Passive: "will be sent".'], ['In event of disaster, help will be sended.', 'send – sent – sent.']] },
+      { label: 'Clause 3', ok: 'The Presidents will meet every year to renew this promise.', bad: [['The Presidents will meet every years.', '"every year".'], ['The Presidents will meet every year for renew this promise.', 'Purpose: "to renew".']] },
+      { label: 'Signature', ok: 'Signed by the Presidents, who hope for a peaceful future.', bad: [['Signed by the Presidents, which hope for a peaceful future.', 'People → who.'], ['Signed by the Presidents, who hope a peaceful future.', 'hope FOR something.']] }],
+    press: [
+      ['JOURNALIST: Does this treaty mean our army will disappear?', 'Not at all. Our army will focus on protecting people and helping in disasters.', ['What a silly question.', 'Not at all. Our army will focus in protecting people.', 'Maybe, who knows?'], 'focus ON something. Stay calm and respectful.'],
+      ['JOURNALIST: What did the other president promise?', 'He promised that his soldiers would leave the border by June.', ['He promised that his soldiers will left the border.', 'He promised me his soldiers leave.', 'Many things, I don\'t remember.'], 'Reported speech: will leave → would leave.'],
+      ['JOURNALIST: Can we really trust the other nation?', 'Trust is built step by step. This treaty is a very important first step.', ['No, but I signed anyway.', 'Trust is build step by step.', 'Of course, they are perfect.'], 'Passive: "trust is built".'],
+      ['JOURNALIST: What would you do if the other nation broke the treaty?', 'We would talk to them immediately and try to solve the problem peacefully.', ['We will attack them.', 'We would talked to them immediately.', 'We would talk to them immediately and try to solving the problem.'], 'Second conditional: would + base verb.'],
+      ['JOURNALIST: Why is the rescue exercise in September?', 'It\'s held in September so that our teams are ready before the rainy season.', ['Because September is nice.', 'It\'s held in September for that our teams are ready.', 'It holds in September.'], '"so that" for purpose; passive "is held".'],
+      ['JOURNALIST: Any message for the citizens?', 'Yes: peace is not just a treaty, it\'s something we build together every day.', ['No.', 'Yes: peace is not just a treaty, is something we build together.', 'Read the treaty yourselves.'], 'English needs a subject: "it\'s something…".']] }
+};
+const STAGE_NAME = ['🤝 The summit', '🎮 The treaty mission'];
+/* the treaty missions (long 3D missions, played at Hard / B2); they are not in GAMES: no cards, no unlocking */
+const TREATY_GAMES = [];
+const TREATY_MISSION = { trade: 'trtrade', culture: 'trculture', peace: 'trpeace' };
+const TREATY_PASS = 70;
+/* runs a set of multiple-choice questions in the panel; extra(i) adds content above each question */
+function stageQuiz(title, qs, need, extra, done) {
+  let i = 0, right = 0;
   const show = () => {
-    const { q: [q, a, wrong, tip], read } = qs[i];
+    const [q, a, wrong, tip] = qs[i];
     const box = el('div', 'quiz');
-    if (read) box.append(el('div', 'quiz-text', escH(S.text).replace(/\n/g, '<br>')));
-    box.append(el('div', 'quiz-q', `<small>Question ${i + 1} of ${qs.length} · ${read ? '📜 The treaty' : i < 7 ? '🎩 Diplomacy' : '✏️ Formal English'}</small>${escH(q)}`));
+    const x = extra && extra(i); if (x) box.append(x);
+    box.append(el('div', 'quiz-q', `<small>Question ${i + 1} of ${qs.length}</small>${escH(q)}`));
     const opts = el('div', 'dlg-opts');
-    shuffle([a].concat(wrong)).forEach((x, k) => { const b = el('button', 'opt', `<span class="n">${k + 1}</span><span>${escH(x)}</span>`); b.dataset.t = x; b.onclick = () => answer(x, b); opts.append(b); });
+    shuffle([a].concat(wrong)).forEach((t, k) => { const b = el('button', 'opt', `<span class="n">${k + 1}</span><span>${escH(t)}</span>`); b.dataset.t = t; b.onclick = () => answer(t, b); opts.append(b); });
     box.append(opts); const fb = el('div', 'quiz-fb'); fb.hidden = true; box.append(fb);
-    panel(`🤝 Summit with ${t.otherName}`, `${right} correct so far · you need ${need} of ${qs.length}`, box, [], { onClose: () => {} });
-    function answer(x, b) {
-      const ok = x === a; if (ok) right++;
+    panel(title, `${right} correct so far · you need ${need} of ${qs.length}`, box, [], { onClose: () => {} });
+    function answer(t, b) {
+      const ok = t === a; if (ok) right++;
       opts.querySelectorAll('button').forEach(y => { y.disabled = true; if (y.dataset.t === a) y.classList.add('right'); });
       if (!ok) b.classList.add('wrong');
-      fb.hidden = false; fb.className = 'quiz-fb ' + (ok ? 'good' : 'bad'); fb.textContent = ok ? '✔ Correct!' : '✘ ' + tip;
+      fb.hidden = false; fb.className = 'quiz-fb ' + (ok ? 'good' : 'bad'); fb.textContent = ok ? '✔ Correct!' : '✘ ' + (tip || `The answer is: ${a}`);
       const f = $('#panelFoot'); f.innerHTML = '';
-      const nx = el('button', 'btn primary', i + 1 < qs.length ? 'Next question' : 'End the summit'); nx.onclick = () => { i++; i < qs.length ? show() : end(); }; f.append(nx); nx.focus();
+      const nx = el('button', 'btn primary', i + 1 < qs.length ? 'Next' : 'Finish'); nx.onclick = () => { i++; i < qs.length ? show() : done(right >= need, right, qs.length); }; f.append(nx); nx.focus();
     }
   };
-  const end = async () => {
-    const pass = right >= need;
-    panel('Saving…', '', '<p class="panel-p">Sending the result to the other president…</p>', [], { onClose: () => {} });
+  show();
+}
+const treatyNext = (t, k, pass, ready) => !pass ? 'Read the tips and try again tomorrow (one stage a day).' : ready ? `You and ${escH(t.otherName)} have finished all the stages! Now <b>present your treaty in class together</b> (2–3 minutes in English). When your teacher validates it, the treaty is signed and each nation gets the prize.` : k < STAGE_NAME.length - 1 ? `Well done! Next stage tomorrow: <b>${STAGE_NAME[k + 1]}</b>.` : `Well done! You have finished your part. Now ${escH(t.otherName)}'s president must finish theirs. Then you present the treaty in class together.`;
+function launchTreaty(t) {
+  const id = TREATY_MISSION[t.type]; if (!SCEN[id]) { notify('⚠️', 'This treaty mission is not available yet.', 'bad'); return; }
+  TREATY_RUN = t; difficulty = 'hard'; launch(id);
+}
+let TREATY_RUN = null;
+/* called by showResults when a treaty mission ends */
+function treatyResult(overall) {
+  const t = TREATY_RUN; TREATY_RUN = null; const pass = overall >= TREATY_PASS;
+  $('#resFob').textContent = `Treaty mission · score ${overall}/100 · ${pass ? 'passed ✓' : `you need ${TREATY_PASS}`} · saving…`;
+  $('#resCard').hidden = false;
+  $('#resCard').innerHTML = `<div><b>${pass ? '🤝 Your part of the treaty is done!' : '🤝 Treaty mission: not yet'}</b><p>${treatyNext(t, 1, pass, false)}</p></div>`;
+  if (!(CLOUD && account)) return;
+  apiU('nationStage', t.id, 1, pass).then(r => {
+    $('#resFob').textContent = `Treaty mission · score ${overall}/100 · ${pass ? 'passed ✓' : `you need ${TREATY_PASS}`} · saved ✓`;
+    if (r.stage && r.stage.ready) $('#resCard').innerHTML = `<div><b>🎉 Both presidents are ready!</b><p>${treatyNext(t, 1, true, true)}</p></div>`;
+  }).catch(e => { $('#resFob').textContent = `Treaty mission · score ${overall}/100 · not saved: ${e.message}`; });
+}
+function summit(t) {   // one stage of the treaty project (the button in ✉ Letters)
+  const k = t.myStage || 0, S = SUMMIT[t.type]; if (!S || k >= STAGE_NAME.length) return;
+  const title = `${STAGE_NAME[k]} · ${TREATY_NAME[t.type]} with ${t.otherName}`;
+  const save = async (pass, right, n) => {
+    panel('Saving…', '', '<p class="panel-p">Saving your result…</p>', [], { onClose: () => {} });
     try {
-      const r = await NAPI.summit(t.id, pass); applyNation(r);
-      const sm = r.summit || {};
-      panel(pass ? (sm.signed ? '🎉 Treaty signed!' : '✅ Summit passed!') : 'Not yet…', '', `<div class="quiz-end"><b>${right} / ${qs.length}</b><p>${!pass ? `You need ${need} correct answers. Read the tips and try again tomorrow.` : sm.signed ? `Both presidents passed the summit: the ${TREATY_NAME[t.type]} with ${escH(t.otherName)} is signed!${sm.prize ? ` <b>+${sm.prize} GOYUX</b> for your nation.` : ' (Your nation has already been paid for three treaties, but you still get the bonus to your stats.)'}` : `Excellent diplomacy! Now ${escH(t.otherName)}'s president must pass the summit too. Then the treaty is signed and both nations get the prize.`}</p></div>`,
-        [{ t: 'Close', cls: 'primary', fn: closePanel }]);
-      if (sm.signed && sm.prize) notify('🤝 Treaty signed!', `+${sm.prize} GOYUX for ${G.s.state.nation.name}!`, 'good');
+      const r = await NAPI.summit(t.id, k, pass); applyNation(r);
+      const ready = r.stage && r.stage.ready;
+      panel(pass ? `✅ ${STAGE_NAME[k]}: passed!` : 'Not yet…', '', `<div class="quiz-end"><b>${right} / ${n}</b><p>${treatyNext(t, k, pass, ready)}</p></div>`, [{ t: 'Close', cls: 'primary', fn: closePanel }]);
     } catch (e) { closePanel(); notify('⚠️ Not saved', e.message, 'bad'); }
   };
-  intro();
+  const start = fn => panel(title, `Stage ${k + 1} of ${STAGE_NAME.length} · one try a day`, `<p class="panel-p">${[
+    'Read the draft of the treaty carefully. At the summit you must understand it, speak like a diplomat and use formal English. You need 8 of 10.',
+    `Now put the treaty into practice in a <b>long 3D mission</b> (about 20–25 minutes, level B2): negotiate, read documents, listen to the minister's voice message (turn your sound on 🔊), write the treaty text and face the press. You need <b>${TREATY_PASS}/100</b>. You have one try a day, so take your time!`][k]}</p>${k === 0 ? `<div class="quiz-text">${escH(S.text).replace(/\n/g, '<br>')}</div>` : ''}`,
+    [{ t: 'Not now', fn: closePanel }, { t: 'Start', cls: 'primary', fn }], { onClose: () => {} });
+  if (k === 0) {
+    const qs = shuffle(S.qs.slice()).map(q => q.concat(['read'])).concat(sample(SUMMIT.talk, 4), sample(SUMMIT.gram, 3));
+    return start(() => stageQuiz(title, qs, 8, i => qs[i][4] === 'read' ? el('div', 'quiz-text', escH(S.text).replace(/\n/g, '<br>')) : null, save));
+  }
+  start(() => { closePanel(); launchTreaty(t); });
 }
 
 /* ---------------- progress card (made to be screenshotted and sent to the teacher) ---------------- */
@@ -9952,6 +10069,7 @@ async function loadTeacher() {
   $('#tTable').innerHTML = '<tr><td>Cargando alumnos…</td></tr>';
   try { applyTeacher(await api('teacherList')); } catch (e) { $('#tTable').innerHTML = `<tr><td>${escH(e.message)}</td></tr>`; }
   try { renderGuests(await api('teacherGuests')); } catch (e) {}
+  try { renderTreaties(await api('teacherTreaties')); } catch (e) {}
   $('#tAdmin').hidden = !account.isAdmin;
   if (account.isAdmin) { try { renderAdmin(await api('adminTeachers')); } catch (e) {} }
 }
@@ -9963,6 +10081,15 @@ $('#aAdd').onclick = async () => {
   const em = $('#aEmail').value.trim(); if (!em) { hToast('Escribe el correo del profesor.', true); return; }
   try { renderAdmin(await api('adminAddTeacher', em, $('#aName').value.trim())); $('#aEmail').value = ''; $('#aName').value = ''; hToast('Profesor añadido. Ya puede entrar con el enlace de GOBLOX.'); } catch (e) { hToast(e.message, true); }
 };
+const TREATY_ES = { trade: 'Acuerdo comercial', culture: 'Intercambio cultural', peace: 'Tratado de paz' };
+function renderTreaties(list) {
+  $('#trTable').innerHTML = '<tr><th>Tratado</th><th>Países</th><th>Etapas</th><th>Estado</th><th></th></tr>' + (list.map(t => `<tr><td>${escH(TREATY_ES[t.type] || t.type)}</td><td><b>${escH(t.from)}</b> y <b>${escH(t.to)}</b></td><td>${t.stFrom}/${t.stages} · ${t.stTo}/${t.stages}</td><td>${t.status === 'present' ? '🎤 Listo para presentar en clase' : 'En curso'}</td><td>${t.status === 'present' ? `<div class="acts"><button class="mini pos" data-tv="${escH(t.id)}" data-ok="1">Validar (+1000 cada uno)</button><button class="mini" data-tv="${escH(t.id)}" data-ok="0">Repetir</button></div>` : ''}</td></tr>`).join('') || '<tr><td colspan="5">Todavía no hay tratados en marcha.</td></tr>');
+  $('#trTable').querySelectorAll('[data-tv]').forEach(b => b.onclick = async () => {
+    const ok = b.dataset.ok === '1';
+    if (ok && !confirm('¿Han presentado el tratado en clase? Al validarlo, cada país recibe 1000 GOYUX.')) return;
+    try { renderTreaties(await api('teacherValidateTreaty', b.dataset.tv, ok)); hToast(ok ? 'Tratado firmado. ¡1000 GOYUX para cada país!' : 'Tendrán que repetir la última etapa.'); } catch (e) { hToast(e.message, true); }
+  });
+}
 function renderGuests(list) {
   $('#gTable').innerHTML = '<tr><th>Código</th><th>Nombre</th><th>Clase</th><th>Estado</th><th></th></tr>' + (list.map(g => `<tr><td><span class="code">${escH(g.code)}</span></td><td>${escH(g.name)}</td><td>${escH(g.className || '—')}</td><td>${g.active ? 'Activo' : 'Desactivado'}</td><td><button class="mini ${g.active ? 'neg' : 'pos'}" data-g="${escH(g.code)}" data-on="${g.active ? 0 : 1}">${g.active ? 'Desactivar' : 'Activar'}</button></td></tr>`).join('') || '<tr><td colspan="5">Todavía no hay invitados.</td></tr>');
   $('#gTable').querySelectorAll('[data-g]').forEach(b => b.onclick = async () => { try { renderGuests(await api('teacherSetGuest', b.dataset.g, b.dataset.on === '1')); } catch (e) { hToast(e.message, true); } });
