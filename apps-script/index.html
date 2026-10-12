@@ -1081,7 +1081,7 @@ function initThree() {
   const canvas = $('#c');
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
   renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
-  renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap; renderer.shadowMap.autoUpdate = false;
   const camera = new THREE.PerspectiveCamera(62, 1, 0.1, 600);
   R = { renderer, camera, canvas, ray: new THREE.Raycaster() };
   addEventListener('resize', resize);
@@ -1113,11 +1113,12 @@ function checkerTex(a, b, n, rx, rz) {
 }
 
 function newWorld() {
+  perf.sunKey = ''; perf.sum = 0; perf.n = 0; perf.t0 = performance.now();
   const scene = new THREE.Scene();
   scene.background = new THREE.Color('#a8dcff'); scene.fog = new THREE.Fog('#a8dcff', 90, 260);
   scene.add(new THREE.HemisphereLight('#ffffff', '#6f7f5f', 0.78));
   const sun = new THREE.DirectionalLight('#fff3df', 0.72); sun.castShadow = true;
-  sun.shadow.mapSize.set(2048, 2048); const sc = sun.shadow.camera; sc.left = -45; sc.right = 45; sc.top = 45; sc.bottom = -45; sc.near = 1; sc.far = 160; sun.shadow.bias = -0.0006;
+  sun.shadow.mapSize.set(QUAL[perf.q].map, QUAL[perf.q].map); const sc = sun.shadow.camera; sc.left = -45; sc.right = 45; sc.top = 45; sc.bottom = -45; sc.near = 1; sc.far = 160; sun.shadow.bias = -0.0006;
   scene.add(sun); scene.add(sun.target);
   W = { scene, sun, colliders: [], occluders: [], inter: [], npcs: [], hides: [], timers: [], t: 0, bounds: { minX: -60, maxX: 60, minZ: -60, maxZ: 60 }, update: null, marker: null };
   $('#bubbles').innerHTML = ''; $('#chatLog').innerHTML = ''; $('#notes').innerHTML = '';
@@ -1139,12 +1140,16 @@ function part(x, y, z, w, h, d, color, o = {}) {
   return m;
 }
 function plane(x, y, z, w, h, rotY, tex, o = {}) {
-  const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ map: tex, transparent: !!o.transparent }));
+  const mat = tex.keep && !o.transparent ? tex.mat || (tex.mat = new THREE.MeshBasicMaterial({ map: tex })) : new THREE.MeshBasicMaterial({ map: tex, transparent: !!o.transparent });
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), mat);
   m.position.set(x, y, z); m.rotation.y = rotY || 0; (o.parent || W.scene).add(m); return m;
 }
+const signCache = {};
 function sign(text, x, y, z, w, h, rotY, o = {}) {
-  const cw = 1024, ch = Math.round(1024 * h / w);
-  const tex = canvasTex(cw, ch, (g) => {
+  // small signs get smaller textures, and the same sign is drawn only once (nations redraw their plots often)
+  const cw = Math.min(1024, Math.max(256, Math.round(w * 128))), ch = Math.round(cw * h / w);
+  const key = [text, w, h, o.bg, o.fg, o.border, o.size, o.weight].join('|');
+  const tex = signCache[key] || (signCache[key] = canvasTex(cw, ch, (g) => {
     g.fillStyle = o.bg || '#222'; g.fillRect(0, 0, cw, ch);
     if (o.border) { g.strokeStyle = o.border; g.lineWidth = ch * 0.08; g.strokeRect(0, 0, cw, ch); }
     const lines = String(text).split('\n');
@@ -1154,7 +1159,8 @@ function sign(text, x, y, z, w, h, rotY, o = {}) {
     if (maxW > cw * 0.9) { size *= cw * 0.9 / maxW; g.font = `${o.weight || 900} ${size}px Montserrat, Arial, sans-serif`; }
     g.fillStyle = o.fg || '#fff'; g.textAlign = 'center'; g.textBaseline = 'middle';
     lines.forEach((l, i) => g.fillText(l, cw / 2, ch / 2 + (i - (lines.length - 1) / 2) * size * 1.15));
-  });
+  }));
+  tex.keep = true;
   return plane(x, y, z, w, h, rotY, tex, o);
 }
 function tagSprite(text, color = '#ffffff') {
@@ -1357,6 +1363,24 @@ $('#touch').hidden = !(matchMedia('(pointer: coarse)').matches || 'ontouchstart'
 
 /* ---------------- loop ---------------- */
 let last = performance.now(), curInter = null;
+/* Automatic quality: if the computer can't keep up (slow frames for 2 seconds), lower the resolution
+   and the shadow quality step by step, so walking stays smooth on school laptops. */
+const QUAL = [{ px: 2, map: 2048, soft: true }, { px: 1.25, map: 2048, soft: true }, { px: 1, map: 1024, soft: false }, { px: 0.8, map: 1024, soft: false }];
+const perf = { q: 0, sum: 0, n: 0, frame: 0, sunKey: '' };
+function applyQuality() {
+  const Q = QUAL[perf.q], r = R.renderer;
+  r.setPixelRatio(Math.min(devicePixelRatio || 1, Q.px)); resize();
+  const type = Q.soft ? THREE.PCFSoftShadowMap : THREE.PCFShadowMap;
+  if (r.shadowMap.type !== type) { r.shadowMap.type = type; if (W) W.scene.traverse(o => { if (o.material) [].concat(o.material).forEach(m => { m.needsUpdate = true; }); }); }
+  if (W && W.sun.shadow.mapSize.x !== Q.map) { W.sun.shadow.mapSize.set(Q.map, Q.map); if (W.sun.shadow.map) { W.sun.shadow.map.dispose(); W.sun.shadow.map = null; } }
+}
+function watchPerf(dt) {
+  if (performance.now() - perf.t0 < 3000) return;   // the first seconds of a scene are slow while it loads
+  perf.sum += dt; perf.n++;
+  if (perf.sum < 2) return;
+  const avg = perf.sum / perf.n; perf.sum = 0; perf.n = 0;
+  if (avg > 1 / 32 && perf.q < QUAL.length - 1) { perf.q++; applyQuality(); }
+}
 const _v = new THREE.Vector3();
 function toScreen(x, y, z) {
   _v.set(x, y, z).project(R.camera); if (_v.z > 1) return null;
@@ -1364,7 +1388,7 @@ function toScreen(x, y, z) {
 }
 function loop(now) {
   requestAnimationFrame(loop);
-  const dt = Math.min(0.05, (now - last) / 1000); last = now;
+  const raw = (now - last) / 1000, dt = Math.min(0.05, raw); last = now;
   if (!W || !P.av || $('#game').hidden) return;
   W.t += dt;
   for (let i = W.timers.length - 1; i >= 0; i--) if (W.t >= W.timers[i].at) { const tm = W.timers.splice(i, 1)[0]; tm.fn(); }
@@ -1386,8 +1410,12 @@ function loop(now) {
   R.ray.set(R.camera.position, _v); R.ray.far = Math.max(0.1, dist - 0.4);
   const hits = new Set(R.ray.intersectObjects(W.occluders, false).map(h => h.object));
   for (const m of W.occluders) { const f = hits.has(m); if (f !== m.userData.faded) { m.userData.faded = f; m.material.transparent = f; m.material.opacity = f ? 0.2 : 1; m.material.depthWrite = !f; m.material.needsUpdate = true; } }
-  W.sun.position.set(P.pos.x + 25, 45, P.pos.z + 18); W.sun.target.position.set(P.pos.x, 0, P.pos.z);
+  // the sun follows the player in 2-unit steps; the shadow map is redrawn when it moves or every 3rd frame (for people walking)
+  const sx = Math.round(P.pos.x / 2) * 2, sz = Math.round(P.pos.z / 2) * 2, sk = sx + ',' + sz;
+  if (sk !== perf.sunKey) { perf.sunKey = sk; W.sun.position.set(sx + 25, 45, sz + 18); W.sun.target.position.set(sx, 0, sz); R.renderer.shadowMap.needsUpdate = true; }
+  if (++perf.frame % 3 === 0) R.renderer.shadowMap.needsUpdate = true;
   R.renderer.render(W.scene, R.camera);
+  if (!blocked()) watchPerf(raw);
   hud();
 }
 function hud() {
@@ -6303,6 +6331,41 @@ function ribbon(pts, y, col) {   // pts: [[x, z, half width], …] along a river
 }
 const WATER = '#2d8bd6', BANK = '#c9b57c', GRASS = '#5c9e45', LANE = '#d9caa0';
 const segDist = (px, pz, [x1, z1, x2, z2]) => { const dx = x2 - x1, dz = z2 - z1, L = dx * dx + dz * dz || 1, t = clamp(((px - x1) * dx + (pz - z1) * dz) / L, 0, 1); return Math.hypot(px - x1 - t * dx, pz - z1 - t * dz); };
+/* Performance: merge the still meshes of a group into one mesh per material, so the GPU draws a whole
+   building (or the whole island) in a few calls instead of hundreds. Moving parts are kept apart. */
+function bakeStatic(root, keep) {
+  root.updateMatrixWorld(true);
+  const inv = new THREE.Matrix4().copy(root.matrixWorld).invert(), buckets = new Map(), done = [];
+  const kept = o => { for (let a = o; a && a !== root; a = a.parent) if (keep.has(a)) return true; return false; };
+  root.traverse(o => {
+    if (!o.isMesh || kept(o) || o.userData.noBake) return;
+    const g = o.geometry, pos = g.attributes.position; if (!pos || g.morphAttributes.position) return;
+    const mats = Array.isArray(o.material) ? o.material : [o.material];
+    if (mats.some(m => m.transparent)) return;
+    const mw = new THREE.Matrix4().multiplyMatrices(inv, o.matrixWorld), nm = new THREE.Matrix3().getNormalMatrix(mw);
+    // a box always has 6 face groups; they only matter when the mesh has one material per face
+    const groups = Array.isArray(o.material) && g.groups.length ? g.groups : [{ start: 0, count: g.index ? g.index.count : pos.count, materialIndex: 0 }];
+    const nor = g.attributes.normal, uv = g.attributes.uv, idx = g.index, v = new THREE.Vector3();
+    groups.forEach(gr => {
+      const mat = mats[gr.materialIndex]; if (!mat) return;
+      const key = mat.uuid + (o.castShadow ? 's' : '') + (o.receiveShadow ? 'r' : '');
+      let bk = buckets.get(key); if (!bk) buckets.set(key, bk = { mat, cast: o.castShadow, recv: o.receiveShadow, p: [], n: [], u: [] });
+      for (let k = gr.start; k < gr.start + gr.count; k++) {
+        const i = idx ? idx.getX(k) : k;
+        v.fromBufferAttribute(pos, i).applyMatrix4(mw); bk.p.push(v.x, v.y, v.z);
+        if (nor) { v.fromBufferAttribute(nor, i).applyMatrix3(nm).normalize(); bk.n.push(v.x, v.y, v.z); } else bk.n.push(0, 1, 0);
+        if (uv) bk.u.push(uv.getX(i), uv.getY(i)); else bk.u.push(0, 0);
+      }
+    });
+    done.push(o);
+  });
+  done.forEach(o => { o.parent.remove(o); o.geometry.dispose(); });
+  buckets.forEach(bk => {
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(bk.p, 3)); g.setAttribute('normal', new THREE.Float32BufferAttribute(bk.n, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(bk.u, 2));
+    const m = new THREE.Mesh(g, bk.mat); m.castShadow = bk.cast; m.receiveShadow = bk.recv; m.matrixAutoUpdate = false; root.add(m);
+  });
+}
 function drawIsland(I) {
   const { rnd, coast, inside, riverX, pos, lanes } = I;
   flatShape(a => coast(a) + 16, -0.45, '#4fb3e8');
@@ -6397,7 +6460,7 @@ function facadeMat(col) {
   });
   t.wrapS = t.wrapT = THREE.RepeatWrapping; t.keep = true;
   const side = new THREE.MeshLambertMaterial({ map: t }), top = M(col);
-  return facadeCache[col] = [side, side, top, top, side, side];
+  t.keep = true; return facadeCache[col] = [side, side, top, top, side, side];
 }
 function addWindows(m, col, size = 1.5) {
   const p = m.geometry.parameters, uv = m.geometry.attributes.uv;
@@ -6634,15 +6697,17 @@ const ALL_PLOTS = [...Array(NR.size * NR.size).keys()].concat(OUTER);
 const SITE_COL = { 200: '#bcaaa4', 201: '#90a4ae', 202: '#a1887f', 203: '#cfd8dc', 204: '#9e9e9e' };
 function renderPlots() {
   const s = G.s, st = s.state, n = st.nation, pos = s.plan.pos;
-  (s.layers || []).forEach(l => {
-    W.scene.remove(l.g); const dead = new Set(l.refs); W.colliders = W.colliders.filter(c => !dead.has(c));
+  const dead = new Set((s.layers || []).flatMap(l => l.refs)); W.colliders = W.colliders.filter(c => !dead.has(c));
+  [...new Set((s.layers || []).map(l => l.g))].forEach(g => {
+    W.scene.remove(g);
     // free GPU memory: every plot is redrawn after each change (cached textures are kept)
-    l.g.traverse(o => { if (o.geometry) o.geometry.dispose(); const m = o.material; if (m && !Array.isArray(m) && m.map && !m.map.keep) { m.map.dispose(); m.dispose(); } });
+    g.traverse(o => { if (o.geometry) o.geometry.dispose(); const m = o.material; if (m && !Array.isArray(m) && m.map && !m.map.keep) { m.map.dispose(); m.dispose(); } });
   });
-  s.layers = []; W.flags = [];
+  s.layers = []; W.flags = []; W.spin = [];
   const forSale = (txt, x, z, g, bg = '#fffde7', fg = '#b71c1c') => { part(x, 0.1, z + 4, 0.15, 1.4, 0.15, '#795548', { parent: g, solid: false }); sign(txt, x, 1.6, z + 4.08, 2.2, 1, 0, { bg, fg, parent: g }); };
+  const city = new THREE.Group();   // every plot is drawn here and then merged into a few big meshes
   ALL_PLOTS.forEach(i => {
-    const g = new THREE.Group(); W.scene.add(g); const c0 = W.colliders.length;
+    const g = new THREE.Group(); city.add(g); const c0 = W.colliders.length;
     const [x, z] = pos(i), owned = !!n && n.plots.includes(i), river = RIVER.includes(i), site = SITES[i], country = !!COUNTRY[i];
     if (i >= 81) {
       /* countryside and special sites */
@@ -6673,8 +6738,9 @@ function renderPlots() {
     const b = n && n.buildings[i];
     if (b && river && !BRIDGES.includes(b)) part(x, 0, z, 8.6, 0.16, 8.6, '#7cc36b', { solid: false, parent: g, shadow: false });   // built before the river existed: a small island
     if (b) drawBuilding(b, x, z, g, n.flag, river, site);
-    s.layers.push({ g, refs: W.colliders.slice(c0) });
+    s.layers.push({ g: city, refs: W.colliders.slice(c0) });
   });
+  bakeStatic(city, new Set(W.flags.map(f => f.m).concat(W.spin))); W.scene.add(city);
 }
 const plotKind = i => SITES[i] ? `${SITES[i][1]} site` : COUNTRY[i] ? 'countryside' : RIVER.includes(i) ? 'river' : 'city';
 function plotInteractions() {
@@ -6767,7 +6833,9 @@ async function launchNation(visit) {
   W.walk = (x, z) => plan.inside(x, z, 2);   // walk anywhere on the island, not into the sea
   W.scene.fog = new THREE.Fog('#a8dcff', 110, 300);
   const sea = new THREE.Mesh(new THREE.PlaneGeometry(700, 700), new THREE.MeshLambertMaterial({ color: '#2f80d0' })); sea.rotation.x = -Math.PI / 2; sea.position.y = -0.5; W.scene.add(sea);
-  const boats = drawIsland(plan);
+  const n0 = W.scene.children.length, boats = drawIsland(plan), isle = new THREE.Group();
+  W.scene.children.slice(n0).filter(o => o.isMesh && !boats.includes(o)).forEach(o => isle.add(o));
+  W.scene.add(isle); bakeStatic(isle, new Set());
   renderPlots(); plotInteractions();
   W.update = dt => {
     W.spin.forEach(h => { h.rotation.z += dt * 2.2; });
