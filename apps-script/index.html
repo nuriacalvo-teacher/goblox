@@ -1334,7 +1334,10 @@ function loop(now) {
   if (W.marker && W.marker.visible) { const [x, y, z] = W.marker.userData.base; W.marker.position.set(x, y + Math.sin(W.t * 4) * 0.25, z); W.marker.rotation.y += dt * 2; }
   // camera
   const tx = P.pos.x, ty = P.pos.y + 2.2, tz = P.pos.z, cp = Math.cos(cam.pitch);
-  R.camera.position.set(tx + Math.sin(cam.yaw) * cp * cam.dist, Math.max(0.6, ty + Math.sin(cam.pitch) * cam.dist), tz + Math.cos(cam.yaw) * cp * cam.dist);
+  let cx = tx + Math.sin(cam.yaw) * cp * cam.dist, cz = tz + Math.cos(cam.yaw) * cp * cam.dist;
+  // inside a building the camera stays inside its walls, so outside signs and roofs never cover the screen
+  for (const h of W.hides) if (tx > h.minX && tx < h.maxX && tz > h.minZ && tz < h.maxZ) { cx = clamp(cx, h.minX + 0.5, h.maxX - 0.5); cz = clamp(cz, h.minZ + 0.5, h.maxZ - 0.5); }
+  R.camera.position.set(cx, Math.max(0.6, ty + Math.sin(cam.pitch) * cam.dist), cz);
   R.camera.lookAt(tx, ty, tz);
   // fade walls between camera and player
   _v.set(tx, ty, tz).sub(R.camera.position); const dist = _v.length(); _v.normalize();
@@ -1386,7 +1389,7 @@ function bubble(av, text, secs) {
   let b = av.userData.bubble; if (!b) { b = el('div', 'bubble'); $('#bubbles').append(b); av.userData.bubble = b; }
   b.textContent = text; av.userData.bubbleUntil = W.t + (secs || Math.max(3.5, text.length / 14));
 }
-function say(n, text) { bubble(n.av, text); chat(n.name, text, n.color); }
+function say(n, text) { if (n.av) bubble(n.av, text); chat(n.name, text, n.color); }   // people on the phone have no avatar: no bubble
 function playerSay(text) { bubble(P.av, text); chat(profile.name, text, '#8ec5ff'); }
 function sendChat() {
   const v = $('#chatIn').value.trim(); $('#chatIn').value = ''; $('#chatIn').blur();
@@ -1826,7 +1829,7 @@ function buildDiner() {
   const dad = npc('Olaf (Dad)', { skin: '#f1c27d', shirt: '#2e7d32', pants: '#5d4037', hair: '#8d6e63', sleeves: true }, 0, 0, 0, { color: '#a5d6a7', voice: { pitch: 0.8, rate: 0.95 } });
   const kid = npc('Timmy', { skin: '#f1c27d', shirt: '#ff9800', pants: '#1565c0', hair: '#d4a017' }, 0, 0, 0, { scale: 0.72, color: '#ffcc80', voice: { pitch: 1.6, rate: 1.1 }, speed: 7 });
   npc('Marco (Chef)', { skin: '#ffdbac', shirt: '#ffffff', pants: '#424242', chef: true, sleeves: true }, 4, -10, 0, { color: '#ffab91' });
-  const lady = npc('Nuria (Customer)', { skin: '#ffdbac', shirt: '#ec407a', pants: '#37474f', hair: '#cfd8dc', sleeves: true }, 0, 0, 0, { color: '#f48fb1', voice: { pitch: 1.3, rate: 0.9 } });
+  const lady = npc('Nuria (Lady at the next table)', { skin: '#ffdbac', shirt: '#ec407a', pants: '#37474f', hair: '#cfd8dc', sleeves: true }, 0, 0, 0, { color: '#f48fb1', voice: { pitch: 1.3, rate: 0.9 } });
   host.badge = hostP.badge; waiter.badge = '#00838f'; dad.badge = '#2e7d32'; kid.badge = '#ef6c00'; lady.badge = '#ad1457';
   sitAv(dad.av, -11.2, 4.35, Math.PI); sitAv(kid.av, -11.2, 1.65, 0); sitAv(lady.av, 7, -4.85, Math.PI);
   const ladyLines = ['This soup is lovely!', 'Excuse me, could I have some more water, please?', 'Mmm, the fruit salad here is so fresh.', `${WN}, could you bring me a napkin, please?`, 'I always ask about allergies. Better safe than sorry!'];
@@ -1873,7 +1876,7 @@ function buildDiner() {
   inter({ obj: 'Olaf (Dad)', label: 'Talk', at: () => dad.pos, r: 6, when: () => s.phase === 'noise', act: dadTalk });
   inter({ obj: 'Your meal', get label() { return s.drinkMissing && !s.drinkDone ? 'Call the waiter about your drink 🛎' : 'Eat'; }, at: () => ({ x: -7, y: 0, z: 3.4 }), r: 3, h: 2, when: () => s.phase === 'eat', act: () => s.drinkMissing && !s.drinkDone ? drinkTalk() : eat() });
   inter({ obj: `${WN} (Waiter)`, label: 'Call the waiter 🛎', at: () => ({ x: -7, y: 0, z: 3.4 }), r: 3, h: 2, when: () => s.phase === 'bill', act: callWaiter });
-  inter({ obj: 'Nuria (Customer)', label: 'Say hello', at: () => lady.pos, r: 3.5, act: () => choice(lady, 'Oh, hello dear! Are you enjoying your evening?', '¡Oh, hola, cariño! ¿Estás disfrutando de la noche?', [{ t: 'Yes, thank you! Enjoy your meal!', fn: () => say(lady, 'Thank you, sweetheart. You too!') }, { t: 'Yes! What are you eating? It looks good.', fn: () => say(lady, 'The vegetable soup. It\'s healthy AND cheap!') }]) });
+  inter({ obj: 'Nuria (Lady at the next table)', label: 'Say hello', at: () => lady.pos, r: 3.5, act: () => choice(lady, 'Oh, hello dear! Are you enjoying your evening?', '¡Oh, hola, cariño! ¿Estás disfrutando de la noche?', [{ t: 'Yes, thank you! Enjoy your meal!', fn: () => say(lady, 'Thank you, sweetheart. You too!') }, { t: 'Yes! What are you eating? It looks good.', fn: () => say(lady, 'The vegetable soup. It\'s healthy AND cheap!') }]) });
 
   function hostGreet() {
     const g = pick1([['Hi there, welcome to Healthy Bites! How many people are in your party?', '¡Hola, bienvenido/a a Healthy Bites! ¿Cuántas personas sois?'], ['Good evening! Welcome to Healthy Bites. A table for how many?', '¡Buenas noches! Bienvenido/a a Healthy Bites. ¿Mesa para cuántos?'], ['Hello and welcome! How many are you tonight?', '¡Hola y bienvenido/a! ¿Cuántos sois esta noche?']]);
@@ -1948,11 +1951,11 @@ function buildDiner() {
     const list = orderList();
     G.inv = s.order.map(i => ({ emoji: i.emo, label: i.name, info: () => `${i.desc} ${money(i.price)}` })); renderHotbar();
     const g = pick1([['Are you ready to order?', '¿Estás listo/a para pedir?'], ['So, what can I get you?', 'Bueno, ¿qué te pongo?'], ['Have you decided?', '¿Ya lo has decidido?']]);
-    ask(waiter, g[0], g[1], phr([`Yes, I'd like ${list}, please.`, `Yes. Could I have ${list}, please?`, `Yes, can I get ${list}, please?`], [
-      { t: `Yes, I would like to ${list}.`, kind: 'grammar', tip: 'After "I would like" use a noun directly: "I\'d like the salad". "I\'d like to" needs a verb: "I\'d like to order…"' },
+    ask(waiter, g[0], g[1], phr([`I'd like ${list}, please.`, `Could I have ${list}, please?`, `Can I get ${list}, please?`], [
+      { t: `I would like to ${list}.`, kind: 'grammar', tip: 'After "I would like" use a noun directly: "I\'d like the salad". "I\'d like to" needs a verb: "I\'d like to order…"' },
       { t: `Give me ${list}.`, kind: 'rude', tip: '"Give me" sounds like an order. Use "I\'d like…, please" or "Could I have…?"' },
       { t: `I want that you bring me ${list}.`, kind: 'grammar', tip: '"Quiero que…" is not "I want that…" in English. Say "Could you bring me…?"' },
-      { t: `Yes, for me ${list}, and fast.`, kind: 'rude', tip: '"And fast" is rude. End with "please".' }
+      { t: `For me ${list}, and fast.`, kind: 'rude', tip: '"And fast" is rude. End with "please".' }
     ]), allergyQ);
   }
   function allergyQ() {
@@ -2155,8 +2158,13 @@ function buildDiner() {
     if (s.ev.D && !s.extra) s.extra = Object.assign({}, pick1(MENU.filter(m => m.price > 0 && !s.order.some(o => o.id === m.id) && (m.cat === 'Drinks' || m.cat === 'Desserts' || m.cat === 'Starters'))));
     wGo(toTable, () => {
       faceTo(waiter, -7, 4.35); if (plateMesh) W.scene.remove(plateMesh);
-      const g = pick1([['How was everything?', '¿Qué tal todo?'], ['Did you enjoy your meal?', '¿Te ha gustado la comida?'], ['Can I get you anything else?', '¿Te traigo algo más?']]);
-      ask(waiter, g[0], g[1], phr(['It was delicious, thank you! Could I have the check, please?', 'Everything was great, thanks. Could I get the check, please?', 'No, thank you. Just the check, please.'], [
+      // each question has its own natural answers
+      const g = pick1([
+        ['How was everything?', '¿Qué tal todo?', ['It was delicious, thank you! Could I have the check, please?', 'Everything was great, thanks. Could I get the check, please?']],
+        ['Did you enjoy your meal?', '¿Te ha gustado la comida?', ['Yes, it was delicious, thank you! Could I have the check, please?', 'Yes, I did, thanks. Could I get the check, please?']],
+        ['Can I get you anything else?', '¿Te traigo algo más?', ['No, thank you. Just the check, please.', 'No, thanks. Could I have the check, please?']]
+      ]);
+      ask(waiter, g[0], g[1], phr(g[2], [
         { t: 'It was very delicious. Can you bring me the count?', kind: 'grammar', tip: '"La cuenta" = the check (US) or the bill (UK). And "delicious" is already strong: don\'t say "very delicious".' },
         { t: 'Can you bring me the account?', kind: 'grammar', tip: '"La cuenta" in a restaurant = the check / the bill. An "account" is at the bank.' },
         { t: 'Whatever. Bring the money paper.', kind: 'rude', tip: 'Say "Could I have the check, please?"' }
@@ -2219,10 +2227,11 @@ function buildDiner() {
     const thanks = s.paidShort ? ['Oh… that\'s not enough. Never mind, the manager says it\'s OK this time.', 'Oh… no es suficiente. Bueno, el encargado dice que por esta vez no pasa nada.'] : tip === 0 ? ['Oh… OK. Thanks, I guess.', 'Oh… vale. Gracias, supongo.'] : tip === 10 ? ['Thank you. Have a good evening.', 'Gracias. Que pases buena noche.'] : ['Thank you so much! Have a great night!', '¡Muchísimas gracias! ¡Que pases una noche estupenda!'];
     line(waiter, thanks[0], thanks[1], () => {
       if (tip === 0 && !s.paidShort) notify('💡 Culture note', 'In the USA, leaving no tip is considered very rude unless the service was terrible.', 'warn');
-      P.av.userData.seated = false; P.pos.set(-5, 0, 5.6); P.frozen = false; s.phase = 'leave';
+      P.av.userData.seated = false; P.pos.set(-5, 0, 5.6); P.frozen = false; s.phase = 'leave'; P.yaw = 0; cam.yaw = Math.PI; cam.pitch = 0.42; cam.dist = 11;
+      host.av.userData.wave = true; say(host, 'Bye! Come and see me at the door!');
       wGo(toKitchen, () => faceTo(waiter, 0, 0));
-      setMarker(0, 4.2, 7.2); notify('🚪 Almost done', `Say goodbye to ${HN} at the entrance.`);
-      byeHelp(s.extra && !s.extraRemoved ? 45 : 25);
+      setMarker(0, 4.2, 7.2); notify('🚪 Almost done', `Walk to ${HN} (the host) at the entrance, follow the green arrow and press E to say goodbye.`);
+      byeHelp(s.extra && !s.extraRemoved ? 40 : 18);
     });
   }
   /* if the player can't find the host, the host comes to say goodbye: the mission always ends */
@@ -2252,7 +2261,7 @@ function buildDiner() {
     });
   }
   function hostBye() {
-    hideMarker();
+    hideMarker(); s.phase = 'saying bye'; host.av.userData.wave = false;
     const g = pick1([['Thanks for coming! Have a nice evening!', '¡Gracias por venir! ¡Que pases una buena noche!'], ['Thank you, come back soon! Have a good night!', '¡Gracias, vuelve pronto! ¡Buenas noches!']]);
     ask(host, g[0], g[1], phr(['Thank you, you too! Goodbye!', 'Thanks, you too! See you next time!', 'Thanks a lot. Same to you!'], [
       { t: 'Thanks, equally!', kind: 'grammar', tip: '"Igualmente" is not "equally" here. Say "You too!" or "Same to you!"' },
@@ -2436,13 +2445,28 @@ function buildMall() {
     n.pos.y = n.baseY = 0.25;
   };
   wander(mia, [-30, -1.5], [8, -1.5], MIA); wander(leo, [-20, 11.8], [40, 11.8], LEO);
-  const smallTalk = (n, lines) => ask(n, pick1(['Hey! What\'s up?', 'Hi! How\'s it going?', 'Oh, hi! Shopping for school too?']), '¡Hola! ¿Qué tal?', phr(['Hi! Not much. I\'m shopping for my school uniform. Any tips?', 'Hey! Yeah, I\'m buying my uniform. Do you have any advice?'], [
-    { t: 'Hi! I am buying my uniform. You have any advice?', kind: 'grammar', tip: 'Questions need an auxiliary: "Do you have any advice?" or "Any tips?"' },
-    { t: 'Hello. What is up? The sky!', kind: 'grammar', tip: '"What\'s up?" means "¿Qué tal?". Answer "Not much!" or "Fine, thanks!"' },
-    { t: 'Hi! Can you give me an advice?', kind: 'grammar', tip: '"Advice" is uncountable: "some advice" or "a piece of advice".' }
-  ]), () => line(n, pick1(lines), 'Un consejo de un/a compañero/a.', () => {}, 'Thanks!'));
-  inter({ obj: 'Nuria (Student)', label: 'Chat', at: () => mia.pos, r: 3.5, act: () => { mia.path = []; mia.hold = true; later(9, () => mia.hold = false); faceTo(mia, P.pos.x, P.pos.z); smallTalk(mia, MIA); } });
-  inter({ obj: 'Olaf (Student)', label: 'Chat', at: () => leo.pos, r: 3.5, act: () => { leo.path = []; leo.hold = true; later(9, () => leo.hold = false); faceTo(leo, P.pos.x, P.pos.z); smallTalk(leo, LEO); } });
+  /* each greeting has its own natural answers; then the student gives a real piece of advice */
+  const TALK = [
+    ['Hey! What\'s up?', '¡Hola! ¿Qué tal?', ['Not much! I\'m shopping for my school uniform. Any tips?', 'Not much, thanks. I\'m buying my uniform. Do you have any advice?'],
+      { t: 'Hello. What is up? The sky!', kind: 'grammar', tip: '"What\'s up?" means "¿Qué tal?" / "¿Qué pasa?". Answer "Not much!"' }],
+    ['Hi! How\'s it going?', '¡Hola! ¿Cómo va?', ['Fine, thanks! I\'m shopping for my school uniform. Any tips?', 'Good, thanks! I\'m buying my uniform. Do you have any advice?'],
+      { t: 'Hi! It goes good, I buy my uniform.', kind: 'grammar', tip: 'Answer "Fine, thanks!" or "Good, thanks!". For now, use the present continuous: "I\'m buying…"' }],
+    ['Oh, hi! Shopping for school too?', '¡Hola! ¿Tú también de compras para el insti?', ['Yes! I\'m buying my uniform. Do you have any advice?', 'Yeah! I need my uniform for tomorrow. Any tips?'],
+      { t: 'Yes, I am buying the uniform for go to school.', kind: 'grammar', tip: 'Purpose: "to + verb": "…my uniform to go to school." Or just "my school uniform".' }]
+  ];
+  const ADVICE = {
+    mia: [[`Sure! Ask at Campus Corner: they give a ${s.discPct}% student discount, but only if you ask!`, `¡Claro! Pregunta en Campus Corner: hacen un ${s.discPct}% de descuento a estudiantes, pero solo si lo pides.`], [`Remember: the polo has to be ${s.code.polo.toLowerCase()}. Read the colour on the label!`, 'Recuerda el color del polo. ¡Lee la etiqueta!'], ['Be careful at Bargain Barn: it\'s cheap, but they never give refunds.', 'Cuidado con Bargain Barn: es barato, pero nunca devuelven el dinero.']],
+    leo: [['Cheap things don\'t always last, you know. Check the quality!', 'Lo barato no siempre dura. ¡Mira la calidad!'], [`I heard the ${SALE} at Luxe Label are on sale this week.`, `He oído que en Luxe Label hay rebajas esta semana.`], ['Always try clothes on before you buy them!', '¡Pruébate siempre la ropa antes de comprarla!'], ['Check the price at the till. Shop assistants make mistakes too!', 'Revisa el precio en la caja. ¡Los dependientes también se equivocan!']]
+  };
+  const smallTalk = (n, who) => {
+    const [q, qes, ok, extra] = pick1(TALK);
+    ask(n, q, qes, phr(ok, [extra,
+      { t: 'Hi! I am buying my uniform. You have any advice?', kind: 'grammar', tip: 'Questions need an auxiliary: "Do you have any advice?" or "Any tips?"' },
+      { t: 'Hi! Can you give me an advice?', kind: 'grammar', tip: '"Advice" is uncountable: "some advice" or "a piece of advice".' }
+    ]), () => { const a = pick1(ADVICE[who]); line(n, a[0], a[1], () => {}, 'Thanks!'); });
+  };
+  inter({ obj: 'Nuria (Student)', label: 'Chat', at: () => mia.pos, r: 3.5, act: () => { mia.path = []; mia.hold = true; later(9, () => mia.hold = false); faceTo(mia, P.pos.x, P.pos.z); smallTalk(mia, 'mia'); } });
+  inter({ obj: 'Olaf (Student)', label: 'Chat', at: () => leo.pos, r: 3.5, act: () => { leo.path = []; leo.hold = true; later(9, () => leo.hold = false); faceTo(leo, P.pos.x, P.pos.z); smallTalk(leo, 'leo'); } });
   inter({ obj: `${tP.name} (Teacher)`, label: 'Show your things', at: () => teacher.pos, r: 4, when: () => !G.over, act: () => teacherTalk(teacher) });
 
   spawnPlayer(-44, -1, Math.PI / 2, -Math.PI / 2);
@@ -2525,12 +2549,13 @@ function askDiscount(k) {
     { t: 'Do you make discount to students?', kind: 'grammar', tip: 'Shops "offer" or "give" a discount: "Do you have / offer a student discount?"' },
     { t: 'Is there some offer?', kind: 'grammar', tip: 'In questions use "any": "Are there any special offers?"' },
     { t: 'You have rebates?', kind: 'grammar', tip: 'False friend! "Rebajas" = sales. And questions need "Do": "Do you have any sales?"' }
-  ]), () => {
+  ]), p => {
     let r;
+    const student = /student/.test(p.t);
     const SALE = { trainers: 'designer sneakers', backpack: 'leather backpacks', polo: 'designer polos', shoes: 'shoes' }[s.saleCat];
-    if (k === 'campus') { s.discount = true; r = [`Yes! Students get ${s.discPct}% off everything. I'll take it off the prices for you.`, `¡Sí! Los estudiantes tienen un ${s.discPct}% de descuento en todo. Te lo aplico en los precios.`]; }
-    else if (k === 'luxe') { s.sale = true; r = [`We never give discounts… however, our ${SALE} are half price this week.`, 'Nunca hacemos descuentos… sin embargo, esta semana tenemos un artículo a mitad de precio.']; }
-    else r = ['Discount? Kid, everything here is already cheap!', '¿Descuento? Chaval, ¡aquí ya está todo baratísimo!'];
+    if (k === 'campus') { s.discount = true; r = student ? [`Yes! Students get ${s.discPct}% off everything. I'll take it off the prices for you.`, `¡Sí! Los estudiantes tienen un ${s.discPct}% de descuento en todo. Te lo aplico en los precios.`] : [`Nothing's on sale right now, but students get ${s.discPct}% off everything. Are you a student? Great, I'll take it off the prices for you.`, `Ahora no hay rebajas, pero los estudiantes tienen un ${s.discPct}% de descuento en todo. ¿Eres estudiante? Genial, te lo aplico.`]; }
+    else if (k === 'luxe') { s.sale = true; r = [`We don't have a student discount, I'm afraid… however, our ${SALE} are half price this week.`, 'Me temo que no tenemos descuento para estudiantes… sin embargo, esta semana tenemos un artículo a mitad de precio.']; }
+    else r = student ? ['A student discount? Kid, everything here is already cheap!', '¿Descuento para estudiantes? Chaval, ¡aquí ya está todo baratísimo!'] : ['Offers? Kid, everything here is already cheap!', '¿Ofertas? Chaval, ¡aquí ya está todo baratísimo!'];
     line(n, r[0], r[1], () => shopTalk(k), 'Great');
   });
 }
@@ -2631,7 +2656,7 @@ function checkout(k) {
   if (s.ev.queue && !s.queueDone) { queueJump(k, () => checkout(k)); return; }
   const items = basketOf(k).map(id => itemOf(k, id));
   const many = items.length > 1, sizes = {};
-  const q = k === 'luxe' ? pick1([many ? 'An excellent selection. Shall I wrap them for you?' : 'An excellent choice. Shall I wrap it for you?', 'Will you be taking ' + (many ? 'these' : 'this') + ' today?'])
+  const q = k === 'luxe' ? pick1([many ? 'An excellent selection. Shall I ring these up for you?' : 'An excellent choice. Shall I ring it up for you?', 'Will you be taking ' + (many ? 'these' : 'this') + ' today?'])
     : k === 'bargain' ? pick1([many ? 'You buying all that?' : 'You gonna buy that or what?', 'So? You buying ' + (many ? 'them' : 'it') + '?'])
     : pick1([many ? 'Great choices! Is that everything?' : 'Great choice! Do you want it?', 'Nice! Would you like to buy ' + (many ? 'them' : 'it') + '?']);
   const ok = many ? ['Yes, I\'ll take these, please.', 'Yes, I\'ll take all of these, thanks!', 'That\'s everything. I\'ll take them, please.'] : ['Yes, I\'ll take it, please.', 'Yes please, I\'ll take this one.', 'I\'ll take it, thanks!'];
@@ -2766,7 +2791,7 @@ function doExchange(k, r) {
 }
 function doRefund(k, r) {
   const n = SHOPS[k].npc;
-  ask(n, 'What\'s wrong with it?', '¿Qué le pasa?', phr(['I\'d like to return this, please. Can I get a refund? Here\'s the receipt.', 'I\'ve changed my mind. Could I return this, please? I have the receipt.'], [
+  ask(n, 'Hello again! How can I help?', '¡Hola otra vez! ¿En qué te puedo ayudar?', phr(['I\'d like to return this, please. Can I get a refund? Here\'s the receipt.', 'I\'ve changed my mind. Could I return this, please? I have the receipt.'], [
     { t: 'I want to give back this and you return me the money.', kind: 'grammar', tip: 'Say "I\'d like to return this" and "Can I get a refund?"' },
     { t: 'Take this back and give me my money.', kind: 'rude', tip: 'Be polite: "I\'d like to return this, please."' },
     { t: 'I want to devolve this.', kind: 'grammar', tip: 'False friend! "Devolver" = return.' }
@@ -3091,13 +3116,13 @@ function buildER() {
   }
   function next() { complete('wait'); s.phase = 'sit2'; setMarker(myChair[0], 2.4, myChair[1]); }
   function phoneCall() {
-    const host = { name: 'Nuria (Host mum)', badge: '#ef6c00', gender: 'f', av: P.av };
+    const host = { name: 'Nuria (Host mum) 📱', badge: '#ef6c00', gender: 'f' };
     notify('📱 Your phone is ringing', 'It\'s your host mum, Mrs Taylor.', 'warn');
     ask(host, `Hi love, it's me! Where are you? Are you OK?`, '¡Hola, cariño! Soy yo. ¿Dónde estás? ¿Estás bien?', phr([`Hi! I'm at A&E at the hospital. I've ${I.what}, but I'm OK.`, `Don't worry, I'm OK. I'm in A&E because I've ${I.what}.`], [
       { t: 'I am in the urgencies of the hospital.', kind: 'grammar', tip: 'False friend! "Urgencias" = A&E (UK) or the ER (USA).' },
       { t: `I'm in the hospital. I have had an accident with the ${I.part}.`, kind: 'grammar', tip: `More natural: "I've hurt my ${I.part}."` },
       { t: 'I am being in the hospital.', kind: 'grammar', tip: '"Be" is not used in the continuous here: "I\'m at the hospital."' }
-    ]), () => ask(host, 'Oh no! Do you want me to come and pick you up?', '¡Oh, no! ¿Quieres que vaya a recogerte?', phr(['Yes, please. That would be great. Thank you!', 'That would be lovely, thanks. I\'m in Manchester Royal A&E.'], [
+    ]), () => ask(host, 'Oh no! Do you want me to come and pick you up?', '¡Oh, no! ¿Quieres que vaya a recogerte?', phr(['Yes, please. That would be great. Thank you!', 'That would be lovely, thanks. I\'m at Manchester Royal Infirmary, in A&E.'], [
       { t: 'Yes. Come now.', kind: 'rude', tip: 'Add please and thank you: "Yes, please. That would be great!"' },
       { t: 'Yes, please, you can pick up me?', kind: 'grammar', tip: 'With a pronoun, it goes in the middle: "pick me up". And: "Could you pick me up?"' }
     ]), () => { s.phoned = true; line(host, 'I\'ll be there in twenty minutes. See you soon, love!', 'Estaré allí en veinte minutos. ¡Hasta pronto, cariño!', () => { s.phase = 'waiting'; later(2, waitEvents); }); }));
@@ -3196,10 +3221,10 @@ function buildER() {
    SCENARIO 4 — HOTEL TROUBLE (The Thistle & Stag, Edinburgh, Scotland)
    ===================================================================== */
 const ROOM_PROBLEMS = {
-  shower: { text: 'the shower isn\'t working', es: 'la ducha no funciona', ok: 'I\'m afraid the shower isn\'t working.', bad: [['The shower doesn\'t function.', '"Funcionar" (a machine) = work: "The shower isn\'t working."'], ['The shower is broken. Come now.', 'Too bossy. "I\'m afraid the shower isn\'t working. Could you send someone, please?"']], fix: 'I\'ll send someone from maintenance right away.' },
-  towels: { text: 'there are no towels', es: 'no hay toallas', ok: 'I\'m afraid there aren\'t any towels in the bathroom.', bad: [['There are not towels in the bath.', 'Use any: "There aren\'t any towels." And "bath" is the bañera: the room is the bathroom.'], ['Is not towels.', 'There + be: "There aren\'t any towels."']], fix: 'I\'m so sorry! Housekeeping will bring some up in five minutes.' },
-  heating: { text: 'the heating isn\'t working and the room is freezing', es: 'la calefacción no funciona', ok: 'I\'m afraid the heating isn\'t working. The room is really cold.', bad: [['The calefaction doesn\'t go.', '"Calefacción" = heating. "Doesn\'t go" → isn\'t working.'], ['Hello, I am very cold in the room, it\'s broke.', 'Say what is broken: "The heating isn\'t working."']], fix: 'Sorry about that! I\'ll send someone up to fix it now.' },
-  noise: { text: 'there is loud building work next to your room', es: 'hay obras muy ruidosas', ok: 'I\'m afraid it\'s very noisy. Is it possible to change rooms?', bad: [['There is many noise. Change my room.', 'Noise is uncountable: "a lot of noise". And ask: "Is it possible to change rooms?"'], ['There is very much noise in my habitation.', 'False friend! Habitación = room.']], fix: 'I do apologise. I\'ll move you to a quiet room on the same floor. Same key card!' }
+  shower: { text: 'the shower isn\'t working', es: 'la ducha no funciona', ok: 'I\'m afraid the shower isn\'t working. Could you send someone to fix it, please?', bad: [['The shower doesn\'t function.', '"Funcionar" (a machine) = work: "The shower isn\'t working."'], ['The shower is broken. Come now.', 'Too bossy. "I\'m afraid the shower isn\'t working. Could you send someone, please?"']], fix: 'I\'ll send someone from maintenance right away.' },
+  towels: { text: 'there are no towels', es: 'no hay toallas', ok: 'I\'m afraid there aren\'t any towels in the bathroom. Could you bring some up, please?', bad: [['There are not towels in the bath.', 'Use any: "There aren\'t any towels." And "bath" is the bañera: the room is the bathroom.'], ['Is not towels.', 'There + be: "There aren\'t any towels."']], fix: 'I\'m so sorry! Housekeeping will bring some up in five minutes.' },
+  heating: { text: 'the heating isn\'t working and the room is freezing', es: 'la calefacción no funciona', ok: 'I\'m afraid the heating isn\'t working, and the room is really cold. Could you send someone, please?', bad: [['The calefaction doesn\'t go.', '"Calefacción" = heating. "Doesn\'t go" → isn\'t working.'], ['Hello, I am very cold in the room, it\'s broke.', 'Say what is broken: "The heating isn\'t working."']], fix: 'Sorry about that! I\'ll send someone up to fix it now.' },
+  noise: { text: 'there is loud building work next to your room', es: 'hay obras muy ruidosas', ok: 'I\'m afraid it\'s very noisy because of some building work. Is it possible to change rooms?', bad: [['There is many noise. Change my room.', 'Noise is uncountable: "a lot of noise". And ask: "Is it possible to change rooms?"'], ['There is very much noise in my habitation.', 'False friend! Habitación = room.']], fix: 'I do apologise. I\'ll move you to a quiet room on the same floor. Same key card!' }
 };
 const MINIBAR = [['Bottle of water', 3], ['Shortbread biscuits', 4], ['Crisps', 3.5], ['Irn-Bru (soft drink)', 3], ['Chocolate bar', 3.5]];
 SCEN.hotel = {
@@ -3297,7 +3322,7 @@ function buildHotel() {
   inter({ obj: 'Minibar', label: 'Open', at: () => ({ x: RX - 2, y: 0, z: 2.8 }), r: 2, h: 2, when: () => s.phase === 'inRoom', act: minibar });
   inter({ obj: 'Bed', label: 'Go to sleep 😴', at: () => ({ x: RX - 1, y: 0, z: 0 }), r: 2.6, h: 2, when: () => s.phase === 'inRoom' && (!s.ev.room || s.roomFixed), act: sleep });
   inter({ obj: waiter.name, label: 'Talk', at: () => ({ x: -13, y: 0, z: 0.6 }), r: 3, when: () => s.phase === 'morning', act: breakfast });
-  inter({ obj: 'Olaf (Guest)', label: 'Say hello', at: () => guest.pos, r: 3, act: () => choice(guest, 'Morning! Lovely hotel, isn\'t it? First time in Edinburgh?', '¡Buenos días! Bonito hotel, ¿verdad? ¿Primera vez en Edimburgo?', [{ t: 'Yes, it is! Have you visited the castle?', fn: () => say(guest, 'Yes! Go at one o\'clock to hear the One O\'Clock Gun!') }, { t: 'Yes, it\'s my first time. It\'s beautiful!', fn: () => say(guest, 'It is! Don\'t forget your umbrella, though.') }]) });
+  inter({ obj: 'Olaf (Guest)', label: 'Say hello', at: () => guest.pos, r: 3, act: () => choice(guest, 'Hello! Lovely hotel, isn\'t it? First time in Edinburgh?', '¡Hola! Bonito hotel, ¿verdad? ¿Primera vez en Edimburgo?', [{ t: 'Yes, it is! Have you visited the castle?', fn: () => say(guest, 'Yes! Go at one o\'clock to hear the One O\'Clock Gun!') }, { t: 'Yes, it\'s my first time. It\'s beautiful!', fn: () => say(guest, 'It is! Don\'t forget your umbrella, though.') }]) });
 
   /* ---- 1. check-in */
   function checkIn() {
@@ -3367,7 +3392,7 @@ function buildHotel() {
   }
   function phoneReception() {
     const pr = ROOM_PROBLEMS[s.ev.room], hl = { name: recep.name + ' ☎', badge: recep.badge, gender: recep.gender, av: recep.av };
-    ask(hl, 'Reception, good evening. How can I help?', 'Recepción, buenas noches. ¿En qué puedo ayudarle?', phr([`Hi, this is room ${s.room}. ${pr.ok} Could you send someone, please?`, `Hello, I'm calling from room ${s.room}. ${pr.ok}`], pr.bad.map(([t, tip]) => ({ t: `Hello, room ${s.room}. ${t}`, kind: /bossy|Too|calm/.test(tip) ? 'rude' : 'grammar', tip })).concat([
+    ask(hl, 'Reception, good evening. How can I help?', 'Recepción, buenas noches. ¿En qué puedo ayudarle?', phr([`Hi, this is room ${s.room}. ${pr.ok}`, `Hello, I'm calling from room ${s.room}. ${pr.ok}`], pr.bad.map(([t, tip]) => ({ t: `Hello, room ${s.room}. ${t}`, kind: /bossy|Too|calm/.test(tip) ? 'rude' : 'grammar', tip })).concat([
       { t: `Hello. ${pr.ok}`, kind: 'grammar', tip: `Reception doesn't know who you are! Start with your room number: "Hi, this is room ${s.room}."` }
     ])), () => { issue(true); s.roomFixed = true; complete('problem'); line(hl, pr.fix, 'Lo arreglamos enseguida.', () => notify('🛠 Fixed!', 'Problem solved. Now you can rest.', 'good')); });
   }
@@ -3578,7 +3603,7 @@ function buildLondon() {
   ];
   function askWay() {
     hideMarker();
-    ask(local, 'Hiya! You look a bit lost. Can I help?', '¡Hola! Pareces un poco perdido/a. ¿Te puedo ayudar?', phr(['Yes, please! Excuse me, how do I get to Camden Town tube station?', 'Yes, thank you. Could you tell me the way to the tube station, please?'], [
+    ask(local, 'Hiya! You look a bit lost. Can I help?', '¡Hola! Pareces un poco perdido/a. ¿Te puedo ayudar?', phr(['Yes, please! How do I get to Camden Town tube station?', 'Yes, thank you. Could you tell me the way to the tube station, please?'], [
       { t: 'Where is the metro?', kind: 'grammar', tip: 'In London the metro is "the tube" or "the Underground". And add "Excuse me" and "please".' },
       { t: 'Yes, I am lost. Where is the station? Tell me.', kind: 'rude', tip: '"Tell me" sounds bossy. Try "Could you tell me the way to…?"' },
       { t: 'Yes! How can I arrive to the station?', kind: 'grammar', tip: '"Llegar a" = get to: "How do I get to the station?"' },
@@ -3602,9 +3627,9 @@ function buildLondon() {
   }
   function helpTourist() {
     hideMarker();
-    ask(tourist, 'Sorry, do you speak English? I\'m looking for a pharmacy. Is there one near here?', 'Perdona, ¿hablas inglés? Busco una farmacia. ¿Hay alguna por aquí?', phr(['Yes, there\'s one just behind you, on the other side of the street.', 'Yes! It\'s over there, opposite the café.'], [
-      { t: 'Yes, there is one in front of you behind.', kind: 'grammar', tip: 'Choose one: "behind you" or "in front of you". Opposite = enfrente de.' },
-      { t: 'I don\'t know, I\'m not from here. Bye.', kind: 'rude', tip: 'You can see the pharmacy! Help him: "It\'s over there, opposite the café."' },
+    ask(tourist, 'Sorry, do you speak English? I\'m looking for a pharmacy. Is there one near here?', 'Perdona, ¿hablas inglés? Busco una farmacia. ¿Hay alguna por aquí?', phr(['Yes! There\'s one just down the street, next to the market.', 'Yes, there\'s one over there, between the bookshop and the market.'], [
+      { t: 'Yes, there is one next of the market.', kind: 'grammar', tip: 'We say "next TO": "next to the market".' },
+      { t: 'I don\'t know, I\'m not from here. Bye.', kind: 'rude', tip: 'You can see the pharmacy! Help him: "There\'s one just down the street, next to the market."' },
       { t: 'Yes, the farmacy is there.', kind: 'grammar', tip: 'Spelling: pharmacy (with ph). In the UK people also say "chemist\'s".' }
     ]), () => { complete('tourist'); s.helped = true; say(tourist, 'Thank you so much! Cheers!'); s.phase = 'walk'; setMarker(ST.x, 3.4, ST.z - 4.5); });
   }
