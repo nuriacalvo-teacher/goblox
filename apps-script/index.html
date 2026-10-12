@@ -5378,19 +5378,26 @@ const GQ = {
   ]] }
 };
 /* n questions, each from a different grammar point, getting harder: the first one starts at level 1
-   for a young nation and climbs as the nation grows (more buildings → harder tests). */
-function gradedQs(n, built) {
-  const shift = built < 5 ? 0 : built < 12 ? 1 : 2, used = new Set(), out = [];
+   for a young nation and climbs as the nation grows (more buildings → harder tests).
+   With a building id, the sentences come from TQ[id] (about that building) and GQ fills any gap. */
+function gradedQs(n, built, id) {
+  const shift = built < 5 ? 0 : built < 12 ? 1 : 2, used = new Set(), out = [], own = (id && TQ[id]) || [];
   for (let k = 0; k < n; k++) {
     const lv = Math.min(3, (n === 1 ? (Math.random() * 3 | 0) : k) + shift);
-    for (let l = lv; l >= 0; l--) {
+    let got = null;
+    for (let l = lv; l >= 0 && !got; l--) {
+      const mine = own.filter(x => x[0] === l + 1 && !used.has(x[1]));
+      if (mine.length) { const x = pick1(mine); got = { t: x[1], q: x.slice(2), l }; break; }
       const ts = Object.keys(GQ).filter(t => !used.has(t) && GQ[t].L[l].length);
-      if (!ts.length) continue;
-      const t = pick1(ts); used.add(t); out.push({ q: pick1(GQ[t].L[l]), label: GQ[t].label, level: l + 1 }); break;
+      if (ts.length) { const t = pick1(ts); got = { t, q: pick1(GQ[t].L[l]), l }; }
     }
+    if (got) { used.add(got.t); out.push({ q: got.q, label: GQ[got.t].label, level: got.l + 1 }); }
   }
   return out;
 }
+/* Grammar questions about each building: [level 1-4, GQ topic, sentence, answer, wrong options, tip] */
+const TQ = {};
+/*TQ_DATA*/
 const CULT = {
   houses: [
     ['In Britain, rows of houses joined together in a line are called…', 'terraced houses', ['detached houses', 'bungalows'], 'Terraced houses were built for workers in the 1800s. A detached house stands alone; a bungalow has only one floor.', 'UK'],
@@ -6377,7 +6384,7 @@ function runQuiz(o) {
   /* o.n grammar questions from o.topic (or 'any'), then one culture question from CULT[o.culture] */
   const built = G && G.s && G.s.state && G.s.state.nation ? Object.keys(G.s.state.nation.buildings).length : 0;
   const pool = o.graded ? null : o.topic === 'any' ? Object.values(QB).flatMap(t => t.qs) : QB[o.topic].qs;
-  const qs = o.graded ? gradedQs(o.n || 4, built) : sample(pool, Math.min(o.n || 5, pool.length)).map(q => ({ q }));
+  const qs = o.graded ? gradedQs(o.n || 4, built, o.culture) : sample(pool, Math.min(o.n || 5, pool.length)).map(q => ({ q }));
   if (o.culture && CULT[o.culture]) qs.push({ q: pick1(CULT[o.culture]), culture: true });
   const need = Math.ceil(qs.length * 0.8);
   const label = (o.graded ? 'Mixed grammar, getting harder' : o.topic === 'any' ? 'Mixed grammar' : QB[o.topic].label) + (o.culture ? ' + 🌍 culture' : '');
