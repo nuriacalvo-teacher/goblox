@@ -12,7 +12,7 @@ Un juego al estilo Roblox para practicar inglés con situaciones reales (*scenar
 
 | Archivo | Qué es |
 | --- | --- |
-| `index.html` | La portada de **https://nuriacalvo-teacher.github.io/goblox/**. Lleva a los alumnos al juego de Apps Script. |
+| `index.html` | La portada de **https://nuriacalvo-teacher.github.io/goyaland/**. Lleva a los alumnos al juego de Apps Script. |
 | `apps-script/index.html` | El juego completo. En Apps Script se pega en un archivo HTML llamado `index`. |
 | `apps-script/Code.gs` | El servidor. Guarda todo en la hoja de cálculo de Google. |
 | `apps-script/LEEME.md` | Instrucciones paso a paso para instalarlo y usarlo en clase. |
@@ -29,7 +29,7 @@ Sigue [`apps-script/LEEME.md`](apps-script/LEEME.md). En resumen:
 
 ## Enlace para los alumnos
 
-Da a los alumnos **https://nuriacalvo-teacher.github.io/goblox/**. La portada tiene dos botones: **Students** lleva al juego de Apps Script (`/exec`), donde entran con su cuenta de iesgoya.es y todo se guarda en tu hoja; **Guests** es para quien entra con un código de invitado.
+Da a los alumnos **https://nuriacalvo-teacher.github.io/goyaland/**. La portada tiene dos botones: **Students** lleva al juego de Apps Script (`/exec`), donde entran con su cuenta de iesgoya.es y todo se guarda en tu hoja; **Guests** es para quien entra con un código de invitado.
 
 - El enlace `/exec` está escrito en `index.html` (línea `GAME_URL`). Si algún día creas una implementación nueva con otra URL, cámbiala ahí.
 - **Invitados** (sin cuenta de iesgoya.es): el mismo enlace, botón *Guests: play with an invite code*. Lleva a la segunda implementación (`GUEST_URL` en `index.html`).
