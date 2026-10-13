@@ -1,6 +1,6 @@
-# Publicar GOBLOX para la clase (cuentas @iesgoya.es)
+# Publicar GOYALAND para la clase (cuentas @iesgoya.es)
 
-GOBLOX funciona de dos formas:
+GOYALAND funciona de dos formas:
 
 - **Sin conexión:** la demo https://nuriacalvo-teacher.github.io/goblox/apps-script/index.html (o el archivo `apps-script/index.html` abierto en el navegador). Sirve para probarlo, pero el progreso se queda en ese navegador.
 - **Con cuentas de clase:** lo publicas con Google Apps Script. Cada alumno entra con su cuenta de Google de iesgoya.es y todo se guarda en una hoja de cálculo tuya: partidas, nivel, estrellas, dinero que le queda en cada misión, puntuación y GOYUX.
@@ -10,7 +10,7 @@ No hace falta servidor ni pagar nada. Se tarda unos 10 minutos.
 ## 1. Crear la hoja de cálculo y el script
 
 1. Entra en Google Drive con **tu cuenta de profesor de iesgoya.es**.
-2. Crea una hoja de cálculo nueva y llámala, por ejemplo, `GOBLOX - datos`.
+2. Crea una hoja de cálculo nueva y llámala, por ejemplo, `GOYALAND - datos`.
 3. En la hoja, abre **Extensiones → Apps Script**.
 4. Borra el contenido de `Código.gs` y pega todo el contenido de [`Code.gs`](Code.gs).
 5. Arriba del todo, en `CONFIG`, cambia `tu.correo@iesgoya.es` por tu correo. Puedes poner varios profesores separados por comas:
@@ -32,7 +32,7 @@ No hace falta servidor ni pagar nada. Se tarda unos 10 minutos.
 
 ## 3. Crea tus clases
 
-1. Abre el enlace de GOBLOX con tu cuenta y entra en **Profesor → Mis clases**.
+1. Abre el enlace de GOYALAND con tu cuenta y entra en **Profesor → Mis clases**.
 2. Crea una clase por grupo (por ejemplo `3º ESO B`). Cada clase recibe un **código** (por ejemplo `3ESOB-K7Q2`).
 3. Da a cada grupo su código. La primera vez que un alumno entra, el juego le pide el código y lo coloca en su clase.
 
@@ -58,7 +58,7 @@ Sirve para que juegue alguien de fuera del instituto, por ejemplo tu hija. Se ha
 1. **Implementar → Nueva implementación → Aplicación web.**
 2. **Ejecutar como:** *Yo*. **Quién tiene acceso:** *Cualquier usuario*. Así no necesita ninguna cuenta de Google.
 3. Copia esta segunda URL: es el **enlace para invitados**.
-4. En GOBLOX, abre la pestaña **Profesor → Invitados**, escribe su nombre, elige la clase en la que quieres que aparezca y pulsa **Crear código** (por ejemplo `LUCIA-7K3P`).
+4. En GOYALAND, abre la pestaña **Profesor → Invitados**, escribe su nombre, elige la clase en la que quieres que aparezca y pulsa **Crear código** (por ejemplo `LUCIA-7K3P`).
 5. Dale el enlace para invitados y su código. La primera vez el juego le pide el código y lo recuerda en ese navegador.
 
 Sin un código válido no se puede jugar, aunque alguien consiga el enlace. Desde el mismo panel puedes **desactivar** un código cuando quieras. Los invitados aparecen en la lista de alumnos con un correo del tipo `invitado:lucia-7k3p` y puedes darles GOYUX igual que a un alumno.
@@ -94,9 +94,10 @@ El nombre de cada alumno sale de su cuenta de iesgoya.es (por ejemplo, `ana.garc
 
 Antes de cada misión el alumno elige la dificultad:
 
-| | Easy (A2) | Normal (A2–B1) | Hard (B1+) |
+| | Easy (A2) | Normal (B1) | Hard (B2–C1) |
 | --- | --- | --- | --- |
-| Opciones de respuesta | 2 | 3 | 4 |
+| Opciones de respuesta | 3 | 4 | 4 |
+| Registro (misiones nuevas) | solo errores de gramática | 1 respuesta correcta pero demasiado formal o brusca | 2 respuestas correctas pero de registro inadecuado |
 | Traducción al español | siempre visible | con el botón ES | no hay |
 | Presupuesto | más dinero | normal | más ajustado |
 | Sorpresas | menos | normal | todas |
@@ -109,9 +110,9 @@ La dificultad de cada partida queda guardada en la hoja **Partidas**. El **nivel
 Cada alumno funda su propio país anglosajón en una isla 3D y lo hace crecer con sus GOYUX:
 
 - **Terreno:** la isla tiene 81 parcelas (9 × 9). Se empieza con 5 y cada parcela nueva cuesta 4 GOYUX más que la anterior (30, 34, 38…). Comprar la isla entera cuesta más de 13.000 GOYUX, así que hay terreno para muchos juegos.
-- **Precios:** los edificios cuestan entre 30 GOYUX (parque) y 240 (Estatua de la Libertad, Casa Blanca, Golden Gate, Ópera de Sídney, Harbour Bridge). Cada nivel de cada misión da GOYUX una sola vez, al ganar su cromo: 40 (Easy), 60 (Normal) u 80 (Hard), un 25 % más con 3 estrellas.
+- **Precios:** los edificios cuestan entre 15 GOYUX (bosque) y 155 (Estatua de la Libertad, Casa Blanca, Golden Gate, Ópera de Sídney, Harbour Bridge). Cada parcela nueva cuesta 2 GOYUX más que la anterior (empieza en 31): todo el país cuesta unos 12.000 GOYUX de terreno y unos 6.000 en edificios. Cada nivel de cada misión da GOYUX una sola vez, al ganar su cromo: 40 (Easy), 60 (Normal) u 80 (Hard), un 25 % más con 3 estrellas.
 - **Mover un edificio:** desde el edificio (tecla E → *Move to another plot*) se puede trasladar a otra parcela vacía propia, por la mitad de lo que costó.
-- **Edificios:** cada uno tiene un precio y un **test autocorregido de 5 preguntas: 4 de gramática + 1 de cultura** del mundo angloparlante (Reino Unido, Irlanda, EE. UU., Canadá, Australia, Nueva Zelanda…). Hay que acertar 4 de 5, y las preguntas cambian en cada intento. La gramática depende del edificio: pasiva (fábrica), modales (parlamento), pasado simple (museo), *should* (hospital), primer condicional (puerto), estilo indirecto (TV), pedir comida (restaurante), oraciones de relativo (biblioteca), etc. La pregunta de cultura va sobre el tema del edificio (en el restaurante, platos típicos; en la escuela, sistemas educativos…) y en los monumentos, sobre el propio monumento. Tiene un enlace **🔎 Search it on the web** para que la busquen, y después de responder siempre se muestra el dato curioso.
+- **Edificios:** cada uno tiene un precio y un **test autocorregido de 5 preguntas: 4 de gramática + 1 de cultura** del mundo angloparlante (Reino Unido, Irlanda, EE. UU., Canadá, Australia, Nueva Zelanda…). Hay que acertar 4 de 5, y las preguntas cambian en cada intento. Las 4 de gramática son frases sobre el propio edificio (en el aeropuerto, pasaportes y vuelos; en el hospital, médicos y pacientes…): cada edificio tiene 12 preguntas propias (420 en total), y hay además un banco general de unas 200 para el impuesto diario. Tratan 18 puntos distintos (preposiciones, tiempos de presente, pasado y futuro, estilo indirecto, relativos, conectores, pasiva, condicionales y *wish*, adverbios, participios irregulares, pronombres, auxiliares y *question tags*, modales, *have something done*, partitivos, comparativos, verbo + *-ing* / *to*), cada una de un punto distinto y en 4 niveles: la 1.ª es la más fácil y la 4.ª la más difícil. Cuantos más edificios tiene la nación, más sube el nivel de todo el test. La pregunta de cultura va sobre el tema del edificio (en el restaurante, platos típicos; en la escuela, sistemas educativos…) y en los monumentos, sobre el propio monumento. Tiene un enlace **🔎 Search it on the web** para que la busquen, y después de responder siempre se muestra el dato curioso.
 - **Bosque, mina y faro:** edificios nuevos del campo y de los lugares especiales, también con su pregunta de cultura.
 - **Monumentos (13):** Big Ben, Tower Bridge, Stonehenge, castillo de Edimburgo, Newgrange, CN Tower, Inukshuk, Estatua de la Libertad, Casa Blanca, Golden Gate, Ópera de Sídney, Harbour Bridge y Hobbiton. Al mirarlos (tecla E) se lee un texto corto sobre ellos.
 - **El mapa:** en el centro está la **ciudad** (cuadrícula de 9×9): ahí se construye casi de todo, y el terreno nuevo tiene que tocar el que ya tienes. La cruza un **río**, desde las montañas hasta el mar, y **en el río solo se pueden construir puentes**. Alrededor está el **campo** (14 parcelas que se pueden comprar en cualquier momento), con caminos hasta la ciudad. En el campo se ponen bosques, granjas, casas, parques, parques eólicos, fábricas y monumentos rurales (Stonehenge, Newgrange, Inukshuk, Hobbiton). Además hay **5 lugares especiales**, y cada uno solo admite un edificio: **puerto** (en la costa), **aeródromo** (aeropuerto), **mina** (al pie de la montaña), **cabo** (faro) y **Castle Rock** (castillo de Edimburgo). Cuestan 20 GOYUX más que una parcela normal. Si alguien ya tenía uno de esos edificios en la ciudad de antes, se queda donde está.
@@ -119,7 +120,8 @@ Cada alumno funda su propio país anglosajón en una isla 3D y lo hace crecer co
 - **Voces:** en la portada (botón **🔊 Voices**) o dentro del juego (Esc → *Voices and accents*) cada alumno elige la voz de mujer y de hombre, el acento y la velocidad. Las voces más naturales son las de **Microsoft Edge** (*Online (Natural)*) o las *Enhanced/Premium* de iPhone y iPad.
 - **Indicadores:** población, felicidad, economía, seguridad, cultura y medio ambiente. Una fábrica da dinero pero contamina, así que tienen que equilibrar.
 - **Impuestos:** una vez al día pueden cobrar impuestos acertando una pregunta de inglés: entre 5 y 30 GOYUX, según la economía del país.
-- **Diplomacia:** con una embajada pueden escribir una **carta formal** a otro país de la clase para proponer un tratado comercial, cultural o de paz. Las cartas se construyen eligiendo frases correctas y formales. Si el otro país responde aceptando, también con una carta correcta, los dos ganan bonificaciones.
+- **Diplomacia y tratados:** con una embajada pueden escribir una **carta formal** a otro país de la clase para proponer un tratado comercial, cultural o de paz. Si el otro país acepta (también con una carta formal), empieza el **proyecto del tratado**: cada presidente debe superar, en días distintos, **la cumbre** (10 preguntas de lectura del tratado, lenguaje diplomático e inglés formal; 8 aciertos) y **la misión del tratado** (una misión 3D larga de nivel B2 con escucha de un mensaje de voz, redacción del texto del tratado y rueda de prensa; 70/100). Cuando los dos terminan, el tratado se firma solo: cada país recibe **1000 GOYUX** (máximo 3 tratados pagados por país) y una bonificación en sus estadísticas. En el panel de profesor ves el progreso de cada tratado.
+- **Registro:** en las misiones nuevas, en Normal y Hard aparecen respuestas gramaticalmente correctas pero inadecuadas: demasiado formales con amigos o familia, o demasiado bruscas con desconocidos o funcionarios. No cortan la conversación, pero restan modales y, por tanto, puntuación y GOYUX.
 - **Visitas:** pueden visitar los países de sus compañeros y ver sus edificios.
 
 ### Ideas para clase
@@ -142,12 +144,12 @@ Los enlaces no cambian.
 ## Problemas frecuentes
 
 - **"Necesitas permiso" o "No se puede abrir el archivo":** el alumno ha entrado con una cuenta personal (gmail). Tiene que cambiar a su cuenta de iesgoya.es (icono de su foto → cambiar de cuenta) o abrir el enlace en una ventana de incógnito.
-- **"GOBLOX no encuentra su hoja de cálculo":** el script se creó desde script.google.com y no desde la hoja. Abre la hoja, copia su ID (la parte de la dirección entre `/d/` y `/edit`), pégalo en `SHEET_ID` dentro de `CONFIG` y publica una versión nueva.
+- **"GOYALAND no encuentra su hoja de cálculo":** el script se creó desde script.google.com y no desde la hoja. Abre la hoja, copia su ID (la parte de la dirección entre `/d/` y `/edit`), pégalo en `SHEET_ID` dentro de `CONFIG` y publica una versión nueva.
 - **"Could not connect to your account":** revisa que la implementación esté en *Ejecutar como: Yo* y *Cualquier usuario de IES Goya*.
 - **Un alumno no puede abrir la aplicación aunque use su cuenta del instituto:** algunos centros tienen bloqueadas las aplicaciones de Apps Script para alumnos menores de edad. El administrador de Google Workspace del instituto puede permitirlo en *Consola de administración → Seguridad → Acceso y control de datos → Controles de API*, o en los ajustes de Apps Script para la unidad organizativa de alumnos.
 - **Trampas:** el servidor limita la puntuación a 0–100. Las misiones terminadas en menos de 90 segundos no dan GOYUX y solo se guarda una partida por minuto. Puedes cambiar estos valores en `CONFIG`.
 - **Cromos y GOYUX:** cada misión tiene tres cromos (bronce = Easy, plata = Normal, oro = Hard). Se gana al terminar la misión con 65 puntos o más (2 estrellas), y en ese momento da **40, 60 u 80 GOYUX** (un 25 % más con 3 estrellas). Las partidas por debajo de 65 y las repeticiones de un nivel que ya tiene su cromo no dan GOYUX: sirven para practicar. Los tres niveles de una misión suman 180 GOYUX (225 con 3 estrellas): lo justo para una parcela y un edificio normal. Con las 5 misiones actuales se ganan entre 900 y 1.125 GOYUX jugando, más los impuestos diarios del país y los que des tú. Los cromos se calculan a partir de la pestaña de partidas, así que las partidas antiguas con 65 puntos o más también cuentan. Para cambiar las cantidades, cambia `CARD_GOYUX` en `Code.gs` y en `index.html`.
 - **Desbloqueo por escalera:** al principio solo está abierto el nivel Easy de la primera misión. Cada cromo desbloquea el nivel siguiente de esa misión y el mismo nivel de la misión siguiente (por ejemplo, Easy del restaurante abre Normal del restaurante y Easy de las tiendas). El orden es el de la portada. El servidor también lo comprueba. Los profesores tienen todo desbloqueado para poder probarlo.
-- **Las 9 misiones, en orden de desbloqueo:** Healthy Bites Diner (restaurante, EE. UU.) → Back to School Rush (tiendas) → A&E: Emergency! (urgencias, Manchester) → Hotel Trouble (Edimburgo) → Lost in London (metro) → Airport Check-in (Dublín) → Movie Night (cine, Toronto) → New School in Dublin (instituto) → Join the Gym (Sídney). En la portada aparecen además las situaciones que están *in development*.
+- **Las 15 misiones, en orden de desbloqueo:** Healthy Bites Diner (restaurante, EE. UU.) → Back to School Rush (tiendas) → A&E: Emergency! (urgencias, Manchester) → Hotel Trouble (Edimburgo) → Lost in London (metro) → Airport Check-in (Dublín) → Movie Night (cine, Toronto) → New School in Dublin (instituto) → Join the Gym (Sídney) → My Host Family (familia de acogida, Cork) → Stay Safe: Ask for Help (seguridad personal, Mánchester) → Report a Theft (denuncia de un robo, Edimburgo) → Lost Passport (pasaporte perdido y consulado, Londres) → Noisy Neighbours (vecinos ruidosos, Toronto) → At the Bank (banco, Sídney). En la portada aparecen además las situaciones que están *in development*.
 - **Niveles del alumno:** el nivel (Level 1, 2…) depende de los GOYUX ganados jugando. Como ahora se ganan menos, puedes bajar `XP_PER_LEVEL` en tu bloque `CONFIG` (por ejemplo, a 60) para que suban de nivel más a menudo.
 - **Columnas nuevas:** al publicar esta versión, la pestaña de alumnos añade sola una columna de estrellas para cada misión nueva (A&E, Hotel, London), al final de la tabla.
