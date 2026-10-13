@@ -12935,7 +12935,7 @@ let TREATY_RUN = null;
 /* called by showResults when a treaty mission ends */
 function treatyResult(overall) {
   const t = TREATY_RUN; TREATY_RUN = null; const pass = overall >= TREATY_PASS;
-  $('#resFob').textContent = `Treaty mission · score ${overall}/100 · ${pass ? 'passed ✓' : `you need ${TREATY_PASS}`} · saving…`;
+  $('#resFob').textContent = `Treaty mission · score ${overall}/100 · ${pass ? 'passed ✓' : `you need ${TREATY_PASS}`}` + (CLOUD && account ? ' · saving…' : '');
   $('#resCard').hidden = false;
   $('#resCard').innerHTML = `<div><b>${pass ? '🤝 Your part of the treaty is done!' : '🤝 Treaty mission: not yet'}</b><p>${treatyNext(t, 1, pass, false)}</p></div>`;
   if (!(CLOUD && account)) return;
