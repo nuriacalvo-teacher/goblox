@@ -589,11 +589,11 @@ function adjacent_(i, plots) {
   return plots.some(p => Math.abs(Math.floor(p / N_SIZE) - r) + Math.abs(p % N_SIZE - c) === 1);
 }
 const NATION_HEAD = ['Correo', 'Presidente', 'País', 'Capital', 'Lema', 'Bandera', 'Terrenos', 'Edificios', 'GOYUX gastados', 'Impuestos cobrados', 'Último impuesto', 'Población', 'Felicidad', 'Economía', 'Seguridad', 'Cultura', 'Medio ambiente', 'Puntuación', 'Actualizado'];
-const DIPLO_HEAD = ['ID', 'Fecha', 'De', 'País origen', 'Para', 'País destino', 'Tipo', 'Estado', 'Carta', 'Respuesta', 'Fecha respuesta', 'Etapas superadas (De)', 'Etapas superadas (Para)', 'Último intento (De)', 'Último intento (Para)', 'Premio pagado a', 'Presentación validada'];
+const DIPLO_HEAD = ['ID', 'Fecha', 'De', 'País origen', 'Para', 'País destino', 'Tipo', 'Estado', 'Carta', 'Respuesta', 'Fecha respuesta', 'Etapas superadas (De)', 'Etapas superadas (Para)', 'Último intento (De)', 'Último intento (Para)', 'Premio pagado a', 'Fecha de firma'];
 /* A treaty is a project: after the letters (status 'project') BOTH presidents must pass TREATY_STAGES stages,
    one try a day: 1) the summit (an English test) and 2) the treaty mission (a long 3D mission, 70/100 or more).
-   Then they present the treaty in class (status 'present') and the teacher validates it in the panel: only then
-   is it signed ('accepted') and each nation gets TREATY_PRIZE GOYUX, for at most TREATY_PAID treaties. */
+   When both have finished, the treaty is signed ('accepted') and each nation gets TREATY_PRIZE GOYUX,
+   for at most TREATY_PAID treaties. */
 const TREATY_PRIZE = 1000, TREATY_PAID = 3, TREATY_STAGES = 2;
 function nSheet_(which) {
   const ss = ss_();
@@ -646,7 +646,7 @@ function treatiesFrom_(rows, email) {
     if (t.from !== email && t.to !== email) return;
     if (t.status === 'accepted') { out.accepted.push(t.type); out.acceptedList.push(t); }
     else if (t.status === 'pending') (t.to === email ? out.inbox : out.sent).push(t);
-    else if (t.status === 'project' || t.status === 'present') {   // the treaty project: stages, then the class presentation
+    else if (t.status === 'project') {   // the treaty project: both presidents pass the stages
       const mine = t.from === email;
       out.summits.push(Object.assign(t, { myStage: mine ? t.stFrom : t.stTo, theirStage: mine ? t.stTo : t.stFrom, stages: TREATY_STAGES, triedToday: (mine ? t.tryFrom : t.tryTo) === today_(), otherName: mine ? t.toName : t.fromName }));
     }
@@ -815,39 +815,30 @@ function nationStage(id, stage, passed, guestCode) {
     if (Number(stage) !== cur) throw new Error('Do the stages in order.');
     if (day_(v[tryCol - 1]) === today_()) throw new Error('One stage a day! Come back tomorrow.');
     sh.getRange(i + 2, tryCol).setNumberFormat('@').setValue(today_());
-    let ready = false;
+    let signed = false, prize = 0;
     if (passed === true) {
       sh.getRange(i + 2, stCol).setValue(cur + 1);
-      if (cur + 1 >= TREATY_STAGES && (Number(v[(mine ? 13 : 12) - 1]) || 0) >= TREATY_STAGES) { sh.getRange(i + 2, 8).setValue('present'); ready = true; }
+      if (cur + 1 >= TREATY_STAGES && (Number(v[(mine ? 13 : 12) - 1]) || 0) >= TREATY_STAGES) {   // both presidents have finished: sign and pay
+        signed = true; const paid = [];
+        [from, to].forEach(e => {
+          const done = vals.filter(r => String(r[7]) === 'accepted' && String(r[15] || '').split(',').indexOf(e) >= 0).length;
+          if (done < TREATY_PAID) paid.push(e);
+        });
+        sh.getRange(i + 2, 8).setValue('accepted'); sh.getRange(i + 2, 16, 1, 2).setValues([[paid.join(','), new Date()]]);
+        [from, to].forEach(e => { const nn = getNation_(e); if (nn) { if (paid.indexOf(e) >= 0) nn.income += TREATY_PRIZE; saveNation_(nn); } });
+        if (paid.indexOf(u.email) >= 0) prize = TREATY_PRIZE;
+      }
     }
-    return Object.assign(nationState_(u.email), { stage: { passed: passed === true, ready } });
+    return Object.assign(nationState_(u.email), { stage: { passed: passed === true, signed, prize } });
   });
 }
-/* Teacher: treaties waiting for their class presentation, and validating them (this pays the prize). */
+/* Teacher: the treaty projects of their classes, to follow them (they are signed automatically). */
 function teacherTreaties() {
   const u = teacher_(), classes = classMap_(), sh = sheet_('students');
   const klassOf = e => { const r = findStudentRow_(sh, e); return r > 0 ? String(sh.getRange(r, C.klass + 1).getValue() || '').toUpperCase() : ''; };
-  return diploRows_().filter(v => ['project', 'present'].includes(String(v[7])))
+  return diploRows_().filter(v => ['project', 'accepted'].includes(String(v[7])))
     .filter(v => visibleTo_(u.email, klassOf(String(v[2]).toLowerCase()), classes) || visibleTo_(u.email, klassOf(String(v[4]).toLowerCase()), classes))
     .map(v => ({ id: String(v[0]), type: String(v[6]), status: String(v[7]), from: String(v[3]), to: String(v[5]), stFrom: Number(v[11]) || 0, stTo: Number(v[12]) || 0, stages: TREATY_STAGES }));
-}
-function teacherValidateTreaty(id, ok) {
-  teacher_();
-  withLock_(() => {
-    const sh = nSheet_('d'); const n = sh.getLastRow() - 1;
-    const vals = n < 1 ? [] : sh.getRange(2, 1, n, DIPLO_HEAD.length).getValues();
-    const i = vals.findIndex(v => String(v[0]) === String(id));
-    if (i < 0 || String(vals[i][7]) !== 'present') throw new Error('Este tratado todavía no está listo para validar.');
-    if (!ok) { sh.getRange(i + 2, 8).setValue('project'); sh.getRange(i + 2, 12, 1, 2).setValues([[TREATY_STAGES - 1, TREATY_STAGES - 1]]); return; }   // repeat the last stage
-    const from = String(vals[i][2]).toLowerCase(), to = String(vals[i][4]).toLowerCase(), paid = [];
-    [from, to].forEach(e => {
-      const done = vals.filter(r => String(r[7]) === 'accepted' && String(r[15] || '').split(',').indexOf(e) >= 0).length;
-      if (done < TREATY_PAID) paid.push(e);
-    });
-    sh.getRange(i + 2, 8).setValue('accepted'); sh.getRange(i + 2, 16, 1, 2).setValues([[paid.join(','), new Date()]]);
-    [from, to].forEach(e => { const nn = getNation_(e); if (nn) { if (paid.indexOf(e) >= 0) nn.income += TREATY_PRIZE; saveNation_(nn); } });
-  });
-  return teacherTreaties();
 }
 function nationAnswerTreaty(id, accept, reply, guestCode) {
   const u = user_(guestCode);

@@ -603,7 +603,7 @@ a.btn{text-decoration:none;display:inline-block;color:var(--fg)}
       <div class="tbl-wrap"><table class="tbl" id="tTable"></table></div>
       <div class="t-guests">
         <h2>Tratados entre países</h2>
-        <p class="t-hint">Cada tratado es un proyecto: los dos presidentes superan 2 etapas en inglés (la cumbre, un test de inglés, y la misión del tratado, una misión 3D larga de nivel B2 en la que necesitan 70/100; una etapa al día) y después lo <b>presentan juntos en clase</b> (2–3 minutos en inglés). Cuando lo valides, el tratado queda firmado y cada país recibe <b>1000 GOYUX</b> (máximo 3 tratados pagados por país). Si la presentación no es suficiente, pulsa «Repetir»: tendrán que volver a hacer la última etapa y presentarlo otra vez.</p>
+        <p class="t-hint">Cada tratado es un proyecto: los dos presidentes superan 2 etapas en inglés, una al día: la cumbre (un test de inglés) y la misión del tratado (una misión 3D larga de nivel B2 en la que necesitan 70/100). Cuando los dos terminan, el tratado se firma solo y cada país recibe <b>1000 GOYUX</b> (máximo 3 tratados pagados por país). Aquí puedes seguir su progreso.</p>
         <div class="tbl-wrap"><table class="tbl" id="trTable"></table></div>
       </div>
       <div class="t-guests">
@@ -10892,10 +10892,9 @@ function lettersPanel() {
   const box = el('div', 'letters');
   box.innerHTML = (st.inbox.length ? st.inbox.map(t => `<div class="lcard"><div class="lhead"><b>${TREATY_NAME[t.type]}</b> from <b>${escH(t.fromName)}</b><small>${new Date(t.date).toLocaleDateString('en-GB')}</small></div><div class="letter">${t.letter.split('\n\n').map(p => `<p>${escH(p).replace(/\n/g, '<br>')}</p>`).join('')}</div>
       <div class="acts"><button class="btn primary" data-a="${escH(t.id)}">Reply and accept</button><button class="btn" data-d="${escH(t.id)}">Reply and decline</button></div></div>`).join('') : '<p class="panel-p">No new letters.</p>')
-    + ((st.summits || []).length ? `<h3>🤝 Treaty projects</h3><p class="panel-p">To sign a treaty, <b>both presidents</b> must pass ${STAGE_NAME.length} stages (one a day): ${STAGE_NAME.join(' · ')} (a long mission: ${TREATY_PASS}/100 needed). Then you <b>present the treaty in class together</b>, and when your teacher validates it, each nation gets <b>${st.treatyPrize || 1000} GOYUX</b> (for its first three treaties).</p>${st.summits.map(t => `<div class="lcard"><div class="lhead"><b>${TREATY_NAME[t.type]}</b> with <b>${escH(t.otherName)}</b></div>
+    + ((st.summits || []).length ? `<h3>🤝 Treaty projects</h3><p class="panel-p">To sign a treaty, <b>both presidents</b> must pass ${STAGE_NAME.length} stages (one a day): ${STAGE_NAME.join(' · ')} (a long mission: ${TREATY_PASS}/100 needed). When both have finished, the treaty is signed and each nation gets <b>${st.treatyPrize || 1000} GOYUX</b> (for its first three treaties).</p>${st.summits.map(t => `<div class="lcard"><div class="lhead"><b>${TREATY_NAME[t.type]}</b> with <b>${escH(t.otherName)}</b></div>
       <p class="panel-p">You: ${t.myStage}/${STAGE_NAME.length} stages · ${escH(t.otherName)}: ${t.theirStage}/${STAGE_NAME.length} stages</p>
-      ${t.status === 'present' ? '<p class="panel-p">🎤 <b>Both of you have finished!</b> Present your treaty in class together (2–3 minutes in English: what it says, why it is good for both nations, a problem you solved). Your teacher will validate it.</p>'
-        : t.myStage >= STAGE_NAME.length ? `<p class="panel-p">✅ You have finished your stages. Waiting for ${escH(t.otherName)}.</p>`
+      ${t.myStage >= STAGE_NAME.length ? `<p class="panel-p">✅ You have finished your stages. Waiting for ${escH(t.otherName)}.</p>`
         : t.triedToday ? '<p class="panel-p">⏳ You have done a stage today. Come back tomorrow!</p>'
         : `<div class="acts"><button class="btn primary" data-s="${escH(t.id)}">Stage ${t.myStage + 1}: ${STAGE_NAME[t.myStage]}</button></div>`}</div>`).join('')}` : '')
     + (st.sent.length ? `<h3>Waiting for an answer</h3>${st.sent.map(t => `<p class="panel-p">${TREATY_NAME[t.type]} → ${escH(t.toName)}</p>`).join('')}` : '')
@@ -11054,7 +11053,7 @@ function stageQuiz(title, qs, need, extra, done) {
   };
   show();
 }
-const treatyNext = (t, k, pass, ready) => !pass ? 'Read the tips and try again tomorrow (one stage a day).' : ready ? `You and ${escH(t.otherName)} have finished all the stages! Now <b>present your treaty in class together</b> (2–3 minutes in English). When your teacher validates it, the treaty is signed and each nation gets the prize.` : k < STAGE_NAME.length - 1 ? `Well done! Next stage tomorrow: <b>${STAGE_NAME[k + 1]}</b>.` : `Well done! You have finished your part. Now ${escH(t.otherName)}'s president must finish theirs. Then you present the treaty in class together.`;
+const treatyNext = (t, k, pass, signed, prize) => !pass ? 'Read the tips and try again tomorrow (one stage a day).' : signed ? `🎉 You and ${escH(t.otherName)} have both finished: the ${TREATY_NAME[t.type]} is signed!${prize ? ` <b>+${prize} GOYUX</b> for your nation.` : ' (Your nation has already been paid for three treaties, but you still get the bonus to your stats.)'}` : k < STAGE_NAME.length - 1 ? `Well done! Next stage tomorrow: <b>${STAGE_NAME[k + 1]}</b>.` : `Well done! You have finished your part. When ${escH(t.otherName)}'s president finishes theirs, the treaty is signed and both nations get the prize.`;
 function launchTreaty(t) {
   const id = TREATY_MISSION[t.type]; if (!SCEN[id]) { notify('⚠️', 'This treaty mission is not available yet.', 'bad'); return; }
   TREATY_RUN = t; difficulty = 'hard'; launch(id);
@@ -11069,7 +11068,7 @@ function treatyResult(overall) {
   if (!(CLOUD && account)) return;
   apiU('nationStage', t.id, 1, pass).then(r => {
     $('#resFob').textContent = `Treaty mission · score ${overall}/100 · ${pass ? 'passed ✓' : `you need ${TREATY_PASS}`} · saved ✓`;
-    if (r.stage && r.stage.ready) $('#resCard').innerHTML = `<div><b>🎉 Both presidents are ready!</b><p>${treatyNext(t, 1, true, true)}</p></div>`;
+    if (r.stage && r.stage.signed) $('#resCard').innerHTML = `<div><b>🎉 Treaty signed!</b><p>${treatyNext(t, 1, true, true, r.stage.prize)}</p></div>`;
   }).catch(e => { $('#resFob').textContent = `Treaty mission · score ${overall}/100 · not saved: ${e.message}`; });
 }
 function summit(t) {   // one stage of the treaty project (the button in ✉ Letters)
@@ -11079,8 +11078,8 @@ function summit(t) {   // one stage of the treaty project (the button in ✉ Let
     panel('Saving…', '', '<p class="panel-p">Saving your result…</p>', [], { onClose: () => {} });
     try {
       const r = await NAPI.summit(t.id, k, pass); applyNation(r);
-      const ready = r.stage && r.stage.ready;
-      panel(pass ? `✅ ${STAGE_NAME[k]}: passed!` : 'Not yet…', '', `<div class="quiz-end"><b>${right} / ${n}</b><p>${treatyNext(t, k, pass, ready)}</p></div>`, [{ t: 'Close', cls: 'primary', fn: closePanel }]);
+      const st = r.stage || {};
+      panel(pass ? `✅ ${STAGE_NAME[k]}: passed!` : 'Not yet…', '', `<div class="quiz-end"><b>${right} / ${n}</b><p>${treatyNext(t, k, pass, st.signed, st.prize)}</p></div>`, [{ t: 'Close', cls: 'primary', fn: closePanel }]);
     } catch (e) { closePanel(); notify('⚠️ Not saved', e.message, 'bad'); }
   };
   const start = fn => panel(title, `Stage ${k + 1} of ${STAGE_NAME.length} · one try a day`, `<p class="panel-p">${[
@@ -11150,12 +11149,7 @@ $('#aAdd').onclick = async () => {
 };
 const TREATY_ES = { trade: 'Acuerdo comercial', culture: 'Intercambio cultural', peace: 'Tratado de paz' };
 function renderTreaties(list) {
-  $('#trTable').innerHTML = '<tr><th>Tratado</th><th>Países</th><th>Etapas</th><th>Estado</th><th></th></tr>' + (list.map(t => `<tr><td>${escH(TREATY_ES[t.type] || t.type)}</td><td><b>${escH(t.from)}</b> y <b>${escH(t.to)}</b></td><td>${t.stFrom}/${t.stages} · ${t.stTo}/${t.stages}</td><td>${t.status === 'present' ? '🎤 Listo para presentar en clase' : 'En curso'}</td><td>${t.status === 'present' ? `<div class="acts"><button class="mini pos" data-tv="${escH(t.id)}" data-ok="1">Validar (+1000 cada uno)</button><button class="mini" data-tv="${escH(t.id)}" data-ok="0">Repetir</button></div>` : ''}</td></tr>`).join('') || '<tr><td colspan="5">Todavía no hay tratados en marcha.</td></tr>');
-  $('#trTable').querySelectorAll('[data-tv]').forEach(b => b.onclick = async () => {
-    const ok = b.dataset.ok === '1';
-    if (ok && !confirm('¿Han presentado el tratado en clase? Al validarlo, cada país recibe 1000 GOYUX.')) return;
-    try { renderTreaties(await api('teacherValidateTreaty', b.dataset.tv, ok)); hToast(ok ? 'Tratado firmado. ¡1000 GOYUX para cada país!' : 'Tendrán que repetir la última etapa.'); } catch (e) { hToast(e.message, true); }
-  });
+  $('#trTable').innerHTML = '<tr><th>Tratado</th><th>Países</th><th>Etapas</th><th>Estado</th></tr>' + (list.map(t => `<tr><td>${escH(TREATY_ES[t.type] || t.type)}</td><td><b>${escH(t.from)}</b> y <b>${escH(t.to)}</b></td><td>${t.stFrom}/${t.stages} · ${t.stTo}/${t.stages}</td><td>${t.status === 'accepted' ? '✅ Firmado' : 'En curso'}</td></tr>`).join('') || '<tr><td colspan="4">Todavía no hay tratados en marcha.</td></tr>');
 }
 function renderGuests(list) {
   $('#gTable').innerHTML = '<tr><th>Código</th><th>Nombre</th><th>Clase</th><th>Estado</th><th></th></tr>' + (list.map(g => `<tr><td><span class="code">${escH(g.code)}</span></td><td>${escH(g.name)}</td><td>${escH(g.className || '—')}</td><td>${g.active ? 'Activo' : 'Desactivado'}</td><td><button class="mini ${g.active ? 'neg' : 'pos'}" data-g="${escH(g.code)}" data-on="${g.active ? 0 : 1}">${g.active ? 'Desactivar' : 'Activar'}</button></td></tr>`).join('') || '<tr><td colspan="5">Todavía no hay invitados.</td></tr>');
