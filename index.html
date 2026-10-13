@@ -13,11 +13,11 @@
   --f-display:'Montserrat','Arial Black',system-ui,sans-serif;--f-body:'Nunito Sans',system-ui,-apple-system,'Segoe UI',sans-serif;color-scheme:dark}
 *{box-sizing:border-box}
 html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:var(--f-body)}
-body{display:grid;place-items:center;padding:24px 16px}
+body{display:grid;place-items:center;padding:24px 16px 48px}
 .card{width:min(460px,100%);background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:28px 24px;display:flex;flex-direction:column;gap:16px;text-align:center}
 .logo{font-family:var(--f-display);font-weight:900;font-size:44px;display:flex;justify-content:center;align-items:center;gap:2px;letter-spacing:.02em}
 .logo .o{display:inline-block;width:.72em;height:.72em;background:currentColor;transform:rotate(-14deg);margin:0 .07em;position:relative;top:.02em}
-.logo .o::after{content:"O";position:absolute;inset:0;display:grid;place-items:center;color:var(--surface);font-size:.7em;line-height:1}
+.logo .o::after{content:"G";position:absolute;inset:0;display:grid;place-items:center;color:var(--surface);font-size:.7em;line-height:1}
 p{margin:0;color:var(--muted);line-height:1.5}
 .play{display:flex;align-items:center;justify-content:center;gap:10px;background:var(--green);color:#fff;text-decoration:none;font-family:var(--f-display);font-weight:900;font-size:22px;padding:16px;border-radius:12px}
 .play:hover{background:var(--green-hi)}
@@ -29,11 +29,12 @@ p{margin:0;color:var(--muted);line-height:1.5}
 .alt a{color:var(--gold);font-weight:800}
 .small{font-size:13px}
 [hidden]{display:none!important}
+.credit{position:fixed;left:0;right:0;bottom:calc(8px + env(safe-area-inset-bottom,0px));margin:0;text-align:center;font-size:12px;color:var(--muted)}
 </style>
 </head>
 <body>
 <main class="card">
-  <div class="logo" aria-label="GOYALAND">G<span class="o"></span>YALAND</div>
+  <div class="logo" aria-label="GOYALAND"><span class="o"></span>OYALAND</div>
   <p>Practise real-life English in a blocky 3D world.</p>
   <a class="play" id="play" href="#"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 4.5v15l13-7.5z"/></svg>Students: Play GOYALAND</a>
   <p class="small">Sign in with your <b>@iesgoya.es</b> Google account.</p>
@@ -54,5 +55,6 @@ const GUEST_URL = 'https://script.google.com/macros/s/AKfycbwGco1jLkfwm7yZlliwDM
 document.getElementById('play').href = GAME_URL;
 if (GUEST_URL) { const g = document.getElementById('guest'); g.href = GUEST_URL; g.hidden = false; document.getElementById('guestTxt').hidden = false; }
 </script>
+<p class="credit">© 2026 Nuria Calvo Domínguez</p>
 </body>
 </html>

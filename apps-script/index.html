@@ -28,7 +28,7 @@ h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0}
 /* ---------- logo ---------- */
 .logo{font-family:var(--f-display);font-weight:900;font-size:22px;letter-spacing:.02em;display:flex;align-items:center;gap:1px;user-select:none}
 .logo .o{display:inline-block;width:.72em;height:.72em;background:currentColor;transform:rotate(-14deg);margin:0 .07em;position:relative;top:.02em}
-.logo .o::after{content:"O";position:absolute;inset:0;display:grid;place-items:center;color:var(--bg);font-size:.7em;font-weight:900;line-height:1}
+.logo .o::after{content:"G";position:absolute;inset:0;display:grid;place-items:center;color:var(--bg);font-size:.7em;font-weight:900;line-height:1}
 
 /* ---------- home shell ---------- */
 #home{height:100%;display:flex;flex-direction:column}
@@ -325,7 +325,7 @@ a.btn{text-decoration:none;display:inline-block;color:var(--fg)}
 .hbtn:hover{background:var(--hud-strong)}
 .hbtn .logo{font-size:0}
 .hbtn .logo .o{width:22px;height:22px;margin:0}
-.hbtn .logo .o::after{content:"G";color:#2b2d30;font-size:15px}
+.hbtn .logo .o::after{color:#2b2d30;font-size:15px}
 .hbtn svg{width:22px;height:22px;fill:#fff}
 #chat{position:absolute;top:calc(62px + env(safe-area-inset-top,0px));left:12px;width:min(380px,calc(100% - 24px));display:flex;flex-direction:column;gap:6px}
 #chatLog{background:var(--hud);border-radius:8px;height:150px;overflow-y:auto;padding:8px 10px;font-size:14px;line-height:1.35;font-weight:700;text-shadow:0 1px 1px rgba(0,0,0,.6)}
@@ -519,6 +519,8 @@ a.btn{text-decoration:none;display:inline-block;color:var(--fg)}
   .metric{grid-template-columns:90px 1fr 40px}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.credit{flex:none;margin:0;padding:5px 16px calc(5px + env(safe-area-inset-bottom,0px));text-align:center;font-size:11px;line-height:1.2;color:var(--muted);background:var(--surface);border-top:1px solid var(--line);user-select:none}
+.credit-hud{position:absolute;left:50%;bottom:calc(2px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:5;padding:0;background:none;border:0;color:rgba(255,255,255,.65);text-shadow:0 1px 2px rgba(0,0,0,.7);white-space:nowrap;pointer-events:none}
 </style>
 </head>
 <body>
@@ -526,7 +528,7 @@ a.btn{text-decoration:none;display:inline-block;color:var(--fg)}
 <!-- ================= HOME (website) ================= -->
 <div id="home">
   <header class="topbar">
-    <div class="logo" aria-label="GOYALAND">G<span class="o"></span>YALAND</div>
+    <div class="logo" aria-label="GOYALAND"><span class="o"></span>OYALAND</div>
     <nav aria-label="Main">
       <button data-page="Home" aria-current="page">Home</button>
       <button data-page="Avatar">Avatar</button>
@@ -709,6 +711,7 @@ a.btn{text-decoration:none;display:inline-block;color:var(--fg)}
       <div class="vocab" id="vocabList"></div>
     </section>
   </div>
+  <footer class="credit">© 2026 Nuria Calvo Domínguez</footer>
 </div>
 
 <!-- game detail -->
@@ -766,11 +769,13 @@ a.btn{text-decoration:none;display:inline-block;color:var(--fg)}
     <div class="spin" aria-hidden="true"></div>
     <p id="lText">Joining server…</p>
   </div>
+  <p class="credit credit-hud">© 2026 Nuria Calvo Domínguez</p>
 </div>
 
 <!-- ================= GAME ================= -->
 <div id="game" hidden>
   <canvas id="c" tabindex="0"></canvas>
+  <p class="credit credit-hud">© 2026 Nuria Calvo Domínguez</p>
   <div id="bubbles"></div>
   <div class="hud-layer">
     <div class="hud-tl">
@@ -818,7 +823,7 @@ a.btn{text-decoration:none;display:inline-block;color:var(--fg)}
     </div>
     <div id="esc" hidden>
       <div class="esc-box">
-        <div class="logo">G<span class="o"></span>YALAND</div>
+        <div class="logo"><span class="o"></span>OYALAND</div>
         <button class="btn primary" id="escResume">Resume game <span>Esc</span></button>
         <button class="btn" id="escCard">Character card <span>📄</span></button>
         <button class="btn" id="escHelp">How to play <span>❔</span></button>
@@ -13065,7 +13070,7 @@ async function openProgress() {
     $('#pcard').innerHTML = `
       <div class="pc-top">
         <div class="headshot">${av2d(profile)}</div>
-        <div class="pc-id"><div class="logo">G<span class="o"></span>YALAND</div><h2>${escH(profile.name)}</h2><small>${account ? escH(account.guest ? 'Guest player' : account.email) + (account.className ? '<br>' + escH(account.className) : '') : 'Offline player'}</small></div>
+        <div class="pc-id"><div class="logo"><span class="o"></span>OYALAND</div><h2>${escH(profile.name)}</h2><small>${account ? escH(account.guest ? 'Guest player' : account.email) + (account.className ? '<br>' + escH(account.className) : '') : 'Offline player'}</small></div>
         <div class="pc-lv"><b>${lv}</b><span>Level</span></div>
       </div>
       <div class="lvl" style="margin:0 18px 14px"><i style="width:${into / XP_PER_LEVEL * 100}%"></i></div>
