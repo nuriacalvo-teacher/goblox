@@ -1,4 +1,4 @@
-# GOBLOX
+# GOYALAND
 
 Un juego al estilo Roblox para practicar inglés con situaciones reales (*scenario-based learning*). Cada alumno entra con su cuenta de iesgoya.es, juega misiones, gana GOYUX y construye su propio país angloparlante.
 

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>GOBLOX</title>
+<title>GOYALAND</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&family=Nunito+Sans:wght@400;600;700;800&display=swap">
@@ -515,7 +515,7 @@ a.btn{text-decoration:none;display:inline-block;color:var(--fg)}
 <!-- ================= HOME (website) ================= -->
 <div id="home">
   <header class="topbar">
-    <div class="logo" aria-label="GOBLOX">G<span class="o"></span>BLOX</div>
+    <div class="logo" aria-label="GOYALAND">G<span class="o"></span>YALAND</div>
     <nav aria-label="Main">
       <button data-page="Home" aria-current="page">Home</button>
       <button data-page="Avatar">Avatar</button>
@@ -581,7 +581,7 @@ a.btn{text-decoration:none;display:inline-block;color:var(--fg)}
       </div>
       <div class="t-classes" id="tAdmin" hidden>
         <h2>Profesores del departamento</h2>
-        <p class="t-hint">Añade el correo de cada compañero o compañera. Al abrir el enlace de GOBLOX con su cuenta de iesgoya.es verán la pestaña <b>Profesor</b>, crearán sus clases y solo verán a sus alumnos. No necesitan tocar Apps Script.</p>
+        <p class="t-hint">Añade el correo de cada compañero o compañera. Al abrir el enlace de GOYALAND con su cuenta de iesgoya.es verán la pestaña <b>Profesor</b>, crearán sus clases y solo verán a sus alumnos. No necesitan tocar Apps Script.</p>
         <div class="t-tools"><label for="aEmail">Correo<input id="aEmail" placeholder="nombre.apellido@iesgoya.es" maxlength="80" autocomplete="off"></label><label for="aName">Nombre<input id="aName" placeholder="Nombre" maxlength="40" autocomplete="off"></label><button class="btn primary" id="aAdd">Añadir profesor</button></div>
         <div class="tbl-wrap"><table class="tbl" id="aTable"></table></div>
       </div>
@@ -629,7 +629,7 @@ a.btn{text-decoration:none;display:inline-block;color:var(--fg)}
     <div class="detail">
       <div class="thumb" id="dThumb"></div>
       <div class="detail-body">
-        <div><h2 id="dTitle"></h2><div class="by">By GOBLOX Learning · <span id="dLevel"></span></div></div>
+        <div><h2 id="dTitle"></h2><div class="by">By GOYALAND Learning · <span id="dLevel"></span></div></div>
         <div class="diff" id="dDiff" role="group" aria-label="Difficulty"></div>
         <p class="diff-info" id="dDiffInfo"></p>
         <button class="play" id="dPlay"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 4.5v15l13-7.5z"/></svg>Play</button>
@@ -729,7 +729,7 @@ a.btn{text-decoration:none;display:inline-block;color:var(--fg)}
     </div>
     <div id="esc" hidden>
       <div class="esc-box">
-        <div class="logo">G<span class="o"></span>BLOX</div>
+        <div class="logo">G<span class="o"></span>YALAND</div>
         <button class="btn primary" id="escResume">Resume game <span>Esc</span></button>
         <button class="btn" id="escCard">Character card <span>📄</span></button>
         <button class="btn" id="escHelp">How to play <span>❔</span></button>
@@ -764,7 +764,7 @@ a.btn{text-decoration:none;display:inline-block;color:var(--fg)}
 <script>
 'use strict';
 /* =====================================================================
-   GOBLOX — scenario-based roleplay in a blocky 3D world
+   GOYALAND — scenario-based roleplay in a blocky 3D world
    ===================================================================== */
 const $ = (s, r = document) => r.querySelector(s);
 const el = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
@@ -804,7 +804,7 @@ async function boot() {
   renderHome();
   if (!CLOUD) {
     const n = $('#cloudNote'); n.hidden = false;
-    n.textContent = 'Offline mode: your progress is saved only in this browser. Your teacher\'s GOBLOX link saves it to your iesgoya.es account.';
+    n.textContent = 'Offline mode: your progress is saved only in this browser. Your teacher\'s GOYALAND link saves it to your iesgoya.es account.';
     return;
   }
   $('#whoName').textContent = 'Connecting…';
@@ -1557,11 +1557,11 @@ function openVoices() {
     <div class="vs-row"><label for="vsM">Men (Olaf, customers…)<select id="vsM">${opts('m')}</select></label><button class="btn" id="vsTestM">▶ Test</button></div>
     <label class="vs-row" style="flex-direction:column;align-items:stretch;gap:6px;font-weight:800;font-size:14px"><span>Speed: <span id="vsRateV"></span></span><input type="range" id="vsRate" min="0.7" max="1.3" step="0.05" value="${settings.rate || 1}"></label>
     <p class="vs-tip">${voices.length ? `This device has <b>${voices.length}</b> English voices. ★ = natural voice (sounds almost human).` : 'This device has no English voices yet. Wait a few seconds and open this window again.'}</p>
-    <p class="vs-tip">🎧 For the most natural voices: on a computer, open GOBLOX in <b>Microsoft Edge</b> (voices called <i>Online (Natural)</i>, with accents from the UK, Ireland, the USA, Canada, Australia and New Zealand). On an iPhone or iPad: <b>Settings → Accessibility → Spoken Content → Voices → English</b> and download an <i>Enhanced</i> or <i>Premium</i> voice. Your choice is saved on this device.</p>`;
+    <p class="vs-tip">🎧 For the most natural voices: on a computer, open GOYALAND in <b>Microsoft Edge</b> (voices called <i>Online (Natural)</i>, with accents from the UK, Ireland, the USA, Canada, Australia and New Zealand). On an iPhone or iPad: <b>Settings → Accessibility → Spoken Content → Voices → English</b> and download an <i>Enhanced</i> or <i>Premium</i> voice. Your choice is saved on this device.</p>`;
   const rateTxt = () => { $('#vsRateV').textContent = Math.round((settings.rate || 1) * 100) + '%'; };
   rateTxt();
   const save = () => store.set('settings', settings);
-  const test = g => speak(g === 'm' ? 'Hello! I\'m Olaf. Welcome to GOBLOX. What would you like to do today?' : 'Hi there! I\'m Nuria. Shall we practise some English together?', { name: g === 'm' ? 'Olaf' : 'Nuria', gender: g }, true);
+  const test = g => speak(g === 'm' ? 'Hello! I\'m Olaf. Welcome to GOYALAND. What would you like to do today?' : 'Hi there! I\'m Nuria. Shall we practise some English together?', { name: g === 'm' ? 'Olaf' : 'Nuria', gender: g }, true);
   $('#vsOn').onchange = e => { settings.voice = e.target.value === '1'; save(); if (!settings.voice) try { speechSynthesis.cancel(); } catch (x) {} if ($('#escVoiceV')) $('#escVoiceV').textContent = settings.voice ? 'On' : 'Off'; };
   $('#vsF').onchange = e => { settings.voiceF = e.target.value; save(); test('f'); };
   $('#vsM').onchange = e => { settings.voiceM = e.target.value; save(); test('m'); };
@@ -12975,7 +12975,7 @@ async function openProgress() {
     $('#pcard').innerHTML = `
       <div class="pc-top">
         <div class="headshot">${av2d(profile)}</div>
-        <div class="pc-id"><div class="logo">G<span class="o"></span>BLOX</div><h2>${escH(profile.name)}</h2><small>${account ? escH(account.guest ? 'Guest player' : account.email) + (account.className ? '<br>' + escH(account.className) : '') : 'Offline player'}</small></div>
+        <div class="pc-id"><div class="logo">G<span class="o"></span>YALAND</div><h2>${escH(profile.name)}</h2><small>${account ? escH(account.guest ? 'Guest player' : account.email) + (account.className ? '<br>' + escH(account.className) : '') : 'Offline player'}</small></div>
         <div class="pc-lv"><b>${lv}</b><span>Level</span></div>
       </div>
       <div class="lvl" style="margin:0 18px 14px"><i style="width:${into / XP_PER_LEVEL * 100}%"></i></div>
@@ -13004,7 +13004,7 @@ const T = { list: [], classes: [], sel: new Set(), loading: false };
 const fmtDate = d => d ? new Date(d).toLocaleString('es-ES', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '—';
 const starStr = n => '★'.repeat(n || 0) + '☆'.repeat(3 - (n || 0));
 async function loadTeacher() {
-  if (!CLOUD || !account || !account.isTeacher) { $('#tTable').innerHTML = '<tr><td>El panel funciona cuando GOBLOX está publicado con Google Apps Script y entras con una cuenta de profesor. Consulta apps-script/LEEME.md.</td></tr>'; return; }
+  if (!CLOUD || !account || !account.isTeacher) { $('#tTable').innerHTML = '<tr><td>El panel funciona cuando GOYALAND está publicado con Google Apps Script y entras con una cuenta de profesor. Consulta apps-script/LEEME.md.</td></tr>'; return; }
   $('#tTable').innerHTML = '<tr><td>Cargando alumnos…</td></tr>';
   try { applyTeacher(await api('teacherList')); } catch (e) { $('#tTable').innerHTML = `<tr><td>${escH(e.message)}</td></tr>`; }
   try { renderGuests(await api('teacherGuests')); } catch (e) {}
@@ -13018,7 +13018,7 @@ function renderAdmin(list) {
 }
 $('#aAdd').onclick = async () => {
   const em = $('#aEmail').value.trim(); if (!em) { hToast('Escribe el correo del profesor.', true); return; }
-  try { renderAdmin(await api('adminAddTeacher', em, $('#aName').value.trim())); $('#aEmail').value = ''; $('#aName').value = ''; hToast('Profesor añadido. Ya puede entrar con el enlace de GOBLOX.'); } catch (e) { hToast(e.message, true); }
+  try { renderAdmin(await api('adminAddTeacher', em, $('#aName').value.trim())); $('#aEmail').value = ''; $('#aName').value = ''; hToast('Profesor añadido. Ya puede entrar con el enlace de GOYALAND.'); } catch (e) { hToast(e.message, true); }
 };
 const TREATY_ES = { trade: 'Acuerdo comercial', culture: 'Intercambio cultural', peace: 'Tratado de paz' };
 function renderTreaties(list) {
@@ -13075,7 +13075,7 @@ function renderTeacher() {
       <td>${fmtDate(st.lastRun)}</td>
       <td><div class="acts"><button class="mini pos" data-a="1">+1</button><button class="mini pos" data-a="5">+5</button><button class="mini pos" data-a="10">+10</button><button class="mini neg" data-a="-5">−5</button></div></td>
       <td><button class="mini" data-runs="1">Partidas</button></td></tr>`).join('');
-  $('#tTable').innerHTML = head + (body || `<tr><td colspan="14">${T.list.length ? 'Ningún alumno coincide con la búsqueda.' : 'Todavía no ha entrado ningún alumno. Comparte el enlace de GOBLOX con la clase.'}</td></tr>`);
+  $('#tTable').innerHTML = head + (body || `<tr><td colspan="14">${T.list.length ? 'Ningún alumno coincide con la búsqueda.' : 'Todavía no ha entrado ningún alumno. Comparte el enlace de GOYALAND con la clase.'}</td></tr>`);
   $('#tAll').onchange = e => { rows.forEach(st => e.target.checked ? T.sel.add(st.email) : T.sel.delete(st.email)); renderTeacher(); };
   $('#tTable').querySelectorAll('.tSel').forEach(c => c.onchange = () => { const em = c.closest('tr').dataset.e; c.checked ? T.sel.add(em) : T.sel.delete(em); });
   $('#tTable').querySelectorAll('[data-a]').forEach(b => b.onclick = () => give([b.closest('tr').dataset.e], +b.dataset.a));

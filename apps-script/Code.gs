@@ -1,5 +1,5 @@
 /**
- * GOBLOX — servidor para Google Apps Script.
+ * GOYALAND — servidor para Google Apps Script.
  *
  * Este script va "pegado" a una hoja de cálculo de Google (Extensiones > Apps Script).
  * Guarda en ella los alumnos, las partidas y los GOYUX que da el profesorado.
@@ -75,13 +75,13 @@ function ss_() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   if (ss) return ss;
   if (CONFIG.SHEET_ID) return SpreadsheetApp.openById(CONFIG.SHEET_ID);
-  throw new Error('GOBLOX no encuentra su hoja de cálculo. Abre el script desde la hoja (Extensiones → Apps Script) o escribe SHEET_ID en CONFIG.');
+  throw new Error('GOYALAND no encuentra su hoja de cálculo. Abre el script desde la hoja (Extensiones → Apps Script) o escribe SHEET_ID en CONFIG.');
 }
 
 /* ---------- web app ---------- */
 function doGet() {
   return HtmlService.createHtmlOutputFromFile('index')
-    .setTitle('GOBLOX')
+    .setTitle('GOYALAND')
     .addMetaTag('viewport', 'width=device-width, initial-scale=1, viewport-fit=cover');
 }
 

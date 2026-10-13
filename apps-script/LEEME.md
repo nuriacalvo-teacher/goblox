@@ -1,6 +1,6 @@
-# Publicar GOBLOX para la clase (cuentas @iesgoya.es)
+# Publicar GOYALAND para la clase (cuentas @iesgoya.es)
 
-GOBLOX funciona de dos formas:
+GOYALAND funciona de dos formas:
 
 - **Sin conexión:** la demo https://nuriacalvo-teacher.github.io/goblox/apps-script/index.html (o el archivo `apps-script/index.html` abierto en el navegador). Sirve para probarlo, pero el progreso se queda en ese navegador.
 - **Con cuentas de clase:** lo publicas con Google Apps Script. Cada alumno entra con su cuenta de Google de iesgoya.es y todo se guarda en una hoja de cálculo tuya: partidas, nivel, estrellas, dinero que le queda en cada misión, puntuación y GOYUX.
@@ -10,7 +10,7 @@ No hace falta servidor ni pagar nada. Se tarda unos 10 minutos.
 ## 1. Crear la hoja de cálculo y el script
 
 1. Entra en Google Drive con **tu cuenta de profesor de iesgoya.es**.
-2. Crea una hoja de cálculo nueva y llámala, por ejemplo, `GOBLOX - datos`.
+2. Crea una hoja de cálculo nueva y llámala, por ejemplo, `GOYALAND - datos`.
 3. En la hoja, abre **Extensiones → Apps Script**.
 4. Borra el contenido de `Código.gs` y pega todo el contenido de [`Code.gs`](Code.gs).
 5. Arriba del todo, en `CONFIG`, cambia `tu.correo@iesgoya.es` por tu correo. Puedes poner varios profesores separados por comas:
@@ -32,7 +32,7 @@ No hace falta servidor ni pagar nada. Se tarda unos 10 minutos.
 
 ## 3. Crea tus clases
 
-1. Abre el enlace de GOBLOX con tu cuenta y entra en **Profesor → Mis clases**.
+1. Abre el enlace de GOYALAND con tu cuenta y entra en **Profesor → Mis clases**.
 2. Crea una clase por grupo (por ejemplo `3º ESO B`). Cada clase recibe un **código** (por ejemplo `3ESOB-K7Q2`).
 3. Da a cada grupo su código. La primera vez que un alumno entra, el juego le pide el código y lo coloca en su clase.
 
@@ -58,7 +58,7 @@ Sirve para que juegue alguien de fuera del instituto, por ejemplo tu hija. Se ha
 1. **Implementar → Nueva implementación → Aplicación web.**
 2. **Ejecutar como:** *Yo*. **Quién tiene acceso:** *Cualquier usuario*. Así no necesita ninguna cuenta de Google.
 3. Copia esta segunda URL: es el **enlace para invitados**.
-4. En GOBLOX, abre la pestaña **Profesor → Invitados**, escribe su nombre, elige la clase en la que quieres que aparezca y pulsa **Crear código** (por ejemplo `LUCIA-7K3P`).
+4. En GOYALAND, abre la pestaña **Profesor → Invitados**, escribe su nombre, elige la clase en la que quieres que aparezca y pulsa **Crear código** (por ejemplo `LUCIA-7K3P`).
 5. Dale el enlace para invitados y su código. La primera vez el juego le pide el código y lo recuerda en ese navegador.
 
 Sin un código válido no se puede jugar, aunque alguien consiga el enlace. Desde el mismo panel puedes **desactivar** un código cuando quieras. Los invitados aparecen en la lista de alumnos con un correo del tipo `invitado:lucia-7k3p` y puedes darles GOYUX igual que a un alumno.
@@ -144,7 +144,7 @@ Los enlaces no cambian.
 ## Problemas frecuentes
 
 - **"Necesitas permiso" o "No se puede abrir el archivo":** el alumno ha entrado con una cuenta personal (gmail). Tiene que cambiar a su cuenta de iesgoya.es (icono de su foto → cambiar de cuenta) o abrir el enlace en una ventana de incógnito.
-- **"GOBLOX no encuentra su hoja de cálculo":** el script se creó desde script.google.com y no desde la hoja. Abre la hoja, copia su ID (la parte de la dirección entre `/d/` y `/edit`), pégalo en `SHEET_ID` dentro de `CONFIG` y publica una versión nueva.
+- **"GOYALAND no encuentra su hoja de cálculo":** el script se creó desde script.google.com y no desde la hoja. Abre la hoja, copia su ID (la parte de la dirección entre `/d/` y `/edit`), pégalo en `SHEET_ID` dentro de `CONFIG` y publica una versión nueva.
 - **"Could not connect to your account":** revisa que la implementación esté en *Ejecutar como: Yo* y *Cualquier usuario de IES Goya*.
 - **Un alumno no puede abrir la aplicación aunque use su cuenta del instituto:** algunos centros tienen bloqueadas las aplicaciones de Apps Script para alumnos menores de edad. El administrador de Google Workspace del instituto puede permitirlo en *Consola de administración → Seguridad → Acceso y control de datos → Controles de API*, o en los ajustes de Apps Script para la unidad organizativa de alumnos.
 - **Trampas:** el servidor limita la puntuación a 0–100. Las misiones terminadas en menos de 90 segundos no dan GOYUX y solo se guarda una partida por minuto. Puedes cambiar estos valores en `CONFIG`.
