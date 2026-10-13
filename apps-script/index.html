@@ -42,6 +42,17 @@ h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0}
 .who{font-weight:700;color:var(--muted)}
 .shell{flex:1;overflow:auto;padding-block:24px 48px;padding-inline:max(16px,4vw)}
 .page{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+.help-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.help-head h1{margin:0}
+.help-lang{display:flex;gap:6px}
+.help-lang button{font:inherit;font-weight:800;padding:8px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.15);background:transparent;color:inherit;cursor:pointer}
+.help-lang button[aria-pressed=true]{background:var(--blue,#2f6fde);border-color:transparent;color:#fff}
+.help{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px}
+.help-sec{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:18px 20px;line-height:1.55}
+.help-sec h2{margin:0 0 8px;font-size:19px}
+.help-sec p{margin:0}
+.help-sec ul,.help-sec ol{margin:0;padding-left:20px}
+.help-sec li{margin:4px 0}
 .hello{display:flex;align-items:center;gap:18px}
 .headshot{width:84px;height:84px;border-radius:50%;background:var(--card);position:relative;overflow:hidden;flex:none}
 .hello h1{font-size:clamp(24px,4vw,34px);font-weight:900}
@@ -520,6 +531,7 @@ a.btn{text-decoration:none;display:inline-block;color:var(--fg)}
       <button data-page="Home" aria-current="page">Home</button>
       <button data-page="Avatar">Avatar</button>
       <button data-page="Notebook">Notebook</button>
+      <button data-page="Help">How to play</button>
       <button data-page="Teacher" id="navTeacher" hidden>Profesor</button>
     </nav>
     <div class="top-right">
@@ -613,6 +625,83 @@ a.btn{text-decoration:none;display:inline-block;color:var(--fg)}
         <div class="tbl-wrap"><table class="tbl" id="gTable"></table></div>
       </div>
       <p class="t-hint">Los alumnos aparecen aquí la primera vez que entran con su cuenta de iesgoya.es. Usa una cantidad negativa para quitar GOYUX (por ejemplo, cuando un alumno los canjea por un premio). Todo queda registrado en la hoja de cálculo.</p>
+    </section>
+    <section class="page" id="pageHelp" hidden>
+      <div class="help-head"><h1>How to play</h1><div class="help-lang"><button id="helpEn" aria-pressed="true">English</button><button id="helpEs" aria-pressed="false">Español</button></div></div>
+      <div class="help" id="helpEnBox">
+<div class="help-sec"><h2>🌍 What is GOYALAND?</h2><p>A 3D world where you practise real-life English. You play <b>missions</b> (a restaurant, an airport, a hospital, a host family…), win <b>cards</b> and <b>GOYUX</b> (the game's money), and spend them on <b>your own nation</b>: land, buildings, monuments and treaties with your classmates' nations.</p></div>
+<div class="help-sec"><h2>🎮 Controls</h2><ul>
+<li><b>Move:</b> W A S D or the arrow keys · <b>Jump:</b> Space</li>
+<li><b>Camera:</b> drag with the mouse · <b>Zoom:</b> mouse wheel</li>
+<li><b>Talk / use:</b> walk near a person or object and press <b>E</b></li>
+<li><b>Choose an answer:</b> click it or press <b>1, 2, 3, 4</b></li>
+<li><b>Chat:</b> press <b>/</b> · <b>Menu:</b> Esc</li>
+<li><b>On a phone or tablet:</b> use the joystick to move and drag the screen to turn the camera.</li></ul></div>
+<div class="help-sec"><h2>🃏 Missions, cards and GOYUX</h2><ul>
+<li>Before you start, read your <b>character card</b> 📄: it has the information you need (your budget, your allergies, your plans…). You can open it again at any time.</li>
+<li>Follow the <b>objectives</b> on the right. Some are <b>secret</b>: surprises appear while you play!</li>
+<li>Choose the <b>natural, correct and polite</b> answer. Mistakes give you a tip ✏️, and you can try again.</li>
+<li>At the end you get a score. With <b>65 or more</b> you win the <b>card</b> of that level: 🥉 Easy = 40 GOYUX, 🥈 Normal = 60, 🥇 Hard = 80 (+25% with 3 stars ★★★).</li>
+<li>Each card pays only once. You can replay a level to practise, but without GOYUX.</li>
+<li><b>Unlocking:</b> each card opens the next level of that mission and the same level of the next mission.</li></ul></div>
+<div class="help-sec"><h2>📶 Levels and register</h2><ul>
+<li><b>Easy (A2):</b> 3 answers and the <b>ES</b> button for the Spanish translation.</li>
+<li><b>Normal (B1):</b> 4 answers, no Spanish.</li>
+<li><b>Hard (B2–C1):</b> richer English, and several answers are correct… but only one fits the situation.</li>
+<li><b>Register matters:</b> be polite with strangers, the police or the bank (<i>"Could you…, please?"</i>), and relaxed with friends and family (<i>"Cool, thanks!"</i>). Being too rude 😬 or too formal 🎩 costs <b>manners</b>, so you get a lower score.</li></ul></div>
+<div class="help-sec"><h2>🏝 My Nation</h2><ul>
+<li><b>Found your nation:</b> choose a name, a capital, a motto and a flag, and pass a short English test.</li>
+<li><b>Buy land:</b> walk to a "FOR SALE" sign and press E. Land gets more expensive as your nation grows.</li>
+<li><b>Build:</b> on your land, press E and choose a building. To build it, pass a test: 4 grammar questions about that building (they get harder) + 1 culture question. You need 4 of 5.</li>
+<li><b>Move a building:</b> press E on it → "Move to another plot" (it costs half its price).</li>
+<li><b>Taxes 💰:</b> once a day, answer one question and collect your taxes.</li>
+<li>Look at your <b>stats</b> (people, happiness, economy, security, culture, environment) and complete the nation <b>objectives</b>.</li></ul></div>
+<div class="help-sec"><h2>🤝 Treaties with other nations</h2><ul>
+<li>Build an <b>embassy</b> 🕊 and open 🌍 <b>World</b> to visit your classmates' nations and write them a <b>formal letter</b> proposing a trade, cultural or peace treaty.</li>
+<li>If they accept, the <b>treaty project</b> starts (✉ Letters & summits). Each president must pass, on different days:<ol><li><b>The summit:</b> 10 questions on the treaty, diplomatic language and formal English (8 correct).</li><li><b>The treaty mission:</b> a long B2 mission with listening, writing and a press conference (70/100).</li></ol></li>
+<li>When <b>both</b> presidents finish, the treaty is signed: <b>+1000 GOYUX for each nation</b> (for your first 3 treaties) and a bonus for your stats.</li></ul></div>
+<div class="help-sec"><h2>💡 Tips</h2><ul>
+<li>📒 <b>Notebook:</b> all the useful phrases from your missions.</li>
+<li>🔊 <b>Voices:</b> choose the English voices you like (UK, Ireland, USA, Australia…).</li>
+<li>📇 <b>My progress card:</b> a summary to show your teacher.</li>
+<li><b>Demo / offline mode:</b> you can play, but your progress is saved only in this browser. Use your teacher's link to save it to your account.</li></ul></div></div>
+      <div class="help" id="helpEsBox" hidden>
+<div class="help-sec"><h2>🌍 ¿Qué es GOYALAND?</h2><p>Un mundo en 3D para practicar inglés de situaciones reales. Juegas <b>misiones</b> (un restaurante, un aeropuerto, un hospital, una familia de acogida…), ganas <b>cromos</b> y <b>GOYUX</b> (el dinero del juego) y los gastas en <b>tu propio país</b>: terrenos, edificios, monumentos y tratados con los países de tus compañeros.</p></div>
+<div class="help-sec"><h2>🎮 Controles</h2><ul>
+<li><b>Moverte:</b> W A S D o las flechas · <b>Saltar:</b> espacio</li>
+<li><b>Cámara:</b> arrastra con el ratón · <b>Zoom:</b> rueda del ratón</li>
+<li><b>Hablar / usar:</b> acércate a una persona u objeto y pulsa <b>E</b></li>
+<li><b>Elegir respuesta:</b> haz clic o pulsa <b>1, 2, 3, 4</b></li>
+<li><b>Chat:</b> pulsa <b>/</b> · <b>Menú:</b> Esc</li>
+<li><b>En móvil o tablet:</b> usa el joystick para moverte y arrastra la pantalla para girar la cámara.</li></ul></div>
+<div class="help-sec"><h2>🃏 Misiones, cromos y GOYUX</h2><ul>
+<li>Antes de empezar, lee tu <b>tarjeta de personaje</b> 📄: tiene la información que necesitas (tu presupuesto, tus alergias, tus planes…). Puedes volver a abrirla cuando quieras.</li>
+<li>Sigue los <b>objetivos</b> de la derecha. Algunos son <b>secretos</b>: ¡surgen sorpresas mientras juegas!</li>
+<li>Elige la respuesta <b>natural, correcta y educada</b>. Si te equivocas, aparece un consejo ✏️ y puedes volver a intentarlo.</li>
+<li>Al final obtienes una puntuación. Con <b>65 o más</b> ganas el <b>cromo</b> de ese nivel: 🥉 Easy = 40 GOYUX, 🥈 Normal = 60, 🥇 Hard = 80 (+25 % con 3 estrellas ★★★).</li>
+<li>Cada cromo paga una sola vez. Puedes repetir un nivel para practicar, pero sin GOYUX.</li>
+<li><b>Desbloqueo:</b> cada cromo abre el nivel siguiente de esa misión y el mismo nivel de la misión siguiente.</li></ul></div>
+<div class="help-sec"><h2>📶 Niveles y registro</h2><ul>
+<li><b>Easy (A2):</b> 3 respuestas y el botón <b>ES</b> con la traducción al español.</li>
+<li><b>Normal (B1):</b> 4 respuestas, sin español.</li>
+<li><b>Hard (B2–C1):</b> inglés más rico, y varias respuestas son correctas… pero solo una encaja con la situación.</li>
+<li><b>El registro importa:</b> sé educado con desconocidos, la policía o el banco (<i>"Could you…, please?"</i>) y natural con amigos y familia (<i>"Cool, thanks!"</i>). Ser demasiado brusco 😬 o demasiado formal 🎩 resta <b>modales</b> y baja tu puntuación.</li></ul></div>
+<div class="help-sec"><h2>🏝 Mi país</h2><ul>
+<li><b>Funda tu país:</b> elige nombre, capital, lema y bandera, y supera un pequeño test de inglés.</li>
+<li><b>Compra terreno:</b> acércate a un cartel "FOR SALE" y pulsa E. El terreno se encarece a medida que tu país crece.</li>
+<li><b>Construye:</b> en tu terreno, pulsa E y elige un edificio. Para construirlo debes superar un test: 4 preguntas de gramática sobre ese edificio (cada vez más difíciles) + 1 de cultura. Necesitas 4 de 5.</li>
+<li><b>Mover un edificio:</b> pulsa E sobre él → "Move to another plot" (cuesta la mitad de su precio).</li>
+<li><b>Impuestos 💰:</b> una vez al día, responde a una pregunta y cobra tus impuestos.</li>
+<li>Mira tus <b>estadísticas</b> (población, felicidad, economía, seguridad, cultura, medio ambiente) y completa los <b>objetivos</b> del país.</li></ul></div>
+<div class="help-sec"><h2>🤝 Tratados con otros países</h2><ul>
+<li>Construye una <b>embajada</b> 🕊 y abre 🌍 <b>World</b> para visitar los países de tus compañeros y escribirles una <b>carta formal</b> proponiendo un tratado comercial, cultural o de paz.</li>
+<li>Si aceptan, empieza el <b>proyecto del tratado</b> (✉ Letters & summits). Cada presidente debe superar, en días distintos:<ol><li><b>La cumbre:</b> 10 preguntas sobre el tratado, lenguaje diplomático e inglés formal (8 aciertos).</li><li><b>La misión del tratado:</b> una misión larga de nivel B2 con escucha, escritura y rueda de prensa (70/100).</li></ol></li>
+<li>Cuando <b>los dos</b> presidentes terminan, el tratado se firma: <b>+1000 GOYUX para cada país</b> (en tus 3 primeros tratados) y una bonificación en tus estadísticas.</li></ul></div>
+<div class="help-sec"><h2>💡 Consejos</h2><ul>
+<li>📒 <b>Notebook:</b> todas las frases útiles de tus misiones.</li>
+<li>🔊 <b>Voices:</b> elige las voces en inglés que más te gusten (Reino Unido, Irlanda, EE. UU., Australia…).</li>
+<li>📇 <b>My progress card:</b> un resumen para enseñar a tu profesora.</li>
+<li><b>Demo o modo sin conexión:</b> puedes jugar, pero tu progreso solo se guarda en este navegador. Usa el enlace de tu profesora para guardarlo en tu cuenta.</li></ul></div></div>
     </section>
     <section class="page" id="pageNotebook" hidden>
       <h1>Notebook</h1>
@@ -1061,10 +1150,11 @@ function renderNotebook() {
 document.querySelectorAll('.topbar nav button').forEach(b => b.onclick = () => {
   document.querySelectorAll('.topbar nav button').forEach(x => x.removeAttribute('aria-current'));
   b.setAttribute('aria-current', 'page');
-  ['Home', 'Avatar', 'Notebook', 'Teacher'].forEach(p => $('#page' + p).hidden = p !== b.dataset.page);
+  ['Home', 'Avatar', 'Notebook', 'Help', 'Teacher'].forEach(p => $('#page' + p).hidden = p !== b.dataset.page);
   if (b.dataset.page === 'Teacher') loadTeacher();
   if (b.dataset.page === 'Avatar') renderAvatarPage();
   if (b.dataset.page === 'Notebook') renderNotebook();
+  if (b.dataset.page === 'Help') window.scrollTo(0, 0);
 });
 let detailGame = null;
 function openDetail(g) {
@@ -12995,6 +13085,10 @@ async function openProgress() {
   if (CLOUD && account) { try { render(await apiU('myRuns')); } catch (e) {} }
 }
 $('#progOpen').onclick = openProgress;
+const helpLang = es => { $('#helpEsBox').hidden = !es; $('#helpEnBox').hidden = es; $('#helpEs').setAttribute('aria-pressed', es); $('#helpEn').setAttribute('aria-pressed', !es); store.set('helpEs', es); };
+$('#helpEn').onclick = () => helpLang(false); $('#helpEs').onclick = () => helpLang(true);
+if (store.get('helpEs', false)) helpLang(true);
+if (location.hash === '#help') { const hb = document.querySelector('button[data-page="Help"]'); if (hb) setTimeout(() => hb.click(), 0); }
 $('#nationHero').onclick = () => launchNation();
 $('#progX').onclick = () => $('#progModal').hidden = true;
 $('#progModal').addEventListener('click', e => { if (e.target.id === 'progModal') $('#progModal').hidden = true; });
