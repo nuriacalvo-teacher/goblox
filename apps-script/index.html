@@ -13069,7 +13069,7 @@ const TREATY_FX = { trade: [0, 0, 6, 0, 0, 0], culture: [0, 0, 0, 0, 6, 0], peac
 const TREATY_NAME = { trade: 'Trade Agreement', culture: 'Cultural Exchange', peace: 'Peace Treaty' };
 function nStats(n, treaties) {
   const s = { pop: 50, happy: 50, econ: 20, secu: 20, cult: 10, env: 60 };
-  Object.values(n.buildings || {}).forEach(id => { const b = BLD[id]; if (b) N_KEYS.forEach((k, i) => { s[k] += b[3][i]; }); });
+  Object.keys(n.buildings || {}).forEach(pl => { const b = BLD[n.buildings[pl]]; if (b) { const m = UPG_MULT[bLevel(n, pl)] || 1; N_KEYS.forEach((k, i) => { s[k] += m === 1 ? b[3][i] : Math.round(b[3][i] * m); }); } });
   const per = {};
   (treaties || []).forEach(t => { per[t] = (per[t] || 0) + 1; if (per[t] <= 3 && TREATY_FX[t]) N_KEYS.forEach((k, i) => { s[k] += TREATY_FX[t][i]; }); });
   s.happy = clamp(s.happy, 0, 100); s.env = clamp(s.env, 0, 100);
@@ -13082,6 +13082,13 @@ const moveCost = id => Math.max(10, Math.round(BLD[id][2] / 2));
 /* MIRROR (Code.gs: mejoras_, REPEAT, buildPrice_). The server sends the real flag in every state; FEAT_OFFLINE is for play without the server. */
 const FEAT_OFFLINE = false;
 let FEAT = { mejoras: FEAT_OFFLINE };
+/* MIRROR (Code.gs: UPG_COST, UPG_MULT, UPG_Q, UPG_NEED): upgrades to level 2 and 3 (only with FEAT.mejoras).
+   UPG_COST[id] = [cost of level 2, cost of level 3]; the stats of the base building are multiplied by UPG_MULT[level]. */
+const UPG_COST = { houses: [150, 800], stadium: [450, 1300] };
+const UPG_MULT = [1, 1, 1.6, 2.4];
+const UPG_Q = 5, UPG_NEED = 4;
+const UPG_NAME = { houses: ['Houses', 'Apartment block', 'Skyscraper'], stadium: ['Stadium', 'Grand Stadium', 'Mega Stadium'] };
+const bLevel = (n, i) => (FEAT.mejoras && n && n.levels && n.levels[i]) || 1;
 const REPEAT_B = ['houses', 'farm', 'park', 'forest'];
 const bPrice = (id, n) => {
   const base = BLD[id][2];
@@ -13598,10 +13605,10 @@ const GQ = {
 /* n questions, each from a different grammar point, getting harder: the first one starts at level 1
    for a young nation and climbs as the nation grows (more buildings → harder tests).
    With a building id, the sentences come from TQ[id] (about that building) and GQ fills any gap. */
-function gradedQs(n, built, id) {
+function gradedQs(n, built, id, floor) {
   const shift = built < 5 ? 0 : built < 12 ? 1 : 2, used = new Set(), out = [], own = (id && TQ[id]) || [];
   for (let k = 0; k < n; k++) {
-    const lv = Math.min(3, (n === 1 ? (Math.random() * 3 | 0) : k) + shift);
+    const lv = Math.max(floor || 0, Math.min(3, (n === 1 ? (Math.random() * 3 | 0) : k) + shift));
     let got = null;
     for (let l = lv; l >= 0 && !got; l--) {
       const mine = own.filter(x => x[0] === l + 1 && !used.has(x[1]));
@@ -14432,7 +14439,20 @@ const NAPI = {
       const s = NAPI.local(), n = s.nation, id = n.buildings[from];
       if (!id || id === 'cityhall' || !n.plots.includes(to) || n.buildings[to] || !fitsPlot(id, to)) throw new Error('You cannot move that building there.');
       if (s.goyux.total < moveCost(id)) throw new Error(`You need ${moveCost(id)} GOYUX to move it.`);
-      delete n.buildings[from]; n.buildings[to] = id; n.spent += moveCost(id); store.set('nation', n);
+      delete n.buildings[from]; n.buildings[to] = id; n.spent += moveCost(id);
+      if (n.levels && n.levels[from]) { n.levels[to] = n.levels[from]; delete n.levels[from]; }
+      store.set('nation', n);
+    });
+  },
+  upgrade(plot, score) {
+    return NAPI.run('nationUpgrade', [plot, score], () => {
+      const s = NAPI.local(), n = s.nation, id = n.buildings[plot], costs = UPG_COST[id];
+      if (!FEAT.mejoras || !costs) throw new Error('That building cannot be upgraded.');
+      const lv = bLevel(n, plot);
+      if (lv > costs.length) throw new Error('This building is already at the highest level.');
+      if (!(score >= UPG_NEED && score <= UPG_Q)) throw new Error(`You need ${UPG_NEED} of ${UPG_Q} correct answers in the test.`);
+      if (s.goyux.total < costs[lv - 1]) throw new Error(`You need ${costs[lv - 1]} GOYUX for this upgrade.`);
+      n.levels = n.levels || {}; n.levels[plot] = lv + 1; n.spent += costs[lv - 1]; store.set('nation', n);
     });
   },
   tax() {
@@ -15147,7 +15167,7 @@ function runQuiz(o) {
   /* o.n grammar questions from o.topic (or 'any'), then one culture question from CULT[o.culture] */
   const built = G && G.s && G.s.state && G.s.state.nation ? Object.keys(G.s.state.nation.buildings).length : 0;
   const pool = o.graded ? null : o.topic === 'any' ? Object.values(QB).flatMap(t => t.qs) : QB[o.topic].qs;
-  const qs = o.graded ? gradedQs(o.n || 4, built, o.culture) : sample(pool, Math.min(o.n || 5, pool.length)).map(q => ({ q }));
+  const qs = o.graded ? gradedQs(o.n || 4, built, o.culture, o.floor) : sample(pool, Math.min(o.n || 5, pool.length)).map(q => ({ q }));
   if (o.culture && CULT[o.culture]) qs.push({ q: pick1(CULT[o.culture]), culture: true });
   const need = Math.ceil(qs.length * 0.8);
   const label = (o.graded ? 'Mixed grammar, getting harder' : o.topic === 'any' ? 'Mixed grammar' : QB[o.topic].label) + (o.culture ? ' + 🌍 culture' : '');
@@ -15180,7 +15200,7 @@ function runQuiz(o) {
   const end = () => {
     const pass = right >= need;
     panel(pass ? 'Test passed! 🎉' : 'Not yet…', '', `<div class="quiz-end"><b>${right} / ${qs.length}</b><p>${pass ? 'Excellent English!' : `You need ${need} correct answers. Read the tips and try again: the questions change.`}</p></div>`,
-      pass ? [{ t: 'Continue', cls: 'primary', fn: () => { closePanel(); o.onPass(); } }] : [{ t: 'Close', fn: () => { closePanel(); } }, { t: 'Try again', cls: 'primary', fn: () => runQuiz(o) }]);
+      pass ? [{ t: 'Continue', cls: 'primary', fn: () => { closePanel(); o.onPass(right); } }] : [{ t: 'Close', fn: () => { closePanel(); } }, { t: 'Try again', cls: 'primary', fn: () => runQuiz(o) }]);
   };
   show();
 }
@@ -15222,6 +15242,16 @@ function buildingInfo(id, plot) {
     notify('🚚 Moving ' + b[0], `Walk to an empty plot of yours and press E. Moving costs ${moveCost(id)} GOYUX. Use ✖ in the bar to cancel.`);
   } });
   panel(`${b[1]} ${b[0]}`, '', `<p class="panel-p">${escH(b[5])}</p><div class="fxs">${fxChips(b[3])}</div>${READING[id] ? `<div class="quiz-text">${escH(READING[id].text)}</div>` : ''}`, btns, { onClose: () => {} });
+}
+/* upgrade test: 4 hard grammar questions (levels 3-4 of the bank, or 4 only for the last upgrade) + 1 culture question */
+function upgradeBuilding(plot) {
+  const n = G.s.state.nation, id = n.buildings[plot], costs = UPG_COST[id], lv = bLevel(n, plot);
+  if (!FEAT.mejoras || !costs || lv > costs.length) return;
+  const nm = UPG_NAME[id][lv];
+  runQuiz({ title: `Upgrade: ${nm}`, graded: true, culture: id, n: UPG_Q - 1, floor: lv + 1, onPass: async right => {
+    try { applyNation(await NAPI.upgrade(plot, right)); notify('🏗 Upgraded!', `${nm} is ready. Its effects are now ×${UPG_MULT[lv + 1]}.`, 'good'); }
+    catch (e) { notify('⚠️ Not upgraded', e.message, 'bad'); }
+  } });
 }
 function moveHere(to) {
   const mv = G.s.moving, b = BLD[mv.id];

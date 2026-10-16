@@ -564,6 +564,12 @@ const buildPrice_ = (id, n) => {
   if (!mejoras_() || REPEAT.indexOf(id) < 0) return base;
   return Math.round(base * Math.pow(1.1, Object.values(n.buildings || {}).filter(x => x === id).length));
 };
+/* MIRROR (index.html: UPG_COST, UPG_MULT, UPG_Q, UPG_NEED): upgrades of level 2 and 3 (only with FEATURES.mejoras).
+   UPG_COST[id] = [cost of level 2, cost of level 3]; the stats of the base building are multiplied by UPG_MULT[level]. */
+const UPG_COST = { houses: [150, 800], stadium: [450, 1300] };
+const UPG_MULT = [1, 1, 1.6, 2.4];
+const UPG_Q = 5, UPG_NEED = 4;   // the upgrade test: 4 grammar + 1 culture question, 4 of 5 right
+const levelOf_ = (n, i) => (mejoras_() && n.levels && n.levels[i]) || 1;
 const MONUMENTS = ['bigben', 'castle', 'stonehenge', 'newgrange', 'cntower', 'inukshuk', 'towerbridge', 'hobbiton', 'liberty', 'whitehouse', 'goldengate', 'opera', 'harbourbridge'];
 const UNIQUE = ['cityhall', 'parliament', 'embassy', 'port', 'stadium', 'airport', 'mine', 'lighthouse'].concat(MONUMENTS);
 /* The map:
@@ -585,7 +591,7 @@ const TREATY = { trade: [0, 0, 6, 0, 0, 0], culture: [0, 0, 0, 0, 6, 0], peace: 
 const N_KEYS = ['pop', 'happy', 'econ', 'secu', 'cult', 'env'];
 function nStats_(n, treaties) {
   const s = { pop: 50, happy: 50, econ: 20, secu: 20, cult: 10, env: 60 };
-  Object.values(n.buildings || {}).forEach(id => { const b = BUILD[id]; if (b) N_KEYS.forEach((k, i) => { s[k] += b[i + 1]; }); });
+  Object.keys(n.buildings || {}).forEach(pl => { const b = BUILD[n.buildings[pl]]; if (b) { const m = UPG_MULT[levelOf_(n, pl)] || 1; N_KEYS.forEach((k, i) => { s[k] += m === 1 ? b[i + 1] : Math.round(b[i + 1] * m); }); } });
   const per = {};
   (treaties || []).forEach(t => { per[t] = (per[t] || 0) + 1; if (per[t] <= 3 && TREATY[t]) N_KEYS.forEach((k, i) => { s[k] += TREATY[t][i]; }); });
   s.happy = clamp_(s.happy, 0, 100); s.env = clamp_(s.env, 0, 100);
@@ -600,7 +606,7 @@ function adjacent_(i, plots) {
   const r = Math.floor(i / N_SIZE), c = i % N_SIZE;
   return plots.some(p => Math.abs(Math.floor(p / N_SIZE) - r) + Math.abs(p % N_SIZE - c) === 1);
 }
-const NATION_HEAD = ['Correo', 'Presidente', 'País', 'Capital', 'Lema', 'Bandera', 'Terrenos', 'Edificios', 'GOYUX gastados', 'Impuestos cobrados', 'Último impuesto', 'Población', 'Felicidad', 'Economía', 'Seguridad', 'Cultura', 'Medio ambiente', 'Puntuación', 'Actualizado'];
+const NATION_HEAD = ['Correo', 'Presidente', 'País', 'Capital', 'Lema', 'Bandera', 'Terrenos', 'Edificios', 'GOYUX gastados', 'Impuestos cobrados', 'Último impuesto', 'Población', 'Felicidad', 'Economía', 'Seguridad', 'Cultura', 'Medio ambiente', 'Puntuación', 'Actualizado', 'Niveles'];
 const DIPLO_HEAD = ['ID', 'Fecha', 'De', 'País origen', 'Para', 'País destino', 'Tipo', 'Estado', 'Carta', 'Respuesta', 'Fecha respuesta', 'Etapas superadas (De)', 'Etapas superadas (Para)', 'Último intento (De)', 'Último intento (Para)', 'Premio pagado a', 'Fecha de firma'];
 /* A treaty is a project: after the letters (status 'project') BOTH presidents must pass TREATY_STAGES stages,
    one try a day: 1) the summit (an English test) and 2) the treaty mission (a long 3D mission, 70/100 or more).
@@ -623,7 +629,7 @@ function dayText_(v) {
 }
 function rowToNation_(v) {
   return { email: String(v[0]).toLowerCase(), leader: String(v[1] || ''), name: String(v[2] || ''), capital: String(v[3] || ''), motto: String(v[4] || ''),
-    flag: parse_(v[5], {}), plots: parse_(v[6], []), buildings: parse_(v[7], {}), spent: Number(v[8]) || 0, income: Number(v[9]) || 0, lastTax: dayText_(v[10]) };
+    flag: parse_(v[5], {}), plots: parse_(v[6], []), buildings: parse_(v[7], {}), spent: Number(v[8]) || 0, income: Number(v[9]) || 0, lastTax: dayText_(v[10]), levels: parse_(v[19], {}) };
 }
 function allNations_() {
   const sh = nSheet_('n'); const n = sh.getLastRow() - 1;
@@ -641,7 +647,7 @@ function saveNation_(n) {
   const { sh, r } = nationRow_(n.email);
   const st = nStats_(n, treatiesOf_(n.email).accepted);
   const row = [n.email, n.leader, n.name, n.capital, n.motto, JSON.stringify(n.flag), JSON.stringify(n.plots), JSON.stringify(n.buildings), n.spent, n.income, n.lastTax,
-    st.pop, st.happy, st.econ, st.secu, st.cult, st.env, st.score, new Date()];
+    st.pop, st.happy, st.econ, st.secu, st.cult, st.env, st.score, new Date(), JSON.stringify(n.levels || {})];
   const rr = r < 0 ? sh.getLastRow() + 1 : r;
   sh.getRange(rr, 1, 1, 11).setNumberFormat('@');   // keep names, codes and the tax date as plain text
   sh.getRange(rr, 1, 1, row.length).setValues([row]);
@@ -757,6 +763,25 @@ function nationBuild(i, id, guestCode) {
     return nationState_(u.email);
   });
 }
+/* Upgrade a house block or a stadium to level 2 or 3. `score` = right answers (of UPG_Q) in the test the player has just taken.
+   Like nationTax, the questions live in the page, so the server can only check the score is a valid pass. */
+function nationUpgrade(plot, score, guestCode) {
+  const u = user_(guestCode);
+  plot = Math.round(Number(plot)); score = Math.round(Number(score));
+  return withLock_(() => {
+    if (!mejoras_()) throw new Error('Upgrades are not available yet.');
+    const n = getNation_(u.email); if (!n) throw new Error('Found your nation first.');
+    const id = n.buildings[plot], costs = UPG_COST[id];
+    if (!costs || !n.plots.includes(plot)) throw new Error('That building cannot be upgraded.');
+    const level = levelOf_(n, plot);
+    if (level >= costs.length + 1) throw new Error('This building is already at the highest level.');
+    if (!(score >= UPG_NEED && score <= UPG_Q)) throw new Error('You need ' + UPG_NEED + ' of ' + UPG_Q + ' correct answers in the test.');
+    const cost = costs[level - 1];
+    if (available_(u.email, n) < cost) throw new Error('You need ' + cost + ' GOYUX for this upgrade.');
+    n.levels = n.levels || {}; n.levels[plot] = level + 1; n.spent += cost; saveNation_(n);
+    return nationState_(u.email);
+  });
+}
 function nationMove(from, to, guestCode) {
   const u = user_(guestCode);
   from = Math.round(Number(from)); to = Math.round(Number(to));
@@ -767,7 +792,9 @@ function nationMove(from, to, guestCode) {
     if (!fitsPlot_(id, to)) throw new Error('That building cannot go on this plot.');
     const cost = moveCost_(id);
     if (available_(u.email, n) < cost) throw new Error('You need ' + cost + ' GOYUX to move it.');
-    delete n.buildings[from]; n.buildings[to] = id; n.spent += cost; saveNation_(n);
+    delete n.buildings[from]; n.buildings[to] = id; n.spent += cost;
+    if (n.levels && n.levels[from]) { n.levels[to] = n.levels[from]; delete n.levels[from]; }   // an upgraded building keeps its level
+    saveNation_(n);
     return nationState_(u.email);
   });
 }
@@ -794,7 +821,7 @@ function nationVisit(email, guestCode) {
   const n = getNation_(String(email || '').toLowerCase().trim());
   if (!n || !sameWorld_(u, n.email, studentClasses_(), classMap_())) throw new Error('That nation does not exist.');
   const tr = treatiesOf_(n.email).accepted;
-  return { nation: { leader: n.leader, name: n.name, capital: n.capital, motto: n.motto, flag: n.flag, plots: n.plots, buildings: n.buildings }, stats: nStats_(n, tr), features: { mejoras: mejoras_() } };
+  return { nation: { leader: n.leader, name: n.name, capital: n.capital, motto: n.motto, flag: n.flag, plots: n.plots, buildings: n.buildings, levels: mejoras_() ? n.levels : {} }, stats: nStats_(n, tr), features: { mejoras: mejoras_() } };
 }
 function nationSendTreaty(to, type, letter, guestCode) {
   const u = user_(guestCode);
