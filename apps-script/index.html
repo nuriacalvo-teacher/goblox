@@ -1020,10 +1020,19 @@ const GAMES = [
     desc: 'Your host family in Cardiff, Wales, sends you to buy the ingredients for a veggie cawl. Read the bilingual Welsh–English signs, compare prices per kilo, ask where things are, order cheese by weight at the deli, check "use by" dates and vegetarian labels, and pay at the till. Watch out for sold-out bread, wrong prices and slippery eggs!',
     goals: ['Asking for things: Where can I find…? Could I have 200 grams of…?', 'Smart shopping: price per kilo, offers and "use by" dates', 'Reading labels: Suitable for vegetarians', 'Wales: Croeso, diolch, lush'],
     chips: ['🛒 Supermarket', '🏴 Cardiff', '🎲 New surprises every game', '⏱ 10–15 min'] },
+  { id: 'florist', title: 'At the Florist', emoji: '💐', bg: 'linear-gradient(150deg,#f06292,#880e4f 55%,#2d0418)', level: 'A2–C1',
+    desc: 'A flower shop in Vancouver, Canada, and a different story on every level. Easy: choose a bouquet for a birthday, a thank-you or a friend with a broken leg, and write the card. Normal: an online order for your host gran\'s 80th birthday arrived dead and with somebody else\'s card, so you complain politely and save the party. Hard: your elderly neighbour has died, and you order sympathy flowers for the funeral and find the right words.',
+    goals: ['Choosing and buying: Could you wrap it, please?', 'Complaining politely but firmly: I\'m afraid there\'s a problem with my order.', 'Sensitive language: I\'m so sorry for your loss. / With deepest sympathy', 'Culture: what flowers mean (red roses, lilies, chrysanthemums)'],
+    chips: ['💐 Florist', '🍁 Vancouver', '📖 A different story on each level', '⏱ 10–15 min'] },
+  { id: 'garden', title: 'Garden Centre', emoji: '🌱', bg: 'linear-gradient(150deg,#81c784,#1b5e20 55%,#0a2610)', level: 'A2–C1',
+    desc: 'Greenacre Garden Centre in Bristol, UK, and a different story on every level. Easy: buy seeds, peat-free compost and a watering can for the school veg patch. Normal: your host mum\'s plant is dying, so you describe the symptoms to the plant doctor, answer honestly and ask about the guarantee. Hard: work experience! You are the member of staff: advise customers, warn them about dangers and calm down an angry complaint.',
+    goals: ['Reading labels: sow in April, full sun, harmful to bees', 'Describing problems: The leaves have gone yellow and soft.', 'Giving advice and warnings tactfully: I\'d recommend… / I should mention that…', 'Customer service: I completely understand your frustration.'],
+    chips: ['🌱 Garden centre', '🇬🇧 Bristol', '📖 A different story on each level', '⏱ 10–15 min'] },
+  { id: 'pharmacy', title: 'At the Pharmacy', emoji: '💊', bg: 'linear-gradient(150deg,#4db6ac,#00695c 55%,#00251f)', level: 'A2–C1',
+    desc: 'A pharmacy in Boston, USA, and a different story on every level. Easy: you feel ill on a school trip, so you describe your symptoms, mention your allergy and read the label. Normal: you pick up a prescription with surprises: Spanish double surnames, US dates, generics and the instructions. Hard: your asthma inhaler runs out on a Sunday, and you have to explain clearly, know the warning signs and get a US prescription.',
+    goals: ['Describing symptoms: I\'ve got a sore throat. / My chest feels tight.', 'Safety: I\'m allergic to…, dosage labels, when to call 911', 'Prescriptions: pick-up, generic, take twice a day with food', 'US English: drugstore, over-the-counter, albuterol, month/day/year'],
+    chips: ['💊 Pharmacy', '🇺🇸 Boston', '📖 A different story on each level', '⏱ 10–15 min'] },
   /* in development: sport, events, shows, art and everyday life */
-  { id: 'florist', soon: true, title: 'At the Florist', emoji: '💐', bg: 'linear-gradient(150deg,#f06292,#880e4f)' },
-  { id: 'garden', soon: true, title: 'Garden Centre', emoji: '🌱', bg: 'linear-gradient(150deg,#81c784,#1b5e20)' },
-  { id: 'pharmacy', soon: true, title: 'At the Pharmacy', emoji: '💊', bg: 'linear-gradient(150deg,#4db6ac,#00695c)' },
   { id: 'dentist', soon: true, title: 'At the Dentist', emoji: '🦷', bg: 'linear-gradient(150deg,#80deea,#00838f)' },
   { id: 'hairdresser', soon: true, title: 'At the Hairdresser', emoji: '💇', bg: 'linear-gradient(150deg,#ce93d8,#6a1b9a)' },
   { id: 'post', soon: true, title: 'At the Post Office', emoji: '📮', bg: 'linear-gradient(150deg,#e57373,#b71c1c)' },
@@ -9903,6 +9912,1232 @@ function buildSupermarket() {
     if (!G.reg) good.push('Perfect register: polite with staff and customers, relaxed with your host family.');
     if (G.manners === 100) good.push('Perfect manners. Diolch yn fawr! 🏴󠁧󠁢󠁷󠁬󠁳󠁿');
     showResults({ title: 'Shopping done: cawl tonight!', overall, metrics: [['Smart shopping', shop], ['Money', moneyScore], ['English', eng], ['Manners', G.manners]], good, bad });
+  }
+}
+
+/* =====================================================================
+   SCENARIO — AT THE FLORIST (a flower shop in Vancouver, Canada)
+   Each level is a different story: Easy = choosing a bouquet for an occasion,
+   Normal = complaining about an online order that went wrong, Hard = sympathy flowers for a funeral.
+   ===================================================================== */
+const FLOR_OCC = [
+  { k: 'bday', who: 'your host mum', es: 'tu madre de acogida', why: 'It\'s her birthday today', col: 'yellow', fl: 'Sunflowers', price: 3, budget: 25, card: 'Happy birthday! Love from', cardEs: '¡Feliz cumpleaños!' },
+  { k: 'thanks', who: 'your host family', es: 'tu familia de acogida', why: 'You want to say thank you for a wonderful first month', col: 'orange', fl: 'Orange gerberas', price: 2.5, budget: 20, card: 'Thank you for everything! Love from', cardEs: '¡Gracias por todo!' },
+  { k: 'getwell', who: 'your classmate Sam', es: 'tu compañero Sam', why: 'He broke his leg playing hockey and he\'s at home', col: 'blue', fl: 'Blue irises', price: 3, budget: 20, card: 'Get well soon! From', cardEs: '¡Que te mejores pronto!' }
+];
+SCEN.florist = {
+  title: 'At the Florist', cardTitle: 'Your situation',
+  vocab: [['a bunch / a bouquet / an arrangement', 'un ramo / un ramo (arreglado) / un centro de flores'], ['Could you wrap it, please?', '¿Me lo envuelve, por favor?'], ['They\'ve wilted.', 'Se han marchitado.'], ['I\'m afraid there\'s a problem with my order.', 'Me temo que hay un problema con mi pedido.'], ['a refund / a replacement / a voucher', 'un reembolso / una sustitución / un vale'], ['I\'m so sorry for your loss.', 'Te acompaño en el sentimiento.'], ['With deepest sympathy', 'Con nuestro más sentido pésame'], ['in lieu of flowers', 'en lugar de flores'], ['Red roses mean romantic love.', 'Las rosas rojas significan amor romántico.'], ['Get well soon!', '¡Que te mejores!']],
+  board() { const s = G.s; return [['Money', 'C$' + nz2(s.cash)], ['Good choices', s.okN ? Math.round(100 * s.ok / s.okN) + '%' : '–'], ['English', engPct() + '%'], ['Manners', G.manners]]; },
+  card() {
+    const s = G.s, base = `You are <b>${escH(profile.name)}</b>, 15, from Spain, on a school exchange in <b>Vancouver</b>, Canada, living with the <b>Harper</b> family.`;
+    const tail = `<div class="cs">🌸 In Canada, <b>red roses</b> mean romantic love, <b>white lilies</b> are often for funerals, and people say <b>"Sorry!"</b> a lot. Difficulty: <b>${DIFF[G.diff].label}</b>.</div>`;
+    if (G.diff === 'easy') return `<div class="cs">${base}</div><div class="cs">💐 <b>Today:</b> you want to buy flowers for <b>${s.o.who}</b>. ${s.o.why}. ${s.o.k === 'getwell' ? 'His' : 'Their'} favourite colour is <b>${s.o.col}</b>.</div><div class="cs">💵 <b>Money:</b> C$${s.budget} in cash.</div>` + tail;
+    if (G.diff === 'normal') return `<div class="cs">${base}</div><div class="cs">😩 <b>The problem:</b> last week you ordered a bouquet online from <b>Petal &amp; Fern</b> for your host gran's <b>80th birthday</b>: order <b>${s.ord}</b>, C$55 with delivery. The party is <b>tonight at 6 pm</b>. This morning Gran sent you a photo of what arrived… and it's terrible. Go to the shop and sort it out, politely but firmly.</div>` + tail;
+    return `<div class="cs">${base}</div><div class="cs">🕊 <b>Sad news:</b> <b>Mr Okafor</b>, the Harpers' elderly next-door neighbour, has died. He taught you to play chess. Your host parents are at work, so they've asked you to order <b>sympathy flowers</b> for the funeral and to choose the words for the card.</div><div class="cs">🤍 Speak gently and respectfully: not too casual, but not pompous either.</div>` + tail;
+  },
+  build: buildFlorist
+};
+
+function buildFlorist() {
+  const s = G.s = { phase: 'enter', ev: {}, ok: 0, okN: 0, cash: 0, budget: 0, o: pick1(FLOR_OCC), ord: '#PF-' + (2000 + (Math.random() * 7000 | 0)), street: pick1(['Burrard Street', 'Granville Street', 'Davie Street']), num: pick1([1452, 2318, 875]) };
+  const pool = { easy: ['sold', 'rain', 'typo'], normal: ['defensive', 'late', 'photo'], hard: ['daughter', 'budget', 'early', 'notice', 'declined'] }[G.diff] || ['defensive', 'late', 'photo'];
+  sample(pool, { easy: 1, normal: 2, hard: 4 }[G.diff] || 2).forEach(k => s.ev[k] = true);
+  const okM = ok => { s.okN++; if (ok) s.ok++; updateBoard(); };
+  const C = n => 'C$' + nz2(Math.round(n * 100) / 100);
+  const pay = n => { s.cash = Math.round((s.cash - n) * 100) / 100; G.money = s.cash; updateBoard(); };
+
+  /* ---- world: the street (z > 8) and the shop (24 × 16) */
+  W.bounds = { minX: -24, maxX: 24, minZ: -12, maxZ: 22 };
+  ground('#8d9ea8'); part(0, 0, 13, 48, 0.05, 9, '#bdbdbd', { solid: false });
+  room(0, 0, 24, 16, { wall: '#fce4ec', floor: '#d7ccc8', roof: '#880e4f', door: 's', gap: 4, h: 5.5 });
+  sign('PETAL & FERN · FLORIST', 0, 6.6, 8.3, 10, 1.1, 0, { bg: '#880e4f', fg: '#fff' });
+  const BUCK = [['#fdd835', 'SUNFLOWERS'], ['#e53935', 'RED ROSES'], ['#fff9c4', 'YELLOW ROSES'], ['#ff7043', 'GERBERAS'], ['#5c6bc0', 'IRISES'], ['#fafafa', 'LILIES'], ['#f48fb1', 'TULIPS'], ['#ffffff', 'CHRYSANTHEMUMS']];
+  BUCK.forEach(([c, n], k) => {
+    const x = k < 4 ? -10 : 10, z = -4.5 + (k % 4) * 3;
+    part(x, 0, z, 1, 0.8, 1, '#78909c'); part(x, 0.8, z, 0.9, 0.9, 0.9, '#43a047', { solid: false }); part(x, 1.7, z, 1.1, 0.5, 1.1, c, { solid: false });
+    sign(n, x + (k < 4 ? 0.75 : -0.75), 1, z, 1.4, 0.3, k < 4 ? Math.PI / 2 : -Math.PI / 2, { bg: '#fff', fg: '#4a148c' });
+  });
+  part(0, 0, -4.5, 8, 1.1, 1.2, '#6d4c41'); part(-2.5, 1.1, -4.5, 1.6, 0.1, 0.8, '#f8bbd0', { solid: false });
+  plane(0, 3.4, -7.72, 7, 2.6, 0, canvasTex(700, 260, g => {
+    g.fillStyle = '#4a148c'; g.fillRect(0, 0, 700, 260); g.fillStyle = '#fff'; g.font = '900 30px Montserrat, Arial'; g.fillText('PRICES (per stem)', 20, 40); g.font = '700 22px Montserrat, Arial';
+    ['Sunflowers $3 · Red roses $5 · Yellow roses $4', 'Orange gerberas $2.50 · Blue irises $3 · Tulips $2', 'White lilies $5 · Chrysanthemums $2', 'Gift wrap $3 · Glass vase $12 · Card: free', 'Same-day delivery: order before 2 pm'].forEach((t, k) => g.fillText(t, 20, 84 + k * 36));
+  }));
+  part(7, 0, 4.5, 2, 1, 1.2, '#8d6e63'); sign('CARDS', 7, 2.4, 4.5, 1.6, 0.4, 0, { bg: '#fff', fg: '#880e4f' });
+  [[-18, 12], [18, 12]].forEach(([x, z]) => { part(x, 0, z, 0.5, 2.4, 0.5, '#6d4c41'); part(x, 2.4, z, 2.6, 2.4, 2.6, '#2e7d32', { solid: false }); });
+  W.walk = (x, z) => (x > -11.6 && x < 11.6 && z > -7.6 && z < 20) || (x > -23 && x < 23 && z > 8.4 && z < 20);
+
+  /* ---- people */
+  const fl = staff('Florist', gPick(), { shirt: '#ad1457', apron: '#33691e', pants: '#37474f' }, 0, -6, 0, '#880e4f');
+  const dgd = gPick(), daughter = npc(`${NPC_NAME[dgd]} (Customer)`, Object.assign({ shirt: '#212121', pants: '#212121', sleeves: true, shoes: true }, pick1(STAFF_LOOKS[dgd])), -4, -1, 0, { color: '#b0bec5', voice: NPC_VOICE[dgd] });
+  daughter.gender = dgd; daughter.badge = '#37474f'; daughter.av.visible = false;
+  const hg = gPick(), host = { name: `${NPC_NAME[hg]} (Host ${hg === 'f' ? 'mum' : 'dad'}) 📱`, badge: '#ef6c00', gender: hg, color: '#ffcc80', voice: NPC_VOICE[hg] };
+  const gg = 'f', gran = { name: 'Gran (Host gran) 📱', badge: '#8e24aa', gender: gg, color: '#ce93d8', voice: NPC_VOICE[gg] };
+  npc('Customer', { skin: pick1(SKINS), shirt: pick1(SHIRTS), pants: '#455a64', hair: '#3e2723', sleeves: true, shoes: true }, 8.4, -3, -Math.PI / 2);
+  spawnPlayer(0, 14, Math.PI, 0);
+  setMarker(0, 3.2, -2.4);
+  inter({ obj: fl.name, label: 'Talk', at: () => ({ x: 0, y: 0, z: -2.4 }), r: 2.8, when: () => s.phase === 'enter', act: () => { hideMarker(); s.phase = 'talking'; ({ easy: easy1, normal: norm1, hard: hard1 }[G.diff] || norm1)(); } });
+  inter({ obj: daughter.name, label: 'Talk', at: () => daughter.pos, r: 2.6, when: () => s.phase === 'daughter', act: daughterTalk });
+
+  /* ============ EASY: flowers for an occasion ============ */
+  const o = s.o;
+  if (G.diff === 'easy') {
+    s.budget = s.cash = o.budget; G.money = s.cash;
+    G.inv = [{ emoji: '💵', label: 'Cash', info: () => C(s.cash) }]; renderHotbar();
+    G.obj = [{ id: 'ask', text: 'Tell the florist what you need' }, { id: 'choose', text: `Choose the right flowers for ${o.who}` }];
+    if (s.ev.sold) G.obj.push({ id: 'sold', secret: true, text: 'Accept an alternative politely' });
+    G.obj.push({ id: 'wrap', text: 'Answer the florist\'s questions' }, { id: 'msg', text: 'Choose the message for the card' });
+    if (s.ev.typo) G.obj.push({ id: 'typo', secret: true, text: 'Ask the florist to correct the card' });
+    G.obj.push({ id: 'pay', text: 'Pay and check your change' });
+    if (s.ev.rain) G.obj.push({ id: 'rain', secret: true, text: 'Protect the flowers from the rain' });
+  }
+  function easy1() {
+    askR(fl, [['Hi there! Can I help you?', '¡Hola! ¿Te puedo ayudar?', [`Hi! I'd like some flowers for ${o.who}, please.`, `Hello! I want to buy some flowers for ${o.who}, please.`]]], [], [
+      { t: 'I want flowers. Give me.', kind: 'rude', tip: 'Too direct! "I\'d like some flowers, please."' },
+      { t: `I search flowers for ${o.who}.`, kind: 'grammar', tip: '"Buscar" = look for: "I\'m looking for some flowers."' },
+      { t: 'Hello! I would like some flowers for to give.', kind: 'grammar', tip: '"I\'d like some flowers to give to…" or "…for my host mum".' }
+    ], () => { complete('ask'); askV(fl, [[`Lovely! What's the occasion?`, '¡Qué bien! ¿Cuál es la ocasión?', [{ bday: 'It\'s her birthday today!', thanks: 'I want to say thank you to my host family.', getwell: 'My friend broke his leg. He\'s at home.' }[o.k]]]], [
+      { t: { bday: 'Is her birthday today.', thanks: 'I want to say thanks you.', getwell: 'My friend has broken the leg.' }[o.k], kind: 'grammar', tip: { bday: 'English needs a subject: "It\'s her birthday."', thanks: '"Thank you" or "thanks", never "thanks you".', getwell: 'Use "his": "My friend broke his leg."' }[o.k] },
+      { t: 'Is a special day for to celebrate.', kind: 'grammar', tip: '"It\'s a special day." Then say what it is.' }
+    ], board); });
+  }
+  function board() {
+    const n = Math.floor((o.budget - 3) / o.price);
+    paperQuiz('PRICES (per stem)', `For ${o.who}. Favourite colour: ${o.col}. You have C$${o.budget}, and gift wrap costs $3.`, 'Sunflowers (yellow) $3 · Red roses $5 · Yellow roses $4<br>Orange gerberas $2.50 · Blue irises $3 · Tulips (pink) $2<br>White lilies $5 · Chrysanthemums $2<br>Gift wrap $3', [
+      ['Which flowers are best?', `${o.fl}: ${o.col}, ${o.col === 'yellow' ? 'and cheerful' : 'and friendly'}`, ['Red roses: they mean romantic love', 'White lilies: they\'re often for funerals']],
+      [`How many ${o.fl.toLowerCase()} can you buy, with gift wrap?`, String(n), [String(n + 2), String(n - 2)]]
+    ], (right, nq, ans) => {
+      const good = /^(Sunflowers|Orange|Blue)/.test(ans[0]); okM(good); okM(ans[1] === String(n));
+      complete('choose', right < 2);
+      if (!good) notify('🌹 Careful!', /^Red/.test(ans[0]) ? 'Red roses mean romantic love: not for your host mum or a friend!' : 'White lilies are often for funerals.', 'warn');
+      s.n = n; s.cost = n * o.price + 3;
+      line(fl, `Great choice! ${n} ${o.fl.toLowerCase()}, then.`, `¡Buena elección! ${n}, entonces.`, () => s.ev.sold ? sold() : wrap(), 'Yes, please');
+    }, 'Choose');
+  }
+  function sold() {
+    reveal('sold');
+    askR(fl, [[`Oh, I'm so sorry! I've only got four ${o.fl.toLowerCase()} left. Can I add some tulips? They're cheaper.`, `¡Ay, lo siento mucho! Solo me quedan cuatro. ¿Le añado tulipanes? Son más baratos.`, ['Yes, that\'s fine. Thank you!', 'OK, no problem. Tulips are nice!']]], [], [
+      { t: 'No! I want only those.', kind: 'rude', tip: 'It\'s not the florist\'s fault! "OK, that\'s fine. Thank you."' },
+      { t: 'Yes, is OK for me.', kind: 'grammar', tip: '"Yes, that\'s fine."' },
+      { t: 'Yes, put me tulips.', kind: 'grammar', tip: '"Ponme" = Could you add some tulips?' }
+    ], () => { complete('sold'); s.cost = 4 * o.price + Math.floor((o.budget - 3 - 4 * o.price) / 2) * 2 + 3; wrap(); });
+  }
+  function wrap() {
+    askR(fl, [['Would you like it wrapped, or in a vase? The vase is twelve dollars.', '¿Lo quieres envuelto o en un jarrón? El jarrón cuesta doce dólares.', ['Wrapped, please. Thank you.', 'Just wrapped, please.']]], [], [
+      { t: 'In a vase.', kind: 'fact', fn: () => { okM(false); G.mistakes.push({ said: 'In a vase.', tip: 'A $12 vase is too expensive for your budget: "Wrapped, please."' }); notify('💸 Too expensive', 'With the vase you don\'t have enough money. You change your mind: wrapped, please.', 'warn'); complete('wrap', true); msg(); } },
+      { t: 'Wrap, please.', kind: 'grammar', tip: '"Wrapped, please" (or "Could you wrap it, please?").' },
+      { t: 'I want it in paper of gift.', kind: 'grammar', tip: '"Papel de regalo" = gift wrap: "Could you gift-wrap it?"' }
+    ], () => { okM(true); complete('wrap'); msg(); });
+  }
+  function msg() {
+    paperQuiz('THE CARD', 'Choose the message for the card.', '', [
+      ['Write:', `${o.card} ${profile.name}`, FLOR_OCC.filter(x => x.k !== o.k).map(x => `${x.card} ${profile.name}`).concat(['With deepest sympathy'])]
+    ], right => {
+      okM(right === 1); complete('msg', !right);
+      if (!right) notify('💌 Hmm…', `For this occasion: "${o.card}…"`, 'warn');
+      if (s.ev.typo) return typo();
+      payE();
+    }, 'Write it');
+  }
+  function typo() {
+    reveal('typo');
+    const bad = profile.name.length > 2 ? profile.name.slice(0, -1) + (profile.name.slice(-1) === 'a' ? 'o' : 'a') : profile.name + 'a';
+    askR(fl, [[`Here's the card! I wrote it for you: "${o.card} ${bad}". Is that right?`, `¡Aquí tienes la tarjeta! Te la he escrito yo: "${o.card} ${bad}". ¿Está bien?`, [`It's lovely, thank you! But my name is ${profile.name}. Can you change it, please?`, `Thank you! Sorry, my name is spelt ${profile.name.toUpperCase().split('').join('-')}.`]]], [], [
+      { t: 'No, it\'s wrong. Do it again.', kind: 'rude', tip: 'Be kind: "Sorry, my name is spelt…"' },
+      { t: 'My name is not write like this.', kind: 'grammar', tip: '"My name isn\'t spelt like that."' },
+      { t: 'You have written bad my name.', kind: 'grammar', tip: '"You\'ve spelt my name wrong" (more polite: "my name is spelt…").' }
+    ], () => { complete('typo'); line(fl, 'Oops, sorry! There you go.', '¡Uy, perdona! Ya está.', payE, 'Thanks!'); });
+  }
+  function payE() {
+    const cost = s.cost, ch = Math.round((s.budget - cost) * 100) / 100;
+    paperQuiz('PAY', `The florist says: "That's ${C(cost)}, please." You give C$${s.budget}.`, '', [
+      ['How much change should you get?', C(ch), [C(ch + 2), C(Math.abs(ch - 1))].filter(x => x !== C(ch))]
+    ], right => {
+      okM(right === 1); pay(cost); complete('pay', !right);
+      G.inv.push({ emoji: '💐', label: 'Bouquet', info: () => `For ${o.who}` }); renderHotbar();
+      if (s.ev.rain) return rain();
+      line(fl, 'Have a lovely day! I hope they love them!', '¡Que tengas un buen día! ¡Espero que les encanten!', fin, 'Thank you! Bye!');
+    }, 'Pay');
+  }
+  function rain() {
+    reveal('rain'); W.scene.background = new THREE.Color('#90a4ae');
+    askR(fl, [['Oh no, look! It\'s raining a lot now.', '¡Oh, no, mira! Ahora llueve mucho.', ['Oh no! Can I have a plastic bag for the flowers, please?', 'Can you put a bag on the flowers, please? It\'s raining.']]], [], [
+      { t: 'Give me a bag.', kind: 'rude', tip: 'Add "Could I have…, please?"' },
+      { t: 'Is raining! I need a bag of plastic.', kind: 'grammar', tip: '"It\'s raining! Could I have a plastic bag?"' },
+      { t: 'Can you to give me a bag?', kind: 'grammar', tip: 'No "to" after "can": "Can you give me a bag?"' }
+    ], () => { complete('rain'); line(fl, 'Of course! There you go: nice and dry. Bye!', '¡Claro! Toma: bien sequitas. ¡Adiós!', fin, 'Thanks! Bye!'); });
+  }
+
+  /* ============ NORMAL: a complaint about an online order ============ */
+  if (G.diff === 'normal') {
+    s.cash = s.budget = 0; G.money = 0;
+    G.inv = [{ emoji: '📱', label: 'Order confirmation', info: () => `Petal & Fern ${s.ord} · "Sunshine Bouquet" (yellow roses & sunflowers) · card: "Happy 80th birthday, Gran!" · to ${s.num} ${s.street} · C$55 paid` }]; renderHotbar();
+    G.obj = [{ id: 'evidence', text: 'Check the photo: what went wrong?' }, { id: 'explain', text: 'Explain the problem politely' }];
+    if (s.ev.defensive) G.obj.push({ id: 'defensive', secret: true, text: 'Stay calm when the florist disagrees' });
+    G.obj.push({ id: 'details', text: 'Give your order details' });
+    if (s.ev.photo) G.obj.push({ id: 'photo', secret: true, text: 'Show your evidence and describe it' });
+    G.obj.push({ id: 'option', text: 'Choose the best solution for tonight' }, { id: 'address', text: 'Check the delivery details' });
+    if (s.ev.late) G.obj.push({ id: 'late', secret: true, text: 'Find another way to get the flowers there' });
+    G.obj.push({ id: 'gran', text: 'Call Gran and tell her what\'s happening' });
+    later(1, () => notify('📱 Gran\'s photo', 'Look at the photo in your hotbar, then go to the counter.'));
+  }
+  function norm1() {
+    paperQuiz('📱 GRAN\'S PHOTO', 'Compare the photo with your order confirmation.', `<b>You ordered:</b> "Sunshine Bouquet": yellow roses and sunflowers · card "Happy 80th birthday, Gran!"<br><b>The photo:</b> a few brown, droopy pink carnations in a wet box · card: "<i>Get well soon, Derek</i>"`, [
+      ['What\'s wrong with the flowers?', 'They\'re the wrong flowers, and they\'ve wilted', ['Nothing: they look fresh', 'They\'re the right flowers but the wrong colour']],
+      ['And the card?', 'It\'s for somebody else: "Get well soon, Derek"', ['It\'s correct', 'It has a spelling mistake']]
+    ], right => {
+      for (let k = 0; k < 2; k++) okM(k < right); complete('evidence', right < 2);
+      askR(fl, [['Good morning! How can I help you?', '¡Buenos días! ¿En qué le puedo ayudar?', ['Good morning. I\'m afraid there\'s a problem with an order I placed online.', 'Hi. I\'d like to make a complaint about a delivery, please.']]], [
+        { t: 'Your shop ruined my gran\'s birthday.', kind: 'blunt', tip: 'Too aggressive to start. "I\'m afraid there\'s a problem with my order."', react: 'Oh dear… what happened?' },
+        { t: 'I want my money back. Now.', kind: 'blunt', tip: 'Explain first, then ask for a solution.', react: 'Let\'s see what happened first.' }
+      ], [
+        { t: 'I have a reclamation about my order.', kind: 'grammar', tip: '"Reclamación" = complaint: "I\'d like to make a complaint."' },
+        { t: 'There is a problem with my command.', kind: 'grammar', tip: '"Pedido" = order (not "command").' },
+        { t: 'The flowers that I ordered they arrived bad.', kind: 'grammar', tip: 'No extra "they": "The flowers I ordered arrived in a bad state."' }
+      ], () => { complete('explain'); s.ev.defensive ? defensive() : details(); });
+    }, 'Go to the counter');
+  }
+  function defensive() {
+    reveal('defensive');
+    askR(fl, [['Hmm. All our bouquets are checked before they leave. Are you sure they weren\'t left outside for hours?', 'Mmm. Revisamos todos los ramos antes de que salgan. ¿Seguro que no se quedaron fuera durante horas?', ['I understand, but the flowers aren\'t the ones I ordered, and the card is for someone else.', 'I\'m sure. And even so, they\'re pink carnations, not roses and sunflowers. Could you check the order, please?']]], [
+      { t: 'Are you calling me a liar?', kind: 'blunt', tip: 'Stay calm and stick to the facts: "The flowers aren\'t the ones I ordered."', react: 'No, no, I didn\'t mean that.' },
+      { t: 'That\'s rubbish. Check your system.', kind: 'blunt', tip: 'Too rude. "Could you check the order, please?"', react: 'All right, I\'ll check.' }
+    ], [
+      { t: 'I am sure. The flowers was horribles.', kind: 'grammar', tip: '"The flowers WERE horrible" (adjectives have no plural).' },
+      { t: 'Is not possible, they were not outside.', kind: 'grammar', tip: '"That isn\'t possible. They weren\'t outside."' }
+    ], () => { complete('defensive'); details(); });
+  }
+  function details() {
+    const wrong = '#PF-' + (+s.ord.slice(4) + 9);
+    askR(fl, [['Could I have your order number, please?', '¿Me da el número de pedido, por favor?', [`Sure, it's ${s.ord}. It was the Sunshine Bouquet, with a card for my gran's 80th birthday.`, `Yes: ${s.ord}. I ordered the Sunshine Bouquet for ${s.num} ${s.street}.`]]], [
+      { t: `${s.ord}. Look it up yourself.`, kind: 'blunt', tip: 'Unfriendly. "Sure, it\'s… It was the Sunshine Bouquet."', react: 'OK…' }
+    ], [
+      { t: `The number of order is ${s.ord}.`, kind: 'grammar', tip: '"My order number is…" (noun + noun).' },
+      { t: `Yes, is ${s.ord}.`, kind: 'grammar', tip: '"Yes, it\'s…"' }
+    ].concat([{ t: `Sure, it's ${wrong}.`, kind: 'fact', fn: () => { okM(false); G.mistakes.push({ said: `Sure, it's ${wrong}.`, tip: `Read numbers carefully: your order is ${s.ord}.` }); notify('🔢 Check the number', `Your order is ${s.ord}.`, 'warn'); later(0.5, found); } }]), () => { okM(true); complete('details'); found(); });
+  }
+  function found() {
+    complete('details');
+    if (s.ev.photo && !s.photoDone) return photoTalk();
+    line(fl, 'Oh no, I see what happened: your card and bouquet were swapped with another order. I\'m so sorry. Let me make it right. I can offer you three options.', '¡Oh, no, ya veo qué ha pasado: su tarjeta y su ramo se cambiaron por los de otro pedido. Lo siento muchísimo. Déjeme arreglarlo. Le puedo ofrecer tres opciones.', options, 'Go on');
+  }
+  function photoTalk() {
+    s.photoDone = true; reveal('photo');
+    askR(fl, [['Hmm, our system says it left here in perfect condition. Do you have a photo of what arrived, by any chance?', 'Mmm, el sistema dice que salió de aquí en perfecto estado. ¿Tiene por casualidad una foto de lo que llegó?', ['Yes, my gran sent me this one. As you can see, they\'re pink carnations, they\'re completely wilted, and the card says "Get well soon, Derek".', 'Sure, here it is. You can see the flowers are brown and droopy, and the card is for someone called Derek.']]], [
+      { t: 'Look for yourself.', kind: 'blunt', tip: 'Show it AND describe it: "As you can see, they\'re wilted…"', react: 'Er… OK, let me see.' },
+      { t: 'Are you saying I\'m lying?', kind: 'blunt', tip: 'Don\'t get defensive. Show the photo and describe it calmly.', react: 'Not at all! I just need to see it.' }
+    ], [
+      { t: 'Yes, look. The flowers are died.', kind: 'grammar', tip: '"Died" is a verb: "The flowers are dead / have wilted."' },
+      { t: 'Here is the photo where you can see that are bad.', kind: 'grammar', tip: '"Here\'s the photo. You can see that they\'re in a bad state."' }
+    ], () => { complete('photo'); found(); });
+  }
+  function options() {
+    choice(fl, 'One: a new, bigger bouquet delivered today before 5 pm, free. Two: a full refund. Three: a sixty-dollar voucher for next time. Which would you prefer?', 'Una: un ramo nuevo y más grande entregado hoy antes de las 5, gratis. Dos: el reembolso completo. Tres: un vale de sesenta dólares para la próxima vez. ¿Qué prefiere?', [
+      { t: 'The new bouquet today, please: the party is at six.', fn: () => { okM(true); complete('option'); addr(); } },
+      { t: 'A full refund, please.', fn: () => { okM(false); complete('option', true); G.mistakes.push({ said: 'A full refund, please.', tip: 'With a refund Gran gets no flowers for her party tonight. The new bouquet today was the best option.' }); line(fl, 'Of course. But… then there won\'t be any flowers for the party tonight. Shall I send the new bouquet instead?', 'Por supuesto. Pero… entonces no habrá flores para la fiesta. ¿Le mando mejor el ramo nuevo?', addr, 'Oh! Yes, please'); } },
+      { t: 'The voucher, please.', fn: () => { okM(false); complete('option', true); G.mistakes.push({ said: 'The voucher, please.', tip: 'A voucher is for next time: Gran needs flowers tonight!' }); line(fl, 'Sure. Although… the party is tonight, isn\'t it? Shall I send a new bouquet too?', 'Claro. Aunque… la fiesta es esta noche, ¿no? ¿Le mando también un ramo nuevo?', addr, 'Oh! Yes, please'); } }
+    ]);
+  }
+  function addr() {
+    const wrongN = String(s.num).split('').reverse().join('');
+    paperQuiz('DELIVERY DETAILS', 'The florist reads them back to you. Listen and check.', `"So that's the Sunshine Bouquet, extra large, to <b>${wrongN} ${s.street}</b>, before 5 pm today, card: <b>Happy 80th birthday, Gran!</b>"`, [
+      ['Is the address right?', `No: it's ${s.num}, not ${wrongN}`, ['Yes, it\'s right', `No: it's ${s.street.replace('Street', 'Avenue')}`]],
+      ['What do you say?', `"Sorry, I think the number is ${s.num}: ${String(s.num).split('').join('-')}."`, ['"You never get anything right, do you?"', '"OK, whatever."']]
+    ], right => {
+      okM(right === 2); complete('address', right < 2);
+      if (right < 2) notify('🏠 Listen carefully!', `The florist said ${wrongN}, but Gran lives at ${s.num} ${s.street}.`, 'warn');
+      if (s.ev.late) return late();
+      line(fl, 'Perfect. It\'ll be there by five, and I\'ve added a little box of chocolates for Gran, with our apologies.', 'Perfecto. Estará allí antes de las cinco, y he añadido una cajita de bombones para la abuela, con nuestras disculpas.', granCall, 'Thank you so much!');
+    }, 'Check');
+  }
+  function late() {
+    reveal('late');
+    askR(fl, [['Oh no… I\'ve just checked: our van is fully booked until seven. I\'m really sorry. What would you like to do?', '¡Oh, no!… Acabo de mirar: la furgoneta está completa hasta las siete. Lo siento mucho. ¿Qué quiere hacer?', ['That\'s OK. Could I take it with me now instead? I\'m going to the party anyway.', 'No worries. If it\'s ready soon, I could take it myself. Would that be possible?']]], [
+      { t: 'Seriously? Another mistake?', kind: 'blunt', tip: 'Frustrated, but rude. Suggest a solution: "Could I take it myself?"', react: 'I know, I\'m sorry…' }
+    ], [
+      { t: 'I can carry it myself to the party?', kind: 'grammar', tip: 'Question order: "Could I take it to the party myself?"' },
+      { t: 'No problem, I take it.', kind: 'grammar', tip: '"I\'ll take it" (a decision now = will).' }
+    ], () => { complete('late'); G.inv.push({ emoji: '💐', label: 'Sunshine Bouquet (XL)', info: () => 'Yellow roses and sunflowers, with chocolates for Gran' }); renderHotbar(); line(fl, 'That would be amazing. Give me ten minutes. And here\'s a twenty-dollar voucher for the trouble.', 'Sería genial. Deme diez minutos. Y aquí tiene un vale de veinte dólares por las molestias.', granCall, 'Thanks a lot!'); });
+  }
+  function granCall() {
+    askR(gran, [['Hello, dear! Did you go to the flower shop?', '¡Hola, cielo! ¿Fuiste a la floristería?', ['Yes! It was a mix-up with another order. You\'re getting a big new bouquet before the party!', 'I did! They swapped two orders by mistake, but it\'s all sorted. Your real flowers are on the way!']]], [
+      { t: 'Dear Madam, I am pleased to inform you that the matter has been resolved.', kind: 'stiff', tip: 'It\'s Gran! Be warm and relaxed: "It\'s all sorted!"', react: 'Goodness! Dear Madam? Ha ha!' }
+    ], [
+      { t: 'Yes! They have changed the orders for error.', kind: 'grammar', tip: '"By mistake": "They mixed up the orders by mistake."' },
+      { t: 'Don\'t worry, the new flowers arrive before five o\'clock of the afternoon.', kind: 'grammar', tip: '"…will arrive before five" / "before 5 pm".' }
+    ], () => line(gran, 'Oh, you\'re a treasure! Now, poor Derek got MY card, so I\'d better phone him and wish him well! See you at six, dear.', '¡Ay, eres un tesoro! Ahora, el pobre Derek recibió MI tarjeta, así que más vale que le llame para desearle que se mejore. Hasta las seis, cielo.', () => { complete('gran'); fin(); }, 'See you, Gran!'));
+  }
+
+  /* ============ HARD: sympathy flowers for a funeral ============ */
+  if (G.diff === 'hard') {
+    s.budget = 90; s.cash = 90; G.money = 90;
+    G.inv = [{ emoji: '💳', label: 'Host parent\'s card', info: () => 'Your host parents said you can spend up to C$90.' }]; renderHotbar();
+    G.obj = [{ id: 'text', text: 'Read your host parent\'s message' }, { id: 'greet', text: 'Explain sensitively why you are here' }];
+    if (s.ev.daughter) G.obj.push({ id: 'daughter', secret: true, text: 'Offer your condolences in person' });
+    G.obj.push({ id: 'type', text: 'Choose an appropriate arrangement' });
+    if (s.ev.budget) G.obj.push({ id: 'budget', secret: true, text: 'Negotiate tactfully when it costs too much' });
+    G.obj.push({ id: 'flowers', text: 'Discuss flowers and cultural differences' }, { id: 'card', text: 'Choose the words for the card' });
+    if (s.ev.notice) G.obj.push({ id: 'notice', secret: true, text: 'Respect the family\'s wishes in the funeral notice' });
+    if (s.ev.early) G.obj.push({ id: 'early', secret: true, text: 'Solve a problem with the delivery time' });
+    G.obj.push({ id: 'confirm', text: 'Confirm the delivery details precisely' });
+    if (s.ev.declined) G.obj.push({ id: 'declined', secret: true, text: 'Sort out a payment problem' });
+    later(1, () => notify('📱 A message', 'Your host parent has sent you a message. Read it at the counter (E).'));
+  }
+  function hard1() {
+    paperQuiz(`📱 ${NPC_NAME[hg].toUpperCase()} (HOST ${hg === 'f' ? 'MUM' : 'DAD'})`, 'Read it carefully.', 'Thanks so much for doing this, love. Mr Okafor\'s funeral is on <b>Friday at 11 am</b> at <b>Seaview Chapel</b>. Could you order something tasteful, up to <b>$90</b>, delivered to the chapel by <b>10 am</b>? Sign the card from <b>"The Harper family"</b>. Use my card. You knew him too, so choose the words you think are right. ❤️', [
+      ['When must the flowers arrive?', 'By 10 am on Friday, at Seaview Chapel', ['At 11 am on Friday, at his house', 'Today, at the Harpers\' house']],
+      ['Who is the card from?', 'The Harper family', [profile.name + ' only', 'Mr Okafor']]
+    ], right => {
+      for (let k = 0; k < 2; k++) okM(k < right); complete('text', right < 2);
+      askR(fl, [['Good morning. What can I do for you today?', 'Buenos días. ¿Qué puedo hacer por ti hoy?', ['Good morning. I\'d like to order some flowers for a funeral, please.', 'Hello. I\'m afraid it\'s for a funeral: our neighbour passed away, and we\'d like to send some flowers.']]], [
+        { t: 'Funeral flowers. Nothing too expensive.', kind: 'blunt', tip: 'Too abrupt for such a sad occasion. "I\'d like to order some flowers for a funeral, please."', react: 'Of course…' },
+        { t: 'Somebody died, so I need flowers. Quickly, please.', kind: 'blunt', tip: 'Sounds cold. Speak gently: "Our neighbour has passed away…"', react: 'I see. I\'m sorry.' },
+        { t: 'I hereby wish to procure a floral tribute for the deceased.', kind: 'stiff', tip: 'Respectful but pompous. Simple and gentle is best.', react: 'A floral tribute… certainly.' }
+      ], [
+        { t: 'Our neighbour has dead and we want flowers.', kind: 'grammar', tip: '"Dead" is an adjective. "Our neighbour has died" (or, more gently, "has passed away").' }
+      ], () => askR(fl, [['I\'m so sorry for your loss. Was he someone close to you?', 'Lo siento mucho. ¿Era alguien cercano?', ['Thank you. He was our next-door neighbour. He taught me to play chess.', 'Thank you, that\'s very kind. He lived next door, and he was always so kind to me.']]], [
+        { t: 'Not really. Just a neighbour.', kind: 'blunt', tip: 'Sounds cold. Thank them and say something kind about him.', react: 'Oh. I see.' },
+        { t: 'Yeah, whatever, he was old anyway.', kind: 'blunt', tip: 'Very insensitive! "Thank you. He was a lovely man."', react: '…Right.' },
+        { t: 'Indeed, his demise has occasioned considerable grief.', kind: 'stiff', tip: 'Far too pompous. "Thank you. He was a lovely man."', react: 'I… see.' }
+      ], [
+        { t: 'Thank you. He was our neighbour of next door.', kind: 'grammar', tip: '"Our next-door neighbour."' },
+        { t: 'Thank you. He teached me chess.', kind: 'grammar', tip: 'Teach – taught – taught: "He taught me to play chess."' }
+      ], () => { complete('greet'); s.ev.daughter ? daughterIn() : types(); }));
+    }, 'Go to the counter');
+  }
+  function daughterIn() {
+    reveal('daughter'); daughter.av.visible = true; walkTo(daughter, [[-2.4, -2]], () => faceTo(daughter, P.pos.x, P.pos.z));
+    notify('🖤 Someone you know', 'A customer in black has just come in. It\'s Mr Okafor\'s daughter, who you met at his house. Go and speak to her (E).', 'warn');
+    s.phase = 'daughter'; setMarker(-2.4, 3.4, -2);
+  }
+  function daughterTalk() {
+    hideMarker(); s.phase = 'talking';
+    askR(daughter, [['Oh… hello. You\'re staying with the Harpers, aren\'t you? Dad used to talk about your chess games.', 'Ah… hola. Tú vives con los Harper, ¿verdad? Mi padre hablaba de vuestras partidas de ajedrez.', ['I\'m so sorry about your dad. He was always so kind to me, and I\'ll really miss our games.', 'I\'m so sorry for your loss. Your dad was a lovely man. He was so patient teaching me chess.']]], [
+      { t: 'Oh, hi. Sad, isn\'t it? Anyway, I\'m buying flowers.', kind: 'blunt', tip: 'Too casual. Offer real condolences: "I\'m so sorry about your dad."', react: 'Yes… it is.' },
+      { t: 'Cheer up! He had a long life.', kind: 'blunt', tip: 'Never tell a grieving person to cheer up. "I\'m so sorry for your loss."', react: '…I know. Thanks.' },
+      { t: 'Please accept my most profound and heartfelt condolences on your bereavement.', kind: 'stiff', tip: 'Sincere, but it sounds like a formal letter. Speak from the heart, simply.', react: 'Thank you… that\'s very formal.' }
+    ], [
+      { t: 'I accompany you in the feeling.', kind: 'grammar', tip: 'A literal translation of "te acompaño en el sentimiento". In English: "I\'m so sorry for your loss."' },
+      { t: 'I am very sorry for your father death.', kind: 'grammar', tip: '"I\'m so sorry about your father" (or "your father\'s death").' }
+    ], p => { complete('daughter', p.kind === 'blunt'); line(daughter, 'Thank you. That means a lot. He\'d be so pleased you came. I\'ll see you on Friday.', 'Gracias. Significa mucho. Le habría encantado saber que has venido. Nos vemos el viernes.', () => { walkTo(daughter, [[0, 10]], () => daughter.av.visible = false); types(); }, 'Take care'); });
+  }
+  function types() {
+    const price = s.ev.budget ? 110 : 85;
+    paperQuiz('SYMPATHY FLOWERS', 'The florist\'s brochure. You are sending flowers from a neighbour\'s family. Budget: C$90.', `<b>Casket spray</b> · C$260 · <i>placed on the coffin; usually chosen by the immediate family</i><br><b>Standing wreath</b> · C$140 · displayed at the service<br><b>Sympathy basket</b> · C$${price} · displayed at the service; the family can take it home afterwards<br><b>A single white rose</b> · C$6`, [
+      ['Which is the most appropriate?', `The sympathy basket (C$${price})`, ['The casket spray (C$260)', 'A single white rose (C$6)']],
+      ['Why not the casket spray?', 'It\'s usually for the immediate family, and it\'s over budget', ['Because it\'s too small', 'Because casket sprays are only for weddings']]
+    ], (right, n, ans) => {
+      okM(/^The sympathy/.test(ans[0])); okM(/immediate/.test(ans[1])); complete('type', right < 2);
+      if (right < 2) notify('🕊 Funeral etiquette', 'The casket spray is for the close family. A sympathy basket is right for neighbours and friends.', 'warn');
+      if (s.ev.budget) return budget();
+      s.price = 85; flowers();
+    }, 'Choose');
+  }
+  function budget() {
+    reveal('budget');
+    askR(fl, [['The sympathy basket has gone up to a hundred and ten, I\'m afraid. Our prices changed this week.', 'Me temo que la cesta ha subido a ciento diez. Los precios cambiaron esta semana.', ['I see. Our budget is ninety dollars. Would it be possible to make a slightly smaller basket?', 'Ah. We were hoping to stay under ninety. Is there anything you could suggest for that price?']]], [
+      { t: 'That\'s a rip-off. Make it ninety.', kind: 'blunt', tip: 'Too aggressive. "Would it be possible to make a smaller one for ninety?"', react: 'I\'ll see what I can do…' },
+      { t: 'Ninety. Take it or leave it.', kind: 'blunt', tip: 'Haggling like that is inappropriate here. Ask politely for a smaller option.', react: 'Well…' },
+      { t: 'I must regretfully decline the proposed price.', kind: 'stiff', tip: 'Very stiff. "Would it be possible to do something similar for ninety?"', react: 'Er… I understand.' }
+    ], [
+      { t: 'We have only ninety dollars of budget.', kind: 'grammar', tip: '"Our budget is ninety dollars."' },
+      { t: 'Is possible a more small basket?', kind: 'grammar', tip: '"Would it be possible to make a smaller basket?"' }
+    ], () => { complete('budget'); s.price = 88; line(fl, 'Of course. I can make a smaller basket with the same flowers for eighty-eight. It\'ll still look beautiful.', 'Por supuesto. Puedo hacer una cesta más pequeña con las mismas flores por ochenta y ocho. Seguirá quedando preciosa.', flowers, 'Thank you'); });
+  }
+  function flowers() {
+    askR(fl, [['Do you have any preferences for the flowers? White lilies and roses are traditional. Some people like chrysanthemums too.', '¿Alguna preferencia de flores? Los lirios blancos y las rosas son lo tradicional. A algunos también les gustan los crisantemos.', ['White lilies and roses would be lovely. In Spain, chrysanthemums are mostly for cemeteries, so I\'d rather avoid them, if that\'s all right.', 'Lilies and white roses, please. Funny, in Spain we\'d never give chrysanthemums as a present: they\'re associated with graves.']]], [
+      { t: 'Whatever\'s cheapest.', kind: 'blunt', tip: 'Sounds careless for a funeral. Show you\'ve thought about it.', react: 'Right…' },
+      { t: 'Chrysanthemums are for dead people. Everybody knows that.', kind: 'blunt', tip: 'Not everybody! Cultures differ. Explain it gently: "In Spain, chrysanthemums are…"', react: 'Well, not here, actually.' },
+      { t: 'I would deem lilies most befitting of the solemnity of the occasion.', kind: 'stiff', tip: 'Too formal. "White lilies and roses would be lovely."', react: 'Lilies it is, then.' }
+    ], [
+      { t: 'In Spain the chrysanthemums are for the cemetery always.', kind: 'grammar', tip: 'No "the" for things in general, and adverb position: "In Spain, chrysanthemums are always for cemeteries."' }
+    ], () => { complete('flowers'); line(fl, 'That\'s interesting! Here, chrysanthemums are just autumn flowers. Lilies and white roses it is.', '¡Qué interesante! Aquí los crisantemos son simplemente flores de otoño. Lirios y rosas blancas, entonces.', cardH, 'Thanks'); });
+  }
+  function cardH() {
+    paperQuiz('THE SYMPATHY CARD', 'Choose the most appropriate message.', '', [
+      ['Write:', 'With deepest sympathy. Thinking of you all at this difficult time. We will miss him dearly. – The Harper family', ['RIP Mr O 😢 gonna miss u – The Harpers', 'Get well soon! – The Harper family', 'Our condolences are hereby extended to the family of the deceased. – The Harper family']]
+    ], right => {
+      okM(right === 1); complete('card', !right);
+      if (!right) notify('🕊 The right words', 'Warm and simple: "With deepest sympathy. Thinking of you all at this difficult time."', 'warn');
+      s.ev.notice ? notice() : s.ev.early ? early() : confirm();
+    }, 'Write it');
+  }
+  function notice() {
+    reveal('notice');
+    choice(fl, 'Just one thing: I read the funeral notice in the paper this morning. It says: "In lieu of flowers, the family asks for donations to the Heart and Stroke Foundation." Some people send a small arrangement to the family\'s home instead, and make a donation.', 'Solo una cosa: leí la esquela en el periódico esta mañana. Dice: «En lugar de flores, la familia pide donativos para la Fundación del Corazón». Algunos mandan un centro pequeño a casa de la familia y hacen un donativo.', [
+      { t: 'Thanks for telling me. Let\'s send a small arrangement to the house, and I\'ll suggest a donation to my host family.', fn: () => { okM(true); complete('notice'); s.price = 45; s.toHouse = true; line(fl, 'I think that\'s a lovely, respectful choice. A small arrangement is forty-five.', 'Me parece una elección preciosa y respetuosa. Un centro pequeño son cuarenta y cinco.', () => { complete('early'); confirm(); }, 'Thank you'); } },
+      { t: 'I don\'t care. We want the basket at the chapel.', fn: () => { okM(false); complete('notice', true); G.manners = Math.max(0, G.manners - 15); pop('Manners −15', 'bad'); G.mistakes.push({ said: 'I don\'t care. We want the basket at the chapel.', tip: '"In lieu of flowers" = instead of flowers. Respect the family\'s wishes.' }); notify('🕊 Respect their wishes', '"In lieu of flowers" means "instead of flowers". It\'s polite to follow the family\'s wishes.', 'bad'); s.ev.early ? early() : confirm(); } }
+    ]);
+  }
+  function early() {
+    reveal('early');
+    askR(fl, [['I\'ve just called Seaview Chapel: they don\'t open until ten-thirty on Fridays, so we can\'t deliver by ten. Could we deliver on Thursday afternoon instead? They\'ll keep it in a cool room.', 'Acabo de llamar a la capilla: los viernes no abren hasta las diez y media, así que no podemos entregar antes de las diez. ¿Podríamos entregarlo el jueves por la tarde? Lo guardarán en una sala fresca.', ['That sounds sensible. Thursday afternoon is fine, as long as it\'s there in time for the service.', 'Thursday would be perfect, thank you for checking. Would the flowers still be fresh on Friday?']]], [
+      { t: 'That\'s your problem, not mine.', kind: 'blunt', tip: 'The florist is helping you! "Thursday afternoon sounds sensible."', react: 'I\'m only trying to help.' },
+      { t: 'No. Friday at ten. That\'s what I said.', kind: 'blunt', tip: 'Be flexible: the chapel is closed. "Thursday is fine."', react: 'But they\'ll be closed…' },
+      { t: 'I acquiesce to your proposal regarding Thursday.', kind: 'stiff', tip: 'Ha, very stiff! "Thursday afternoon is fine, thank you."', react: 'Great… I think!' }
+    ], [
+      { t: 'Thursday is good, if the flowers are still freshes.', kind: 'grammar', tip: 'Adjectives have no plural: "fresh".' }
+    ], () => { complete('early'); s.thu = true; confirm(); });
+  }
+  function confirm() {
+    const when = s.thu ? 'Thursday afternoon' : 'by 10 am on Friday', where = s.toHouse ? 'the Okafor family home' : 'Seaview Chapel';
+    paperQuiz('CONFIRM THE ORDER', 'The florist reads the order back. Check every detail.', `"${s.toHouse ? 'Small arrangement' : 'Sympathy basket'}, white lilies and roses, to <b>${where}</b>, <b>${when}</b>, for the funeral of Mr <b>Okafer</b>, card from the Harper family. That's <b>C$${s.price}</b>."`, [
+      ['Is everything correct?', 'No: his name is spelt O-K-A-F-O-R', ['Yes, everything is correct', 'No: the card is from me, not the Harpers']],
+      ['Is the price within the budget?', s.price <= 90 ? 'Yes' : 'No', [s.price <= 90 ? 'No' : 'Yes']]
+    ], right => {
+      okM(right === 2); complete('confirm', right < 2); pay(s.price);
+      if (right < 2) notify('✍️ Names matter', 'At a funeral, spelling the person\'s name correctly is very important: O-K-A-F-O-R.', 'warn');
+      s.ev.declined ? declined() : hostEnd();
+    }, 'Confirm');
+  }
+  function declined() {
+    reveal('declined');
+    askR(fl, [['I\'m so sorry, the card has been declined. It might be a daily limit. Is there another way you could pay?', 'Lo siento mucho, han rechazado la tarjeta. Puede que sea un límite diario. ¿Puedes pagar de otra forma?', ['Oh, how embarrassing! It\'s my host parent\'s card. Would you mind if I gave them a quick call?', 'Ah, I\'m sorry about that. Could I phone my host parent? It\'s their card, so they\'ll know what to do.']]], [
+      { t: 'Your machine is broken. Try again.', kind: 'blunt', tip: 'Don\'t blame the florist. "Would you mind if I made a quick call?"', react: 'I\'ve tried twice, I\'m afraid.' },
+      { t: 'That\'s impossible. The card is fine.', kind: 'blunt', tip: 'Stay calm and find a solution: "Could I phone my host parent?"', react: 'I\'m sure it is, but…' }
+    ], [
+      { t: 'Can I call to my host father?', kind: 'grammar', tip: 'No "to": "Can I call my host dad?"' }
+    ], () => askR(host, [['Hi, love, everything OK?', 'Hola, cariño, ¿todo bien?', ['Sorry to bother you at work. Your card\'s been declined at the florist. Is there another way to pay?', 'Hi, sorry! The florist says your card\'s been declined. What should I do?']]], [
+      { t: 'Dear host, your card has been rejected. Please advise.', kind: 'stiff', tip: 'Too formal for your host family. "Sorry, your card\'s been declined…"', react: 'Please advise?! Ha. OK…' },
+      { t: 'I regret to inform you of a payment irregularity.', kind: 'stiff', tip: 'Like a bank letter! "Your card didn\'t work. What should I do?"', react: 'A what? Oh, the card!' }
+    ], [
+      { t: 'The florist says that your card don\'t work.', kind: 'grammar', tip: 'Third person: "your card doesn\'t work".' }
+    ], () => line(host, 'Oh, the daily limit, of course! Give the florist my number and I\'ll pay over the phone. Thanks, love.', '¡Ah, el límite diario, claro! Dale mi número a la florista y pago por teléfono. Gracias, cariño.', () => { complete('declined'); hostEnd(); }, 'OK')));
+  }
+  function hostEnd() {
+    {
+      askR(host, [['Hi, love. How did it go? Was it OK?', 'Hola, cariño. ¿Qué tal ha ido? ¿Bien?', ['Yes, it\'s all done. I chose white lilies and roses, and signed it from all of us. It was a bit sad, though.', 'It went fine. The florist was really kind. The flowers are ordered, and I wrote the card from all of us.']]], [
+        { t: 'Dear host parent, the floral tribute has been duly ordered.', kind: 'stiff', tip: 'At home, be natural and warm: "It\'s all done. It was a bit sad, though."', react: 'Oh, sweetheart, you don\'t have to be so formal.' },
+        { t: 'I wish to report that the transaction was completed successfully.', kind: 'stiff', tip: 'Like a robot! "It went fine. The florist was really kind."', react: 'Ha… OK. Thank you, love.' }
+      ], [
+        { t: 'Yes, all is done. I wrote the card of all of us.', kind: 'grammar', tip: '"Everything\'s done. I wrote the card from all of us."' }
+      ], () => line(host, 'Thank you, sweetheart. He was very fond of you, you know. We\'ll all go together on Friday.', 'Gracias, cielo. Te tenía mucho cariño, ¿sabes? El viernes iremos todos juntos.', fin, 'OK. See you later'));
+    }
+  }
+
+  function fin() {
+    const choices = s.okN ? Math.round(100 * s.ok / s.okN) : 100, eng = engPct();
+    const overall = 0.3 * choices + 0.2 * eng + 0.25 * G.manners + 0.25 * Math.round((choices + G.manners) / 2);
+    const good = [], bad = [];
+    if (G.diff === 'easy') {
+      if (!obj('choose').failed) good.push(`You chose ${o.fl.toLowerCase()}: the right colour and a good meaning, within your budget.`); else bad.push('Flowers have meanings: red roses = romantic love, white lilies = funerals.');
+      if (!obj('msg').failed) good.push(`The card said "${o.card}…": perfect for the occasion.`); else bad.push('Match the card to the occasion: Happy birthday! / Thank you! / Get well soon!');
+      if (s.ev.sold) good.push('Some flowers had sold out, and you accepted an alternative politely.');
+    } else if (G.diff === 'normal') {
+      if (!obj('explain').failed) good.push('You complained politely but firmly: "I\'m afraid there\'s a problem with my order."');
+      if (!obj('option').failed) good.push('You chose the solution that saved the party: a new bouquet today.'); else bad.push('Think about the goal: Gran needed flowers TONIGHT, so the new bouquet was best.');
+      if (!obj('address').failed) good.push('You noticed the wrong house number when the florist read it back.'); else bad.push('Always check details when someone reads them back to you.');
+      if (s.ev.defensive && !obj('defensive').failed) good.push('The florist was defensive, but you stayed calm and stuck to the facts.');
+    } else {
+      if (!obj('greet').failed) good.push('You spoke gently and simply about a sad situation.');
+      if (!obj('type').failed) good.push('You knew the funeral etiquette: a sympathy basket, not the casket spray.');
+      if (!obj('card').failed) good.push('Your card was warm and sincere: "With deepest sympathy. Thinking of you all…"'); else bad.push('A sympathy card should be warm and simple, not casual or pompous.');
+      if (s.ev.daughter && !obj('daughter').failed) good.push('You offered your condolences in person, with real feeling.');
+      if (s.ev.notice) { if (!obj('notice').failed) good.push('You respected "in lieu of flowers" in the funeral notice.'); else bad.push('"In lieu of flowers" means the family would prefer donations.'); }
+      if (!obj('confirm').failed) good.push('You checked the spelling of Mr Okafor\'s name.');
+    }
+    if (!G.reg) good.push('Perfect register for every person you spoke to.');
+    if (G.manners === 100) good.push('Perfect manners. Very Canadian! 🍁');
+    showResults({ title: { easy: 'Flowers with a smile!', normal: 'Order sorted!', hard: 'Flowers with respect' }[G.diff] || 'Done!', overall, metrics: [['Good choices', choices], ['English', eng], ['Manners', G.manners], ['Tact', Math.round((choices + G.manners) / 2)]], good, bad });
+  }
+}
+
+/* =====================================================================
+   SCENARIO — GARDEN CENTRE (Greenacre Garden Centre, Bristol, UK)
+   Each level is a different story: Easy = shopping for the school veg patch,
+   Normal = the plant doctor (a dying plant and the guarantee), Hard = a Saturday of work experience.
+   ===================================================================== */
+const GC_PLANT = [
+  { k: 'orchid', name: 'orchid', sym: 'The leaves have gone yellow and soft, and the roots look brown and mushy', cause: 'overwatering', facts: ['Every day: a big glass of water', 'On the kitchen windowsill', 'Three weeks ago'], fix: 'Water once a week: soak the pot for 10 minutes, then let it drain completely', covered: false },
+  { k: 'lemon', name: 'lemon tree', sym: 'The leaves are dropping off, and the edges are brown and crispy', cause: 'too much heat and dry air', facts: ['When the soil is dry', 'Right next to the radiator in the living room', 'A month ago'], fix: 'Move it away from the radiator to a bright, cooler spot and mist the leaves', covered: false },
+  { k: 'basil', name: 'basil plant', sym: 'There are tiny white flies under the leaves, and the leaves are sticky', cause: 'whitefly (it had them when you bought it)', facts: ['Twice a week', 'On the kitchen windowsill', 'Five days ago'], fix: 'Keep it away from other plants and spray it with a bee-friendly organic spray', covered: true }
+];
+SCEN.garden = {
+  title: 'Garden Centre', cardTitle: 'Your situation',
+  vocab: [['Excuse me, where can I find…?', 'Perdone, ¿dónde puedo encontrar…?'], ['to sow / to plant / to water', 'sembrar / plantar / regar'], ['full sun / partial shade / shade', 'pleno sol / semisombra / sombra'], ['peat-free compost', 'sustrato sin turba'], ['The leaves are turning yellow.', 'Las hojas se están poniendo amarillas.'], ['overwatering', 'exceso de riego'], ['a 12-month guarantee', 'una garantía de 12 meses'], ['bee-friendly', 'respetuoso con las abejas'], ['toxic to cats', 'tóxico para los gatos'], ['I completely understand your frustration.', 'Entiendo perfectamente su frustración.'], ['Can I give you a hand?', '¿Le echo una mano?']],
+  board() { const s = G.s; return [[G.diff === 'hard' ? 'Customers' : 'Spent', G.diff === 'hard' ? String(s.served || 0) : '£' + (s.spent || 0).toFixed(2)], ['Good advice', s.okN ? Math.round(100 * s.ok / s.okN) + '%' : '–'], ['English', engPct() + '%'], ['Manners', G.manners]]; },
+  card() {
+    const s = G.s, base = `You are <b>${escH(profile.name)}</b>, 15, from Spain, on an exchange in <b>Bristol</b>, England.`;
+    const tail = `<div class="cs">🌱 The British love gardening! Garden centres sell plants, seeds, tools… and usually have a café with tea and cake. Bristolians say <b>"Alright, my lover?"</b> (hello, said to anyone!) and <b>"cheers, drive"</b>. Difficulty: <b>${DIFF[G.diff].label}</b>.</div>`;
+    if (G.diff === 'easy') return `<div class="cs">${base}</div><div class="cs">🥕 <b>Your mission:</b> your class is starting a <b>vegetable patch</b> at school. Your teacher has given you a list and <b>£20</b> from the school. Buy everything at <b>Greenacre Garden Centre</b>.</div>` + tail;
+    if (G.diff === 'normal') return `<div class="cs">${base}</div><div class="cs">🥀 <b>The problem:</b> your host mum bought a <b>${s.p.name}</b> at Greenacre ${s.p.facts[2].toLowerCase()}, and now it looks terrible. She's at work, so you've brought it to the <b>Plant Doctor</b> desk with the receipt. Describe the problem, answer the questions, understand the advice and ask about the <b>12-month guarantee</b>.</div><div class="cs">📝 <b>What you know:</b> she waters it: <b>${s.p.facts[0].toLowerCase()}</b>. It lives: <b>${s.p.facts[1].toLowerCase()}</b>.</div>` + tail;
+    return `<div class="cs">${base}</div><div class="cs">🧑‍🌾 <b>Work experience!</b> Today you're working a Saturday shift at <b>Greenacre Garden Centre</b> for your school's work-experience week. This time <b>you</b> are the member of staff: help the customers, give good advice, stay calm with complaints and keep everybody safe.</div><div class="cs">🎽 With customers: polite and professional. With your supervisor: friendly but respectful.</div>` + tail;
+  },
+  build: buildGarden
+};
+
+function buildGarden() {
+  const s = G.s = { phase: 'enter', ev: {}, ok: 0, okN: 0, spent: 0, budget: 20, served: 0, p: pick1(GC_PLANT), crop: pick1([{ n: 'carrot', sow: 'March–June', sun: 'Full sun', days: 75 }, { n: 'lettuce', sow: 'March–August', sun: 'Full sun or partial shade', days: 50 }, { n: 'radish', sow: 'March–September', sun: 'Full sun', days: 28 }]) };
+  const pool = { easy: ['lostkid', 'sold', 'heavy'], normal: ['noreceipt', 'hostcall', 'product'], hard: ['cats', 'weedkiller', 'heavy', 'phone', 'lostkid'] }[G.diff] || ['noreceipt', 'hostcall', 'product'];
+  sample(pool, { easy: 1, normal: 2, hard: 4 }[G.diff] || 2).forEach(k => s.ev[k] = true);
+  const okM = ok => { s.okN++; if (ok) s.ok++; updateBoard(); };
+  const L = n => '£' + (Math.round(n * 100) / 100).toFixed(2);
+  const spend = n => { s.spent = Math.round((s.spent + n) * 100) / 100; G.money = Math.round((s.budget - s.spent) * 100) / 100; updateBoard(); };
+  const p = s.p, cr = s.crop;
+  G.money = G.diff === 'easy' ? 20 : 0; s.budget = G.diff === 'easy' ? 20 : 0;
+
+  /* ---- world: the car park (z > 12) and the garden centre (36 × 24) */
+  W.bounds = { minX: -30, maxX: 30, minZ: -16, maxZ: 28 };
+  ground('#7cb342'); part(0, 0, 19, 60, 0.05, 13, '#616161', { solid: false });
+  room(0, 0, 36, 24, { wall: '#e8f5e9', floor: '#a1887f', roof: '#2e7d32', door: 's', gap: 5, h: 6 });
+  sign('GREENACRE GARDEN CENTRE', 0, 7.2, 12.3, 13, 1.2, 0, { bg: '#2e7d32', fg: '#fff' });
+  // plant tables
+  [[-12, -2], [-12, 4], [-4, -2], [-4, 4]].forEach(([x, z], k) => { part(x, 0, z, 5, 0.9, 2.4, '#795548'); for (let i = 0; i < 4; i++) part(x - 1.8 + i * 1.2, 0.9, z, 0.8, 0.7 + (i % 2) * 0.3, 0.8, ['#43a047', '#66bb6a', '#e91e63', '#ffeb3b'][(i + k) % 4], { solid: false }); });
+  sign('HOUSEPLANTS', -12, 3, -3.3, 3.4, 0.5, 0, { bg: '#fff', fg: '#1b5e20' }); sign('SHADE LOVERS', -4, 3, -3.3, 3.4, 0.5, 0, { bg: '#fff', fg: '#1b5e20' });
+  sign('VEG & HERBS', -12, 3, 5.3, 3.4, 0.5, Math.PI, { bg: '#fff', fg: '#1b5e20' }); sign('SUN LOVERS', -4, 3, 5.3, 3.4, 0.5, Math.PI, { bg: '#fff', fg: '#1b5e20' });
+  // seeds rack, tools wall, compost pallets
+  part(5, 0, -9, 4, 2.6, 0.8, '#8d6e63'); for (let i = 0; i < 12; i++) part(3.6 + (i % 4) * 0.95, 0.6 + Math.floor(i / 4) * 0.7, -8.55, 0.7, 0.55, 0.1, ['#ff7043', '#66bb6a', '#ffca28', '#ab47bc'][i % 4], { solid: false });
+  sign('SEEDS', 5, 3.4, -8.5, 2.4, 0.5, 0, { bg: '#ff7043', fg: '#fff' });
+  part(12, 0, -10.8, 6, 2.4, 0.4, '#5d4037'); sign('TOOLS & WATERING', 12, 3.3, -10.5, 4, 0.5, 0, { bg: '#37474f', fg: '#fff' });
+  [[14, 0], [14, 2.6]].forEach(([x, z]) => { part(x, 0, z, 3, 0.25, 2, '#a1887f'); part(x, 0.25, z, 2.8, 1, 1.8, '#4e342e', { solid: false }); });
+  sign('COMPOST', 15.6, 2.4, 1.3, 2.4, 0.5, -Math.PI / 2, { bg: '#4e342e', fg: '#fff' });
+  // plant doctor desk, tills, café
+  part(-14, 0, -9, 4, 1.1, 1.2, '#00695c'); sign('PLANT DOCTOR', -14, 3.2, -11.7, 4, 0.6, 0, { bg: '#00695c', fg: '#fff' });
+  part(8, 0, 8, 1.2, 1, 3, '#455a64'); sign('TILLS', 8, 3.3, 10.6, 2.4, 0.5, Math.PI, { bg: '#c62828', fg: '#fff' });
+  part(-15, 0, 8.5, 1.6, 0.9, 1.6, '#fafafa'); chair(-16.4, 8.5, Math.PI / 2, '#8d6e63'); sign('CAFÉ', -15, 3.3, 10.6, 2, 0.5, Math.PI, { bg: '#795548', fg: '#fff' });
+  W.walk = (x, z) => (x > -17.6 && x < 17.6 && z > -11.6 && z < 25) || (x > -29 && x < 29 && z > 12.4 && z < 25);
+
+  /* ---- people */
+  const staffN = staff('Staff', gPick(), { shirt: '#2e7d32', apron: '#1b5e20' }, 6, 2, -Math.PI / 2, '#2e7d32');
+  const doc = staff('Plant doctor', gPick(), { shirt: '#00695c', apron: '#004d40' }, -14, -10.4, 0, '#00695c');
+  const till = staff('Till', gPick(), { shirt: '#2e7d32' }, 9.2, 8, Math.PI / 2, '#2e7d32');
+  const sup = staff('Supervisor', gPick(), { shirt: '#1b5e20', tie: '#ffeb3b' }, 0, -8, 0, '#1b5e20');
+  const kid = npc('Little child', { skin: pick1(SKINS), shirt: '#ffeb3b', pants: '#1565c0', hair: '#5d4037', shoes: true }, -8, 9, Math.PI, { scale: 0.6, color: '#fff59d', voice: { pitch: 1.5, rate: 1.05 } });
+  kid.gender = gPick(); kid.badge = '#f9a825'; kid.av.visible = false;
+  const cust = [0, 1, 2, 3, 4, 5].map(k => { const g = gPick(); const n = npc(`${NPC_NAME[g]} (Customer)`, Object.assign({ shirt: pick1(['#8e24aa', '#ef6c00', '#00838f', '#c62828', '#3949ab']), pants: '#37474f', sleeves: true, shoes: true }, pick1(STAFF_LOOKS[g]), k === 4 ? { hair: '#e0e0e0' } : {}), 0, 20, Math.PI, { color: '#ffcc80', voice: NPC_VOICE[g] }); n.gender = g; n.badge = '#6d4c41'; n.av.visible = false; return n; });
+  const hg = gPick(), host = { name: `${NPC_NAME[hg]} (Host ${hg === 'f' ? 'mum' : 'dad'}) 📱`, badge: '#ef6c00', gender: hg, color: '#ffcc80', voice: NPC_VOICE[hg] };
+  const caller = { name: `${NPC_NAME[gPick()]} (Caller) ☎️`, badge: '#455a64', gender: 'f', color: '#b0bec5', voice: NPC_VOICE.f };
+  if (G.diff !== 'hard') sup.av.visible = false;
+  spawnPlayer(0, 18, Math.PI, 0);
+
+  const go = (ph, x, z, msg) => { s.phase = ph; setMarker(x, 3.4, z); if (msg) notify(msg[0], msg[1]); };
+  inter({ obj: 'Your list', label: 'Read', at: () => ({ x: 0, y: 0, z: 13.5 }), r: 3, when: () => s.phase === 'list', act: listE });
+  inter({ obj: staffN.name, label: 'Ask', at: () => ({ x: 4.4, y: 0, z: 2 }), r: 2.6, when: () => s.phase === 'askE', act: askE });
+  inter({ obj: 'Seed rack', label: 'Choose seeds', at: () => ({ x: 5, y: 0, z: -7.2 }), r: 2.6, when: () => s.phase === 'seeds', act: seeds });
+  inter({ obj: 'Compost', label: 'Choose compost', at: () => ({ x: 11.6, y: 0, z: 1.3 }), r: 2.8, when: () => s.phase === 'compost', act: compost });
+  inter({ obj: 'Tools', label: 'Choose a watering can', at: () => ({ x: 12, y: 0, z: -9 }), r: 2.8, when: () => s.phase === 'can', act: can });
+  inter({ obj: till.name, label: 'Pay', at: () => ({ x: 10.6, y: 0, z: 8 }), r: 2.6, when: () => s.phase === 'tillE', act: tillE });
+  inter({ obj: kid.name, label: 'Talk', at: () => kid.pos, r: 2.4, when: () => s.phase === 'kid', act: kidTalk });
+  inter({ obj: doc.name, label: 'Talk', at: () => ({ x: -14, y: 0, z: -7.6 }), r: 2.8, when: () => s.phase === 'doc', act: docTalk });
+  inter({ obj: 'Spray shelf', label: 'Choose a spray', at: () => ({ x: 12, y: 0, z: -9 }), r: 2.8, when: () => s.phase === 'spray', act: spray });
+  inter({ obj: sup.name, label: 'Talk', at: () => ({ x: 0, y: 0, z: -6.4 }), r: 2.8, when: () => s.phase === 'brief', act: brief });
+  inter({ get obj() { return s.cur ? s.cur.name : 'Customer'; }, label: 'Serve', at: () => s.cur ? s.cur.pos : { x: 0, y: 0, z: 0 }, r: 2.8, when: () => s.phase === 'serve', act: () => { hideMarker(); s.phase = 'serving'; s.next(); } });
+
+  /* ============ EASY: the school veg patch ============ */
+  if (G.diff === 'easy') {
+    G.inv = [{ emoji: '📝', label: 'Teacher\'s list', info: () => `Seeds: ${cr.n}s (to sow this month) · 1 bag of PEAT-FREE compost · 1 watering can · £20 · keep the receipt!` }, { emoji: '💷', label: '£20 note', info: () => 'From the school' }]; renderHotbar();
+    G.obj = [{ id: 'list', text: 'Read your teacher\'s list' }, { id: 'ask', text: 'Ask where the seeds are' }];
+    if (s.ev.lostkid) G.obj.push({ id: 'lostkid', secret: true, text: 'Help a lost child' });
+    G.obj.push({ id: 'seeds', text: 'Read the seed packets and choose' });
+    if (s.ev.sold) G.obj.push({ id: 'sold', secret: true, text: 'Ask for an alternative' });
+    G.obj.push({ id: 'compost', text: 'Choose the right compost' }, { id: 'can', text: 'Choose a watering can' }, { id: 'pay', text: 'Pay and keep the receipt' });
+    if (s.ev.heavy) G.obj.push({ id: 'heavy', secret: true, text: 'Ask for help with something heavy' });
+    go('list', 0, 13.5);
+  }
+  function listE() {
+    hideMarker(); s.phase = 'r';
+    paperQuiz('📝 MRS PATEL\'S LIST', 'Your teacher\'s note. It\'s April.', `For our veg patch 🥕<br>• A packet of <b>${cr.n}</b> seeds (check you can sow them in April!)<br>• One bag of <b>peat-free</b> compost (peat bogs are important for the planet)<br>• A watering can<br>Budget: <b>£20</b>. Bring back the receipt and the change. Thanks!`, [
+      ['What kind of compost?', 'Peat-free', ['Any compost', 'Compost with peat']],
+      ['What must you bring back?', 'The receipt and the change', ['Only the seeds', 'Nothing']]
+    ], (right, n) => { for (let k = 0; k < n; k++) okM(k < right); complete('list', right < n); go('askE', 4.4, 2, ['🔎 Where are the seeds?', 'Ask the member of staff.']); }, 'Go in');
+  }
+  function askE() {
+    hideMarker(); s.phase = 'r';
+    askR(staffN, [['Alright, my lover? Can I help?', '¿Qué tal, cielo? ¿Te ayudo?', ['Hello! Where can I find the seeds, please?', 'Hi! Excuse me, where are the seeds, please?']]], [], [
+      { t: 'Seeds. Where?', kind: 'rude', tip: 'Too short. "Where can I find the seeds, please?"' },
+      { t: 'Where are the semillas?', kind: 'grammar', tip: '"Semillas" = seeds.' },
+      { t: 'Where I can find the seeds?', kind: 'grammar', tip: 'Question order: "Where CAN I find the seeds?"' }
+    ], () => line(staffN, 'They\'re at the back, on the left, next to the tools. The rack with the colourful packets!', 'Están al fondo, a la izquierda, al lado de las herramientas. ¡El expositor de los sobres de colores!', () => {
+      complete('ask');
+      if (s.ev.lostkid) return lostKid(() => go('seeds', 5, -7.2, ['🌱 Seeds', 'At the back, next to the tools.']));
+      go('seeds', 5, -7.2, ['🌱 Seeds', 'At the back, next to the tools.']);
+    }, 'Thank you!'));
+  }
+  function lostKid(next) {
+    reveal('lostkid'); kid.av.visible = true; s.after = next;
+    notify('😢 Someone is crying', 'A little child is crying near the café. Go and see (E).', 'warn'); go('kid', kid.pos.x, kid.pos.z);
+  }
+  function kidTalk() {
+    hideMarker(); s.phase = 'r';
+    askR(kid, [['I… I can\'t find my mummy!', 'No… ¡no encuentro a mi mamá!', ['Don\'t worry. What\'s your name? Let\'s ask a member of staff to help.', 'It\'s OK. Come with me to the lady at the till. She can help.']]], [
+      { t: 'Not my problem, sorry.', kind: 'blunt', tip: 'Help a lost child! Stay with them and take them to staff.', react: 'Waaah!' },
+      { t: 'Stop crying. Where is she?', kind: 'blunt', tip: 'Too hard on a scared child. "Don\'t worry. Let\'s find a member of staff."', react: 'I don\'t KNOW!' },
+      { t: 'Kindly provide a description of your mother.', kind: 'stiff', tip: 'Speak simply to a small child: "What does your mummy look like?"', react: 'What?' }
+    ], [
+      { t: 'Don\'t cry. We go to search your mother.', kind: 'grammar', tip: '"Let\'s go and look for your mummy."' },
+      { t: 'Calm, calm. How you call?', kind: 'grammar', tip: '"What\'s your name?" ("¿Cómo te llamas?")' }
+    ], p => {
+      complete('lostkid', p.kind === 'blunt'); walkTo(kid, [[8.6, 9.6]]);
+      line(G.diff === 'hard' ? sup : till, 'Oh, well done, my lover. I\'ll make an announcement… Ah, here\'s Mum already! Thank you!', '¡Muy bien, cielo! Voy a hacer un aviso… ¡Ah, aquí está ya la mamá! ¡Gracias!', () => { kid.av.visible = false; s.after(); }, 'No problem!');
+    });
+  }
+  function seeds() {
+    hideMarker(); s.phase = 'r';
+    paperQuiz(`SEED PACKET · ${cr.n.toUpperCase()}S`, 'Read the back of the packet. It\'s April.', `<b>Sow outdoors:</b> ${cr.sow}<br><b>Position:</b> ${cr.sun}<br><b>Sow</b> 1 cm deep, 5 cm apart · <b>Water</b> regularly<br><b>Harvest:</b> about ${cr.days} days after sowing<br><b>Price:</b> £1.80 · Organic £2.60`, [
+      ['Can you sow them now, in April?', 'Yes: April is between ' + cr.sow.replace('–', ' and '), ['No, it\'s too early', 'No, only in winter']],
+      ['Where should they grow?', cr.sun, ['In a dark cupboard', 'Only indoors']],
+      ['When can you harvest them?', `After about ${cr.days} days`, [`After ${cr.days} weeks`, 'After one year']]
+    ], (right, n) => {
+      for (let k = 0; k < n; k++) okM(k < right); complete('seeds', right < n);
+      if (s.ev.sold) return soldE();
+      spend(1.8); go('compost', 11.6, 1.3, ['🪴 Compost', 'Now find the compost.']);
+    }, 'Take a packet');
+  }
+  function soldE() {
+    reveal('sold');
+    askR(staffN, [[`Oh, are you looking for ${cr.n} seeds? Sorry, we've sold out!`, `¿Buscas semillas de ${cr.n}? ¡Lo siento, se han agotado!`, ['Oh no! What can I grow instead?', 'Oh! Can you recommend something similar?']]], [], [
+      { t: 'That\'s terrible. Bad shop!', kind: 'rude', tip: 'Ask for an alternative: "What can I grow instead?"' },
+      { t: 'What other thing I can plant?', kind: 'grammar', tip: '"What else can I plant?"' },
+      { t: 'You have another seeds?', kind: 'grammar', tip: '"Have you got any other seeds?"' }
+    ], () => line(staffN, 'Try spring onions: same price, easy to grow, and you can sow them in April too.', 'Prueba con cebolletas: mismo precio, fáciles de cultivar, y también se siembran en abril.', () => { complete('sold'); spend(1.8); go('compost', 11.6, 1.3, ['🪴 Compost', 'Now find the compost.']); }, 'Great, thanks!'));
+  }
+  function compost() {
+    hideMarker(); s.phase = 'r';
+    paperQuiz('COMPOST', 'Your teacher asked for peat-free compost.', 'A · Multi-purpose compost <b>with peat</b>, 50 litres · £5.50<br>B · <b>Peat-free</b> multi-purpose, 40 litres · £6.50<br>C · Peat-free, 10 litres · £3.00', [
+      ['Which bag is best for the school veg patch?', 'B · Peat-free, 40 litres (£6.50)', ['A · With peat, 50 litres (£5.50)', 'C · Peat-free, 10 litres (£3.00): too small']]
+    ], (right, n, ans) => { okM(right === 1); complete('compost', !right); spend(/^A/.test(ans[0]) ? 5.5 : /^B/.test(ans[0]) ? 6.5 : 3); go('can', 12, -9, ['🚿 Watering can', 'Now a watering can, by the tools.']); }, 'Take it');
+  }
+  function can() {
+    hideMarker(); s.phase = 'r';
+    const left = Math.round((20 - s.spent) * 100) / 100;
+    paperQuiz('WATERING CANS', `You have ${L(left)} left.`, 'Metal watering can, 10 litres · £24.99<br>Plastic watering can, 10 litres · £7.99<br>Children\'s watering can, 1 litre · £3.50', [
+      ['Which one can you buy for the school?', 'Plastic, 10 litres (£7.99)', ['Metal, 10 litres (£24.99)', 'Children\'s, 1 litre (£3.50)']]
+    ], (right, n, ans) => { okM(right === 1); complete('can', !right); spend(/Plastic/.test(ans[0]) ? 7.99 : /Children/.test(ans[0]) ? 3.5 : Math.min(24.99, left)); go('tillE', 10.6, 8, ['🧾 The till', 'Go and pay.']); }, 'Take it');
+  }
+  function tillE() {
+    hideMarker(); s.phase = 'r';
+    const ch = Math.max(0, Math.round((20 - s.spent) * 100) / 100);
+    askR(till, [[`That's ${L(s.spent)}, please. Do you want the receipt?`, `Son ${L(s.spent)}, por favor. ¿Quieres el tique?`, ['Yes, please. It\'s for my school.', 'Yes, please! My teacher needs it.']]], [], [
+      { t: 'No, throw it.', kind: 'fact', fn: () => { okM(false); complete('pay', true); G.mistakes.push({ said: 'No, throw it.', tip: 'Your teacher asked for the receipt!' }); notify('🧾 Oops', 'Your teacher needs the receipt!', 'warn'); later(0.5, afterTill); } },
+      { t: 'Yes, give me the ticket.', kind: 'grammar', tip: '"Tique" = receipt: "Yes, please. Could I have the receipt?"' },
+      { t: 'Yes, I need it for the school of me.', kind: 'grammar', tip: '"For my school".' }
+    ], () => { okM(true); complete('pay'); afterTill(); });
+    function afterTill() { G.money = ch; G.inv.push({ emoji: '🧾', label: 'Receipt', info: () => `Total ${L(s.spent)} · change ${L(ch)}` }); renderHotbar(); s.ev.heavy ? heavyE() : line(till, 'Cheers, my lover! Good luck with the veg patch!', '¡Gracias, cielo! ¡Suerte con el huerto!', fin, 'Thanks! Bye!'); }
+  }
+  function heavyE() {
+    reveal('heavy');
+    askR(till, [['That compost bag is really heavy. Are you OK?', 'Esa bolsa de sustrato pesa mucho. ¿Estás bien?', ['Not really! Can I borrow a trolley, please?', 'It\'s very heavy! Can you help me, please?']]], [], [
+      { t: 'I am OK, I am very strong.', kind: 'fact', fn: () => { okM(false); complete('heavy', true); G.mistakes.push({ said: 'I\'m OK, I\'m very strong.', tip: 'Don\'t hurt your back! Ask: "Can I borrow a trolley, please?"' }); notify('😣 Ouch!', 'Your back hurts! Next time ask for a trolley.', 'warn'); later(0.5, fin); } },
+      { t: 'Can you lend me a car of shopping?', kind: 'grammar', tip: '"Carrito" = trolley: "Can I borrow a trolley?"' },
+      { t: 'Is very heavy for me.', kind: 'grammar', tip: '"It\'s too heavy for me."' }
+    ], () => { okM(true); complete('heavy'); line(till, 'Course you can! Here, take this trolley. Bring it back when you\'re done. Cheers!', '¡Claro! Toma este carrito. Devuélvelo cuando acabes. ¡Gracias!', fin, 'Thanks!'); });
+  }
+
+  /* ============ NORMAL: the plant doctor ============ */
+  if (G.diff === 'normal') {
+    G.inv = [{ emoji: '🪴', label: `Sick ${p.name}`, info: () => p.sym }, { emoji: '🧾', label: 'Receipt', info: () => `Greenacre · ${p.name} · £${p.k === 'lemon' ? '24.99' : p.k === 'orchid' ? '14.99' : '3.50'} · 12-month guarantee` }]; renderHotbar();
+    if (s.ev.noreceipt) G.inv = G.inv.filter(i => i.label !== 'Receipt');
+    G.obj = [{ id: 'look', text: 'Look closely at the plant' }, { id: 'describe', text: 'Describe the problem to the plant doctor' }, { id: 'answer', text: 'Answer the plant doctor\'s questions correctly' }, { id: 'advice', text: 'Understand the care advice' }];
+    if (s.ev.noreceipt) G.obj.push({ id: 'noreceipt', secret: true, text: 'Prove you bought it without a receipt' });
+    G.obj.push({ id: 'guarantee', text: 'Ask politely about the guarantee' });
+    if (s.ev.product) G.obj.push({ id: 'product', secret: true, text: 'Read a label and choose a safe product' });
+    if (s.ev.hostcall) G.obj.push({ id: 'hostcall', secret: true, text: 'Explain everything to your host mum on the phone' });
+    go('doc', -14, -7.6, ['🥀 The plant doctor', 'Take the plant to the Plant Doctor desk (back left).']);
+  }
+  function docTalk() {
+    hideMarker(); s.phase = 'r';
+    paperQuiz(`YOUR HOST MUM'S ${p.name.toUpperCase()}`, 'Look closely before you explain.', `🔍 ${p.sym}.`, [
+      ['Which words describe it?', { orchid: 'yellow, soft leaves; mushy brown roots', lemon: 'falling leaves; crispy brown edges', basil: 'tiny white flies; sticky leaves' }[p.k], ['healthy, green leaves', 'big red flowers']]
+    ], right => {
+      okM(right === 1); complete('look', !right);
+      askR(doc, [['Alright? Oh dear, that doesn\'t look happy. What seems to be the problem?', '¿Qué tal? Vaya, esa no parece muy contenta. ¿Qué le pasa?', { orchid: ['My host mum bought this orchid here. The leaves have gone yellow and soft, and the roots look mushy.', 'The leaves are turning yellow, and the roots look brown and soggy. Can you help?'], lemon: ['My host mum bought this lemon tree here. The leaves keep falling off, and the edges are brown and crispy.', 'It\'s losing lots of leaves, and they\'re brown and dry at the edges. What\'s wrong with it?'], basil: ['We bought this basil here last week. There are tiny white flies under the leaves, and they\'re sticky.', 'Can you have a look? There are little white insects on it, and the leaves feel sticky.'] }[p.k]]], [
+        { t: 'Your plant is rubbish. It\'s dying.', kind: 'blunt', tip: 'Describe the problem instead of attacking: "The leaves have gone yellow…"', react: 'Let\'s have a look before we decide that.' },
+        { t: 'Fix it. Or give me a new one.', kind: 'blunt', tip: 'Too demanding. Describe the symptoms first.', react: 'One step at a time!' }
+      ], [
+        { t: 'The leaves are putting yellow.', kind: 'grammar', tip: '"Ponerse amarillo" = turn yellow / go yellow.' },
+        { t: 'The plant is very sick, it have problems.', kind: 'grammar', tip: '"It HAS problems" / "It\'s not very well."' },
+        { t: 'It has a lot of animals small and white.', kind: 'grammar', tip: 'Adjectives go first: "lots of small white insects".' }
+      ], () => { complete('describe'); questions(); });
+    }, 'Show it');
+  }
+  function questions() {
+    const wrongs = { orchid: ['Once a week', 'Next to the radiator'], lemon: ['Every day', 'Outside in the garden'], basil: ['Every day', 'Next to the radiator'] }[p.k];
+    s.ansBad = 0;
+    const ask2 = (q, es, okA, wrongA, gram, next) => ask(doc, q, es, phr([okA], [gram], 1).concat([{ t: wrongA, kind: 'fact', fn: () => { s.ansBad++; okM(false); G.mistakes.push({ said: wrongA, tip: 'Give the real facts from your card: the plant doctor needs them to help!' }); notify('📝 Check your card', 'That isn\'t true. Give the real facts, even if they\'re embarrassing!', 'warn'); later(0.5, next); } }]), () => { okM(true); next(); });
+    ask2('How often do you water it?', '¿Cada cuánto la regáis?', { orchid: 'Every day, I\'m afraid. A big glass of water.', lemon: 'Only when the soil is dry.', basil: 'About twice a week.' }[p.k], wrongs[0] + '.', { t: 'We water it all the days.', kind: 'grammar', tip: '"Todos los días" = every day.' }, () =>
+      ask2('And where do you keep it?', '¿Y dónde la tenéis?', { orchid: 'On the kitchen windowsill.', lemon: 'Right next to the radiator in the living room.', basil: 'On the kitchen windowsill.' }[p.k], wrongs[1] + '.', { t: 'It is in the window of the kitchen.', kind: 'grammar', tip: '"On the kitchen windowsill" (noun + noun).' }, () => { complete('answer', s.ansBad > 0); advice(); }));
+  }
+  function advice() {
+    line(doc, { orchid: 'Ah, I see. The good news: it\'s not a disease. The bad news: it\'s drowning! Orchids hate too much water.', lemon: 'That explains it! Radiators dry the air and the leaves. Lemon trees like light, but not heat.', basil: 'Whitefly! And if it\'s only five days since you bought it, it must have come from us. Sorry about that.' }[p.k], { orchid: 'Ya veo. La buena noticia: no es una enfermedad. La mala: ¡se está ahogando! Las orquídeas odian el exceso de agua.', lemon: '¡Eso lo explica! Los radiadores secan el aire y las hojas. A los limoneros les gusta la luz, pero no el calor.', basil: '¡Mosca blanca! Y si solo hace cinco días que la comprasteis, ha tenido que venir de aquí. Lo siento.' }[p.k], () => paperQuiz('PLANT DOCTOR · CARE CARD', 'Read the advice the plant doctor wrote for you.', `<b>Problem:</b> ${p.cause}<br><b>What to do:</b> ${p.fix}.<br>Cut off any dead parts with clean scissors. Check it again in two weeks.`, [
+      ['What\'s the problem?', cap(p.cause), GC_PLANT.filter(x => x.k !== p.k).map(x => cap(x.cause))],
+      ['What should your host mum do?', cap(p.fix), GC_PLANT.filter(x => x.k !== p.k).map(x => cap(x.fix)).slice(0, 1).concat(['Water it more often'])]
+    ], right => { okM(right === 2); complete('advice', right < 2); s.ev.noreceipt ? noReceipt() : guarantee(); }, 'Got it'), 'I see');
+  }
+  function noReceipt() {
+    reveal('noreceipt');
+    askR(doc, [['Have you got the receipt, by any chance?', '¿Tienes el tique, por casualidad?', ['I\'m afraid not, but my host mum paid by card. Could you find it with the date and the card?', 'Sorry, we\'ve lost it. Is there any other way to prove we bought it here? She has a Greenacre loyalty card.']]], [
+      { t: 'No. You\'ll just have to believe me.', kind: 'blunt', tip: 'Offer another proof: "She paid by card / she has a loyalty card."', react: 'I\'m afraid it doesn\'t work like that.' }
+    ], [
+      { t: 'No, we have lost him.', kind: 'grammar', tip: 'Things are "it": "We\'ve lost it."' },
+      { t: 'No, but she paid with the card of the bank.', kind: 'grammar', tip: '"She paid by card."' }
+    ], () => line(doc, 'No problem: the loyalty card shows every purchase. Yes, here it is.', 'Sin problema: la tarjeta de cliente muestra todas las compras. Sí, aquí está.', () => { complete('noreceipt'); guarantee(); }, 'Great!'));
+  }
+  function guarantee() {
+    askR(doc, [['Anything else I can help with?', '¿Te ayudo con algo más?', ['Yes: does the 12-month guarantee cover this? Could we get a replacement, please?', 'I was wondering whether the guarantee covers this. Would it be possible to exchange it?']]], [
+      { t: 'I want a new one for free. It\'s your fault.', kind: 'blunt', tip: 'Ask, don\'t demand: "Does the guarantee cover this?"', react: 'Let\'s look at the rules first.' }
+    ], [
+      { t: 'The guaranty covers this, no?', kind: 'grammar', tip: 'Spelling "guarantee", and the tag "no?" is Spanish. "Does the guarantee cover this?"' },
+      { t: 'Can you change me the plant?', kind: 'grammar', tip: '"Could I exchange the plant?"' }
+    ], () => {
+      if (p.covered) return line(doc, 'Absolutely: it came with the bugs, so it\'s on us. Pick a new basil from the herb table, and take this little sachet of organic spray too.', 'Por supuesto: vino con los bichos, así que corre de nuestra cuenta. Coge una albahaca nueva de la mesa de hierbas, y llévate también este sobrecito de spray ecológico.', () => { complete('guarantee'); afterG(); }, 'Thank you so much!');
+      choice(doc, 'I\'m sorry, but the guarantee doesn\'t cover care problems like ' + p.cause + '. What I can do is give you 20% off a new one, or show you how to save this one. Which would you prefer?', 'Lo siento, pero la garantía no cubre problemas de cuidado como este. Lo que puedo hacer es un 20% de descuento en una nueva, o enseñarte a salvar esta. ¿Qué prefieres?', [
+        { t: 'That\'s fair. Could you show me how to save this one, please?', fn: () => { okM(true); complete('guarantee'); line(doc, 'Of course. Look: we cut the dead bits off here, and… there. With a bit of care, it\'ll be fine in a month.', 'Claro. Mira: cortamos las partes muertas aquí, y… ya está. Con un poco de cuidado, en un mes estará bien.', afterG, 'Brilliant, thanks!'); } },
+        { t: 'That\'s fair. I\'ll take the 20% off a new one, thank you.', fn: () => { okM(true); complete('guarantee'); line(doc, 'No problem. And remember the care card this time!', 'Sin problema. ¡Y esta vez acordaos de la tarjeta de cuidados!', afterG, 'We will!'); } },
+        { t: 'That\'s ridiculous. I want to speak to the manager!', fn: () => { okM(false); complete('guarantee', true); G.manners = Math.max(0, G.manners - 20); pop('Manners −20', 'bad'); G.mistakes.push({ said: 'I want to speak to the manager!', tip: 'The guarantee doesn\'t cover care problems. Accept a fair offer politely.' }); line(doc, 'The manager will tell you the same, I\'m afraid. The offer is still there if you want it.', 'Me temo que el encargado le dirá lo mismo. La oferta sigue en pie si la quiere.', afterG, 'Fine…'); } }
+      ]);
+    });
+  }
+  function afterG() {
+    if (s.ev.product) { s.phase = 'spray'; setMarker(12, 3.4, -9); reveal('product'); notify('🧴 A customer\'s tip', 'Another customer says: "Just use Bug-Blitz, it kills everything!" Go to the spray shelf and read the labels.'); return; }
+    s.ev.hostcall ? hostCall() : fin();
+  }
+  function spray() {
+    hideMarker(); s.phase = 'r';
+    paperQuiz('PLANT CARE SPRAYS', 'Read the labels carefully.', '<b>BUG-BLITZ</b> · kills all insects · ⚠️ <b>Harmful to bees</b>. Do not use on food plants. Keep away from children and pets. £8.99<br><b>GREENGUARD ORGANIC</b> · plant-oil spray · ✔ Bee-friendly · Safe on herbs and vegetables · £5.49', [
+      [`Which spray is better for a ${p.name} in a family kitchen?`, 'Greenguard Organic', ['Bug-Blitz: it kills everything']],
+      ['Why not Bug-Blitz?', 'It harms bees and you can\'t use it on food plants', ['It\'s too cheap', 'It\'s only for roses']]
+    ], right => { okM(right === 2); complete('product', right < 2); s.ev.hostcall ? hostCall() : fin(); }, 'Choose');
+  }
+  function hostCall() {
+    reveal('hostcall');
+    askR(host, [['Hiya! What did the plant doctor say? Is my poor plant going to make it?', '¡Hola! ¿Qué ha dicho la doctora de plantas? ¿Sobrevivirá mi pobre planta?', [p.covered ? 'Good news! It had bugs when we bought it, so they\'re giving us a new one for free!' : `Probably! The problem is ${p.cause}. They've written a care card for you.`, p.covered ? 'It had whitefly from the shop, so we\'re getting a free replacement and a spray!' : 'Yes, if we change a few things. I\'ve got a care card with all the instructions.']]], [
+      { t: 'Madam, I regret to inform you that your plant has been mistreated.', kind: 'stiff', tip: 'It\'s your host mum! Be relaxed: "It\'ll be fine! We just need to…"', react: 'Mistreated?! Ha! By me, I suppose!' }
+    ], [
+      { t: 'Yes, but you water it too much, you kill it.', kind: 'grammar', tip: 'Tactful AND correct: "It just needs a bit less water."' },
+      { t: 'The doctor says that is a problem of the radiator.', kind: 'grammar', tip: '"She says it\'s because of the radiator."' }
+    ], () => line(host, 'Oh, thank goodness. You\'re a star! Grab yourself a slice of cake in the café, my treat.', '¡Menos mal! ¡Eres un sol! Cógete un trozo de tarta en la cafetería, invito yo.', () => { complete('hostcall'); fin(); }, 'Cheers!'));
+  }
+
+  /* ============ HARD: a Saturday of work experience ============ */
+  const queue = [];
+  if (G.diff === 'hard') {
+    G.inv = [{ emoji: '🎽', label: 'Staff badge', info: () => `${profile.name} · Work experience · Greenacre Garden Centre` }]; renderHotbar();
+    G.obj = [{ id: 'brief', text: 'Listen to your supervisor\'s briefing' }, { id: 'balcony', text: 'Recommend plants for a shady balcony' }];
+    if (s.ev.cats) G.obj.push({ id: 'cats', secret: true, text: 'Warn a customer tactfully about a danger' });
+    if (s.ev.weedkiller) G.obj.push({ id: 'weedkiller', secret: true, text: 'Explain a safety label' });
+    if (s.ev.heavy) G.obj.push({ id: 'heavy', secret: true, text: 'Help an older customer safely' });
+    if (s.ev.lostkid) G.obj.push({ id: 'lostkid', secret: true, text: 'Help a lost child' });
+    if (s.ev.phone) G.obj.push({ id: 'phone', secret: true, text: 'Take a phone message accurately' });
+    G.obj.push({ id: 'complaint', text: 'Calm down an angry customer and find a solution' }, { id: 'debrief', text: 'Report back to your supervisor' });
+    P.pos.set(0, 0, -4);
+    go('brief', 0, -6.4, ['🎽 Saturday shift', 'Your supervisor is waiting for you. Talk to them (E).']);
+  }
+  function brief() {
+    hideMarker(); s.phase = 'r';
+    line(sup, 'Morning! Right, quick briefing. You\'re on the shop floor today. If a customer asks about chemicals, always check the label with them. Never lift anything over twenty kilos on your own: grab a trolley or call me. If a child is lost, keep them with you and call the till: we\'ll make an announcement. And the customer is always… well, usually right. Any questions?', '¡Buenos días! Venga, instrucciones rápidas. Hoy estás en tienda. Si un cliente pregunta por productos químicos, mira siempre la etiqueta con él. Nunca levantes nada de más de veinte kilos tú solo: coge un carro o llámame. Si un niño se pierde, quédate con él y llama a caja: haremos un aviso. Y el cliente siempre tiene… bueno, casi siempre tiene razón. ¿Alguna pregunta?', () => paperQuiz('YOUR BRIEFING', 'What did your supervisor say?', '', [
+      ['A customer asks about weedkiller. What do you do?', 'Read the label with them', ['Recommend the strongest one', 'Tell them to ask online']],
+      ['A pot weighs 30 kg. What do you do?', 'Get a trolley or call the supervisor', ['Lift it on your own, carefully', 'Ask the customer to lift it']],
+      ['A child is lost. What do you do?', 'Stay with them and call the till for an announcement', ['Tell them to wait by the door', 'Take them outside to look']]
+    ], (right, n) => {
+      for (let k = 0; k < n; k++) okM(k < right); complete('brief', right < n);
+      askR(sup, [['So, all clear?', '¿Todo claro, entonces?', ['All clear, thanks. Just one thing: where should I send people with questions about deliveries?', 'Yes, I think so. If I\'m not sure about something, is it OK to come and find you?']]], [
+        { t: 'Yeah, yeah, whatever. Can I go now?', kind: 'blunt', tip: 'Sounds bored and rude with your boss. "All clear, thanks."', react: 'Charming. Off you go, then.' },
+        { t: 'Indeed. I shall execute your instructions to the letter.', kind: 'stiff', tip: 'Too formal with a friendly supervisor. "All clear, thanks!"', react: 'Ha! At ease, soldier!' },
+        { t: 'I hereby acknowledge receipt of the briefing.', kind: 'stiff', tip: 'Like a robot! "Yes, that\'s all clear."', react: 'Er… great.' }
+      ], [
+        { t: 'All clear. If I have doubts, I can ask you?', kind: 'grammar', tip: '"Duda" here = a question: "If I have any questions, can I ask you?"' }
+      ], () => line(sup, 'Of course! Deliveries go to the till. Off you go, and good luck!', '¡Claro! Las entregas, a caja. ¡Venga, y suerte!', () => {
+        const order = ['balcony'].concat(['cats', 'weedkiller', 'heavy', 'lostkid', 'phone'].filter(k => s.ev[k])).concat(['complaint']);
+        order.forEach(k => queue.push(k)); nextC();
+      }, 'Thanks!'));
+    }, 'Check'), 'OK');
+  }
+  function nextC() {
+    const k = queue.shift();
+    if (!k) return debrief();
+    if (k === 'lostkid') return lostKid(nextC);
+    if (k === 'phone') return phoneC();
+    const idx = { balcony: 0, cats: 1, weedkiller: 2, heavy: 4, complaint: 3 }[k], c = cust[idx];
+    const at = { balcony: [-4, 1], cats: [-12, 1], weedkiller: [12, -7.6], heavy: [-4, 7], complaint: [6, 6] }[k];
+    c.av.visible = true; c.pos.set(at[0], 0, at[1]); c.path = []; faceTo(c, P.pos.x, P.pos.z);
+    s.cur = c; s.next = { balcony: balcony, cats: cats, weedkiller: weed, heavy: heavy, complaint: complaint }[k];
+    s.phase = 'serve'; setMarker(at[0], 3.6, at[1]);
+    notify('🙋 A customer', { balcony: 'A customer is looking at the plants, a bit lost.', cats: 'A customer is looking at the lilies.', weedkiller: 'A customer is looking at the weedkillers.', heavy: 'An older customer is trying to lift a huge pot.', complaint: 'A customer is marching towards you. They look furious!' }[k], k === 'complaint' ? 'warn' : '');
+  }
+  const done1 = () => { s.served++; updateBoard(); const c = s.cur; if (c) walkTo(c, [[0, 14], [0, 22]], () => c.av.visible = false); s.cur = null; nextC(); };
+  function balcony() {
+    const c = s.cur;
+    askR(c, [['Excuse me, do you work here? I\'ve just moved into a flat with a balcony, but it faces north and gets hardly any sun. Is there anything that would actually survive?', 'Perdona, ¿trabajas aquí? Me acabo de mudar a un piso con balcón, pero da al norte y casi no le da el sol. ¿Hay algo que sobreviva?', ['I do, yes! Plenty of plants are happy in the shade. Let me show you some that need very little looking after.', 'Yes, how can I help? A north-facing balcony is no problem: there are lots of shade-loving plants. Shall I show you?']]], [
+      { t: 'Nothing grows in the shade. Buy plastic plants.', kind: 'blunt', tip: 'Unhelpful and wrong! Recommend shade-loving plants.', react: 'Oh. Thanks a lot.' },
+      { t: 'Read the labels. It\'s all written there.', kind: 'blunt', tip: 'That\'s your job! "Let me show you some shade-loving plants."', react: 'Right… I thought you\'d help.' },
+      { t: 'Indubitably, madam/sir. Permit me to elucidate the options.', kind: 'stiff', tip: 'Too formal and theatrical. "Of course! Let me show you."', react: 'Er… OK then.' }
+    ], [
+      { t: 'Yes, I work here. There are many plants for the shadow.', kind: 'grammar', tip: '"Sombra" (for plants) = shade, not "shadow".' }
+    ], () => paperQuiz('PLANT LABELS · YOUR RECOMMENDATION', 'The customer wants something for a SHADY, north-facing balcony that needs little care.', '<b>Ferns</b> · Shade or partial shade · Water weekly · Hardy<br><b>Lavender</b> · Full sun only · Drought-tolerant<br><b>Hostas</b> · Full or partial shade · Low maintenance<br><b>Tomatoes</b> · Full sun · Water daily in summer', [
+      ['What do you recommend?', 'Ferns and hostas', ['Lavender and tomatoes', 'Tomatoes and ferns']],
+      ['How do you explain it?', '"Both of these are happy in the shade and don\'t need much looking after."', ['"These are the most expensive, so they\'re the best."', '"No idea, just try them."']]
+    ], right => { okM(right === 2); complete('balcony', right < 2); line(c, right === 2 ? 'Perfect, that\'s exactly what I needed. Thanks so much!' : 'Hmm… I\'m not sure lavender likes the dark. I\'ll ask someone else.', right === 2 ? 'Perfecto, es justo lo que necesitaba. ¡Muchas gracias!' : 'Mmm… no sé si a la lavanda le gusta la oscuridad. Preguntaré a otra persona.', done1, 'You\'re welcome!'); }, 'Recommend'));
+  }
+  function cats() {
+    const c = s.cur;
+    askR(c, [['These lilies are gorgeous! I\'ll take three bunches for the kitchen table. My cats will love sniffing them!', '¡Qué lirios tan preciosos! Me llevo tres ramos para la mesa de la cocina. ¡A mis gatos les encantará olerlos!', ['They are lovely, but I should mention that lilies are very toxic to cats: even the pollen can make them seriously ill. Could I suggest some roses or sunflowers instead?', 'I\'m sorry to interrupt, but did you know lilies are dangerous for cats? Even a little pollen can damage their kidneys. Sunflowers or roses would be much safer.']]], [
+      { t: 'Lilies will kill your cats. Everybody knows that.', kind: 'blunt', tip: 'True, but tactless. Start gently: "I should mention that lilies are toxic to cats…"', react: 'Well, I didn\'t know! No need to be rude.' },
+      { t: 'Bad idea. Pick something else.', kind: 'blunt', tip: 'Explain WHY and suggest an alternative.', react: 'Excuse me?' },
+      { t: 'I am obliged to inform you that said flora pose a considerable feline hazard.', kind: 'stiff', tip: 'Way too formal. "Just so you know, lilies are very toxic to cats."', react: 'A feline… what?' }
+    ], [
+      { t: 'Careful, the lilies are toxics for the cats.', kind: 'grammar', tip: 'Adjectives have no plural: "toxic". And no "the" in general: "toxic to cats".' }
+    ], p => { complete('cats', p.kind === 'blunt'); okM(p.kind !== 'blunt'); line(c, 'Oh my goodness, I had no idea! Thank you so much. Sunflowers it is!', '¡Madre mía, no tenía ni idea! Muchísimas gracias. ¡Girasoles, entonces!', done1, 'My pleasure'); });
+  }
+  function weed() {
+    const c = s.cur;
+    line(c, 'Which of these is the strongest weedkiller? I\'ve got weeds all over the patio, right next to the pond. The grandkids play out there, and we\'ve got a dog.', '¿Cuál de estos es el herbicida más fuerte? Tengo malas hierbas por todo el patio, justo al lado del estanque. Los nietos juegan allí y tenemos un perro.', () => paperQuiz('WEEDKILLER LABELS', 'Read the labels WITH the customer, as your supervisor said.', '<b>ZAP-MAX</b> · Kills everything · ⚠️ <b>Toxic to aquatic life</b> · Keep children and pets off treated areas for 24 hours<br><b>PATIO-PURE</b> · Hot-water foam · ✔ Safe near ponds · Children and pets can return when dry<br><b>A weeding knife</b> · £6.99 · no chemicals', [
+      ['What do you recommend?', 'Patio-Pure (or the weeding knife)', ['Zap-Max: it\'s the strongest', 'Zap-Max, but only near the pond']],
+      ['Why not Zap-Max?', 'It\'s toxic to fish and the pond is right there, and kids and the dog play there', ['It\'s too weak', 'It only works in winter']]
+    ], right => { okM(right === 2); complete('weedkiller', right < 2); askR(c, [['Oh, I didn\'t think about the pond. So what would you suggest?', 'Uy, no había pensado en el estanque. ¿Y qué me recomiendas?', ['I\'d go for Patio-Pure: it\'s safe near the pond, and the kids and the dog can go back out once it\'s dry.', 'Personally, I\'d recommend this one. It\'s gentler, it\'s safe for the pond, and it\'s fine for children and pets once it\'s dry.']]], [
+      { t: 'Just use the strong one and keep the kids inside.', kind: 'blunt', tip: 'Unsafe advice! Recommend the safer product.', react: 'Hmm, that doesn\'t sound right…' },
+      { t: 'Kindly peruse the product information at your leisure.', kind: 'stiff', tip: 'You\'re supposed to help! Recommend clearly and simply.', react: 'I was asking YOU.' }
+    ], [
+      { t: 'I recommend you the Patio-Pure.', kind: 'grammar', tip: '"Recommend" doesn\'t take "you" like that: "I\'d recommend Patio-Pure."' }
+    ], done1); }, 'Advise'), 'Let\'s read the labels');
+  }
+  function heavy() {
+    const c = s.cur;
+    choice(null, 'An older customer is trying to lift a huge ceramic pot. The label says: 32 kg.', 'Una clienta mayor intenta levantar una maceta de cerámica enorme. La etiqueta dice: 32 kg.', [
+      { t: 'Offer help: "Can I give you a hand? I\'ll get a trolley."', say: false, fn: () => askR(c, [['Oh, would you, dear? It weighs a ton. Could you carry it to my car?', '¿De verdad, cielo? Pesa una tonelada. ¿Me la llevas al coche?', ['Of course. Let me just grab a trolley: it\'s too heavy to lift on my own. I\'ll be right back.', 'I\'d be happy to. I\'ll use a trolley, though: we\'re not allowed to lift anything that heavy. Which car is yours?']]], [
+        { t: 'Sure, I\'ll just pick it up. I\'m strong.', kind: 'blunt', tip: 'Your supervisor said: never lift over 20 kg alone. Use a trolley!', react: 'Oh, be careful, dear!' },
+        { t: 'Madam, it would be my privilege to transport your receptacle.', kind: 'stiff', tip: 'Kind, but way too formal! "Of course! I\'ll get a trolley."', react: 'Goodness! My receptacle! Ha!' }
+      ], [
+        { t: 'Of course. I go to search a trolley.', kind: 'grammar', tip: '"I\'ll go and get a trolley."' }
+      ], p => { okM(p.kind !== 'blunt'); complete('heavy', p.kind === 'blunt'); line(c, 'You\'re an angel! Cheers, drive!', '¡Eres un ángel! ¡Gracias, cielo!', done1, 'You\'re welcome!'); }) },
+      { t: 'Lift it for them yourself, quickly.', say: false, fn: () => { okM(false); complete('heavy', true); G.mistakes.push({ said: 'I lifted the 32 kg pot on my own.', tip: 'Safety first: never lift more than 20 kg alone. Get a trolley or call your supervisor.' }); notify('😣 Ouch!', 'You hurt your back. Your supervisor said: over 20 kg, use a trolley!', 'bad'); done1(); } }
+    ]);
+  }
+  function phoneC() {
+    notify('☎️ The phone is ringing', 'Nobody else is near the phone. Answer it!');
+    askR(caller, [['Hello? Is that Greenacre? I was wondering what time you close today, and whether the café does anything gluten-free.', '¿Hola? ¿Es Greenacre? Quería saber a qué hora cerráis hoy y si en la cafetería tenéis algo sin gluten.', ['Good morning, Greenacre Garden Centre. We close at five today. I\'m not sure about the café, but I can check and call you back. Could I take your name and number?', 'Hello, Greenacre Garden Centre, how can I help? We\'re open until five. Let me check about the gluten-free options. Could I take a number?']]], [
+      { t: 'Yeah, what do you want?', kind: 'blunt', tip: 'Answer professionally: "Good morning, Greenacre Garden Centre, how can I help?"', react: 'Well! I only asked…' },
+      { t: 'Dunno. Ring back later.', kind: 'blunt', tip: 'Offer to find out: "I can check and call you back."', react: 'Not very helpful, are you?' },
+      { t: 'Greetings. You have reached the esteemed Greenacre establishment.', kind: 'stiff', tip: 'Too formal. "Good morning, Greenacre Garden Centre."', react: 'Ha! Very grand!' }
+    ], [
+      { t: 'We close at the five.', kind: 'grammar', tip: 'No "the" with times: "We close at five."' }
+    ], () => line(caller, 'Lovely. It\'s Mrs Pemberton: P-E-M-B-E-R-T-O-N, on 0117 496 0382.', 'Estupendo. Soy la señora Pemberton: P-E-M-B-E-R-T-O-N, en el 0117 496 0382.', () => paperQuiz('PHONE MESSAGE', 'Write the message for the café.', '', [
+      ['Name', 'Mrs Pemberton', ['Mrs Pemerton', 'Mrs Bemberton']],
+      ['Number', '0117 496 0382', ['0117 469 0382', '0117 496 0832']],
+      ['Question', 'Gluten-free options in the café', ['Opening hours of the café', 'Wheelchair access']]
+    ], (right, n) => { for (let k = 0; k < n; k++) okM(k < right); complete('phone', right < n); nextC(); }, 'Save message'), 'Got it'));
+  }
+  function complaint() {
+    const c = s.cur;
+    askR(c, [['Are you staff? Right. I ordered six bags of compost for delivery on Thursday. They turned up this morning, two days late, and three of them have split all over my drive! This is the second time!', '¿Trabajas aquí? Bien. Pedí seis sacos de sustrato para el jueves. Han llegado esta mañana, dos días tarde, ¡y tres se han reventado por toda la entrada! ¡Es la segunda vez!', ['I\'m really sorry to hear that. Two days late and damaged bags isn\'t acceptable. Let me see what I can do to put it right.', 'I completely understand your frustration, and I\'m sorry. Could I take your order details so we can sort this out for you?']]], [
+      { t: 'Calm down! It\'s only compost.', kind: 'blunt', tip: 'Never tell an angry customer to calm down. Acknowledge the problem: "I\'m really sorry to hear that."', react: 'Don\'t tell me to calm down!' },
+      { t: 'That\'s not my fault. I\'m only work experience.', kind: 'blunt', tip: 'True, but unhelpful. Apologise on behalf of the company and help.', react: 'Then find me someone who can help!' },
+      { t: 'We deeply regret any inconvenience that may have been occasioned.', kind: 'stiff', tip: 'Sounds like a robot reading a script. Be human: "I\'m really sorry to hear that."', react: 'Don\'t give me that corporate rubbish!' }
+    ], [
+      { t: 'I am very sorry for the delay of your compost.', kind: 'grammar', tip: 'Natural: "I\'m so sorry your compost arrived late."' }
+    ], () => choice(c, 'Hmph. So what are you going to do about it?', 'Mmm. ¿Y qué vais a hacer al respecto?', [
+      { t: 'Check the policy: replace the three split bags today and refund the delivery charge.', fn: () => { okM(true); complete('complaint'); line(c, '…Right. Well. That\'s fair, actually. Thank you for listening.', '…Bueno. Vale. Es justo, la verdad. Gracias por escucharme.', done1, 'You\'re welcome'); } },
+      { t: 'Promise them their whole order for free.', fn: () => { okM(false); complete('complaint', true); G.mistakes.push({ said: 'I promised the whole order for free.', tip: 'Don\'t promise what you can\'t give. Check the policy or ask your supervisor.' }); notify('🙊 Careful!', 'You can\'t promise that! Offer what the policy allows, or ask your supervisor.', 'warn'); line(c, 'Really? All of it? …Well, I\'ll hold you to that!', '¿De verdad? ¿Todo? …¡Pues te tomo la palabra!', done1, 'Um…'); } },
+      { t: 'Tell them to write an email to head office.', fn: () => { okM(false); complete('complaint', true); G.mistakes.push({ said: 'Write an email to head office.', tip: 'Passing the problem on makes angry customers angrier. Offer a solution now.' }); line(c, 'Unbelievable. I\'m never coming back here!', '¡Increíble! ¡No vuelvo a venir aquí!', done1, '…'); } }
+    ]));
+  }
+  function debrief() {
+    s.phase = 'r';
+    askR(sup, [['There you are! So, how was your first Saturday on the shop floor?', '¡Aquí estás! ¿Qué tal tu primer sábado en tienda?', [`Busy, but really good! I helped ${s.served} customers, and there was one complaint about a late delivery, but I think I sorted it out.`, `Really interesting! The complaint was a bit stressful, but I followed the policy, and the customer calmed down in the end.`]]], [
+      { t: 'Boring. Customers are so annoying.', kind: 'blunt', tip: 'Not professional with your supervisor! Be positive and report what happened.', react: 'Hmm. I\'ll put that in your report…' },
+      { t: 'I hereby submit my report on the day\'s activities.', kind: 'stiff', tip: 'Too formal. "It was busy, but really good!"', react: 'Ha! At ease!' },
+      { t: 'Kindly note that all customer interactions were concluded satisfactorily.', kind: 'stiff', tip: 'Robotic. Talk normally: "It went well! I helped…"', react: 'Er… brilliant, I think?' }
+    ], [
+      { t: 'Was very busy but I learned a lot of things.', kind: 'grammar', tip: 'English needs a subject: "It was very busy…"' }
+    ], () => line(sup, 'Brilliant work. You\'re a natural! Same time next Saturday?', 'Un trabajo estupendo. ¡Tienes un don! ¿El sábado que viene a la misma hora?', () => { complete('debrief'); fin(); }, 'Definitely!'));
+  }
+
+  function fin() {
+    const adv = s.okN ? Math.round(100 * s.ok / s.okN) : 100, eng = engPct();
+    const overall = 0.35 * adv + 0.3 * eng + 0.35 * G.manners;
+    const good = [], bad = [];
+    if (G.diff === 'easy') {
+      if (!obj('seeds').failed) good.push('You read the seed packet: when to sow, where and when to harvest.'); else bad.push('Read seed packets carefully: sowing months, sun or shade, days to harvest.');
+      if (!obj('compost').failed) good.push('You chose peat-free compost, the right size.'); else bad.push('Your teacher asked for PEAT-FREE compost, big enough for a veg patch.');
+      if (s.ev.lostkid && !obj('lostkid').failed) good.push('You helped a lost child and took them to a member of staff.');
+    } else if (G.diff === 'normal') {
+      if (!obj('describe').failed) good.push('You described the symptoms clearly to the plant doctor.');
+      if (!obj('answer').failed) good.push('You answered honestly, even when the answer was embarrassing.'); else bad.push('Give the real facts: the plant doctor can\'t help if the information is wrong.');
+      if (!obj('guarantee').failed) good.push('You asked politely about the guarantee and accepted a fair solution.'); else bad.push('A guarantee doesn\'t cover care problems. Accept a fair offer politely.');
+      if (s.ev.product) { if (!obj('product').failed) good.push('You read the label and chose a bee-friendly spray.'); else bad.push('Read chemical labels: "harmful to bees", "not for food plants".'); }
+    } else {
+      if (!obj('balcony').failed) good.push('You recommended shade-loving plants for a north-facing balcony.');
+      if (s.ev.cats && !obj('cats').failed) good.push('You warned a customer tactfully that lilies are toxic to cats.');
+      if (s.ev.weedkiller) { if (!obj('weedkiller').failed) good.push('You read the weedkiller label with the customer and recommended the safe option.'); else bad.push('Safety first: near ponds, children and pets, choose the safe product.'); }
+      if (!obj('complaint').failed) good.push('You calmed down an angry customer and offered a fair solution within the policy.'); else bad.push('With complaints: acknowledge, apologise, and offer what the policy allows.');
+    }
+    if (!G.reg) good.push('Perfect register: professional with customers, friendly with people you know.');
+    if (G.manners === 100) good.push('Perfect manners. Cheers, my lover! 🌱');
+    showResults({ title: { easy: 'Ready to grow!', normal: 'The plant will live!', hard: 'Employee of the day!' }[G.diff] || 'Done!', overall, metrics: [['Good advice', adv], ['English', eng], ['Manners', G.manners]], good, bad });
+  }
+}
+
+/* =====================================================================
+   SCENARIO — AT THE PHARMACY (a pharmacy in Boston, USA)
+   Each level is a different story: Easy = feeling ill on a school trip (over-the-counter medicine),
+   Normal = picking up a prescription that has problems, Hard = your asthma inhaler runs out on a Sunday.
+   ===================================================================== */
+const PH_SYM = [
+  { k: 'throat', what: 'a sore throat and a runny nose', aisle: 'Cold & Flu', say: ['I have a sore throat and a runny nose.', 'My throat really hurts, and I think I\'m getting a cold.'], prod: 'Honey & lemon throat lozenges', price: 6.49, label: 'Dissolve 1 lozenge slowly in the mouth every 2–3 hours. Do not take more than 8 lozenges in 24 hours.', q: ['How many can you take in one day?', 'Eight at most', ['As many as I want', 'Two']] },
+  { k: 'sun', what: 'sunburn on your shoulders', aisle: 'Sun Care', say: ['I\'ve got sunburn on my shoulders, and it really hurts.', 'I stayed in the sun too long yesterday, and now my shoulders are red and sore.'], prod: 'Aloe vera after-sun gel', price: 7.99, label: 'Apply gently to the skin 3–4 times a day. For external use only. Do not apply to broken skin.', q: ['"For external use only" means…', 'Only on the skin: don\'t swallow it', ['Only use it outside', 'Only use it abroad']] },
+  { k: 'bites', what: 'lots of itchy mosquito bites', aisle: 'First Aid', say: ['I\'ve got lots of mosquito bites, and they\'re really itchy.', 'Something bit me last night. My legs are covered in itchy bites.'], prod: 'Anti-itch cream (hydrocortisone 1%)', price: 5.99, label: 'Apply a thin layer to the bites 2–3 times a day. Not for children under 10. Do not use for more than 7 days.', q: ['How long can you use it?', 'Seven days at most', ['As long as I like', 'Only one day']] },
+  { k: 'hay', what: 'hay fever: itchy eyes and lots of sneezing', aisle: 'Allergy', say: ['My eyes are really itchy, and I keep sneezing. I think it\'s hay fever.', 'I can\'t stop sneezing, and my eyes are red and itchy. I think it\'s an allergy to pollen.'], prod: 'Non-drowsy allergy tablets', price: 8.49, label: 'Adults and children 12 years and over: take 1 tablet once a day. Do not take more than 1 tablet in 24 hours.', q: ['How many tablets a day?', 'One', ['Three', 'As many as I need']] }
+];
+SCEN.pharmacy = {
+  title: 'At the Pharmacy', cardTitle: 'Your situation',
+  vocab: [['I\'ve got a sore throat / a rash / sunburn.', 'Me duele la garganta / tengo un sarpullido / me he quemado con el sol.'], ['I\'m allergic to…', 'Soy alérgico/a a…'], ['over-the-counter / a prescription', 'sin receta / una receta'], ['pick-up / drop-off', 'recogida / entrega (de recetas)'], ['a generic (drug)', 'un genérico'], ['Take one tablet twice a day with food.', 'Tome un comprimido dos veces al día con comida.'], ['Finish the whole course.', 'Termine todo el tratamiento.'], ['I\'m a bit short of breath.', 'Me falta un poco el aire.'], ['an inhaler / albuterol (US) = salbutamol', 'un inhalador / albuterol (EE. UU.) = salbutamol'], ['urgent care', 'centro de urgencias (sin cita)'], ['an itemized receipt', 'un recibo detallado']],
+  board() { const s = G.s; return [['Money', '$' + (Math.round(s.cash * 100) / 100).toFixed(2)], ['Health & safety', clamp(s.safe, 0, 100)], ['English', engPct() + '%'], ['Manners', G.manners]]; },
+  card() {
+    const s = G.s, base = `You are <b>${escH(profile.name)} ${s.sur}</b>, 15, from Spain, on a school trip to <b>Boston</b>, USA. Date of birth: <b>${s.dob[0]}</b> (Spanish format: day/month/year).`;
+    const tail = `<div class="cs">🇺🇸 In the US a pharmacy is also called a <b>drugstore</b>. Medicines you can buy without a prescription are <b>over-the-counter</b> (OTC). Dates are written <b>month/day/year</b>. Emergency number: <b>911</b>. Difficulty: <b>${DIFF[G.diff].label}</b>.</div>`;
+    if (G.diff === 'easy') return `<div class="cs">${base}</div><div class="cs">🤒 <b>Today:</b> you've got <b>${s.sym.what}</b>. Your teacher has sent you to the pharmacy next to the hotel.</div><div class="cs">⚠️ <b>Important:</b> you're <b>allergic to ibuprofen</b>. You aren't taking any other medicine. You have <b>$20</b>.</div>` + tail;
+    if (G.diff === 'normal') return `<div class="cs">${base}</div><div class="cs">👂 <b>Yesterday</b> you saw a doctor at an urgent care clinic: you've got an <b>ear infection</b>. The doctor sent a <b>prescription</b> for antibiotics straight to this pharmacy. Go and pick it up.</div><div class="cs">🧾 You don't have US health insurance, but you've got <b>travel insurance</b> from Spain: pay now and claim the money back later. You have <b>$40</b>.</div>` + tail;
+    return `<div class="cs">${base}</div><div class="cs">🫁 You have <b>asthma</b>. It's <b>Sunday afternoon</b> and your blue reliever inhaler (<b>Ventolin</b>, salbutamol, from Spain) has just run out. You're a little wheezy. Your doctor in Spain is closed until Monday.</div><div class="cs">🧾 You've got <b>travel insurance</b> (policy <b>${s.pol}</b>) and <b>$100</b> for emergencies. Explain the situation clearly, calmly and precisely.</div>` + tail;
+  },
+  build: buildPharmacy
+};
+
+function buildPharmacy() {
+  const s = G.s = { phase: 'enter', ev: {}, safe: 100, cash: 20, sym: pick1(PH_SYM), sur: pick1(['García López', 'Martín Ruiz', 'Sánchez Gil']), pol: 'TRV-' + (100000 + (Math.random() * 899999 | 0)), dob: pick1([['14/03/2011', 'March 14th, 2011', '03/14/2011', 'The fourteen of the three, 2011'], ['02/06/2011', 'June 2nd, 2011', '06/02/2011', 'February 6th, 2011'], ['09/11/2010', 'November 9th, 2010', '11/09/2010', 'September 11th, 2010']]) };
+  const pool = { easy: ['line', 'cap', 'offer'], normal: ['name', 'notready', 'generic'], hard: ['worse', 'upsell', 'teacher', 'insurance', 'spell'] }[G.diff] || ['name', 'notready', 'generic'];
+  sample(pool, { easy: 1, normal: 2, hard: 4 }[G.diff] || 2).forEach(k => s.ev[k] = true);
+  s.cash = { easy: 20, normal: 40, hard: 100 }[G.diff] || 40; s.budget = s.cash; G.money = s.cash;
+  const okS = (ok, n = 15) => { if (!ok) s.safe -= n; updateBoard(); };
+  const D = n => '$' + (Math.round(n * 100) / 100).toFixed(2);
+  const pay = n => { s.cash = Math.round((s.cash - n) * 100) / 100; G.money = s.cash; updateBoard(); };
+  const sym = s.sym, sur1 = s.sur.split(' ')[0], sur2 = s.sur.split(' ')[1];
+
+  /* ---- world: the street (z > 10), the pharmacy (30 × 20) and an urgent care clinic (x = 60) */
+  W.bounds = { minX: -26, maxX: 76, minZ: -14, maxZ: 24 };
+  ground('#9e9e9e'); part(0, 0, 15, 52, 0.05, 9, '#bdbdbd', { solid: false });
+  room(0, 0, 30, 20, { wall: '#f5f5f5', floor: '#e0e0e0', roof: '#00695c', door: 's', gap: 4, h: 6 });
+  sign('BEACON PHARMACY', 0, 7.2, 10.3, 11, 1.2, 0, { bg: '#00695c', fg: '#fff' }); sign('Rx', -7, 4, 10.3, 1.4, 1.2, 0, { bg: '#fff', fg: '#00695c' });
+  [['COLD & FLU', -10], ['SUN CARE', -4], ['FIRST AID', 2], ['ALLERGY', 8]].forEach(([t, x], k) => { part(x, 0, 0, 1.2, 2.2, 7, '#90a4ae'); for (let r = 0; r < 3; r++) part(x, 0.4 + r * 0.7, 0, 1.3, 0.3, 6.6, ['#ef5350', '#ffca28', '#42a5f5', '#66bb6a'][(k + r) % 4], { solid: false }); sign(t, x, 3.4, 3.6, 2.6, 0.5, 0, { bg: '#004d40', fg: '#fff' }); });
+  part(0, 0, -8, 16, 1.2, 1.2, '#eceff1');
+  [['DROP-OFF', -5], ['PICK-UP', 0], ['CONSULTATION', 5]].forEach(([t, x]) => sign(t, x, 3.4, -9.7, 3.4, 0.6, 0, { bg: '#00695c', fg: '#fff' }));
+  part(0, 0, -5.4, 14, 0.04, 0.25, '#fdd835', { solid: false }); sign('PLEASE WAIT HERE FOR PRIVACY', 0, 0.9, -5.2, 4, 0.35, 0, { bg: '#fdd835', fg: '#212121' });
+  part(10, 0, 7, 1.2, 1, 3, '#455a64'); sign('CHECKOUT', 10, 3, 8.8, 2.4, 0.5, Math.PI, { bg: '#c62828', fg: '#fff' });
+  for (let k = 0; k < 3; k++) chair(-12, -3 + k * 1.4, Math.PI / 2, '#00897b');
+  const CX = 60;
+  room(CX, 0, 16, 12, { wall: '#e3f2fd', floor: '#cfd8dc', roof: '#1565c0', door: 'x', h: 5 });
+  sign('MINUTECARE URGENT CARE · OPEN 7 DAYS', CX, 4, -5.7, 8, 0.6, 0, { bg: '#1565c0', fg: '#fff' }); part(CX, 0, -3, 6, 1.1, 1.2, '#eceff1');
+  W.walk = (x, z) => (x > -14.6 && x < 14.6 && z > -9.6 && z < 22) || (x > -25 && x < 25 && z > 10.4 && z < 22) || (x > CX - 7.6 && x < CX + 7.6 && z > -5.6 && z < 5.6);
+
+  /* ---- people */
+  const ph = staff('Pharmacist', gPick(), { shirt: '#ffffff', pants: '#263238' }, 0, -9.2, 0, '#00695c');
+  const tech = staff('Pharmacy technician', gPick(), { shirt: '#26a69a', pants: '#263238' }, -5, -9.2, 0, '#00695c');
+  const cashier = staff('Checkout', gPick(), { shirt: '#c62828' }, 11.2, 7, Math.PI / 2, '#c62828');
+  const doctor = staff('Urgent care doctor', gPick(), { shirt: '#ffffff', pants: '#1565c0' }, CX, -4.4, 0, '#1565c0');
+  const cg = gPick(), other = npc(`${NPC_NAME[cg]} (Customer)`, Object.assign({ shirt: '#6d4c41', pants: '#37474f', sleeves: true, shoes: true }, pick1(STAFF_LOOKS[cg])), 1.2, -6.8, 0, { color: '#bcaaa4', voice: NPC_VOICE[cg] });
+  other.gender = cg; other.badge = '#6d4c41'; other.av.visible = !!(s.ev.line || s.ev.upsell);
+  const tg = gPick(), teacher = { name: `${NPC_NAME[tg]} (Teacher) 📱`, badge: '#3949ab', gender: tg, color: '#9fa8da', voice: NPC_VOICE[tg] };
+  const ig = gPick(), insurer = { name: `${NPC_NAME[ig]} (Travel insurance) ☎️`, badge: '#455a64', gender: ig, color: '#b0bec5', voice: NPC_VOICE[ig] };
+  spawnPlayer(0, 16, Math.PI, 0);
+  const go = (ph_, x, z, m) => { s.phase = ph_; setMarker(x, 3.4, z); if (m) notify(m[0], m[1]); };
+  const tp = (x, z) => { P.pos.set(x, 0, z); P.spawn = [x, z, Math.PI, 0]; };
+  inter({ obj: 'Entrance', label: 'Go in', at: () => ({ x: 0, y: 0, z: 11.5 }), r: 3, when: () => s.phase === 'enter', act: () => { hideMarker(); s.phase = 'r'; ({ easy: e1, normal: n1, hard: h1 }[G.diff] || n1)(); } });
+  inter({ obj: ph.name, label: 'Talk', at: () => ({ x: 0, y: 0, z: -6.6 }), r: 2.6, when: () => s.phase === 'counter', act: () => { hideMarker(); s.phase = 'r'; s.next(); } });
+  inter({ obj: tech.name, label: 'Talk', at: () => ({ x: -1, y: 0, z: -6.6 }), r: 3, when: () => s.phase === 'pickup', act: () => { hideMarker(); s.phase = 'r'; s.next(); } });
+  inter({ obj: other.name, label: 'Talk', at: () => other.pos, r: 2.6, when: () => s.phase === 'other', act: () => { hideMarker(); s.phase = 'r'; s.next(); } });
+  inter({ obj: doctor.name, label: 'Talk', at: () => ({ x: CX, y: 0, z: -1.6 }), r: 2.8, when: () => s.phase === 'doctor', act: () => { hideMarker(); s.phase = 'r'; s.next(); } });
+  inter({ obj: cashier.name, label: 'Pay', at: () => ({ x: 12.6, y: 0, z: 7 }), r: 2.6, when: () => s.phase === 'checkout', act: () => { hideMarker(); s.phase = 'r'; s.next(); } });
+  setMarker(0, 3.2, 11.5);
+
+  /* ============ EASY: feeling ill on a school trip ============ */
+  if (G.diff === 'easy') {
+    G.inv = [{ emoji: '💵', label: 'Cash', info: () => D(s.cash) }, { emoji: '⚠️', label: 'Allergy card', info: () => 'ALLERGIC TO IBUPROFEN' }]; renderHotbar();
+    G.obj = [{ id: 'aisle', text: 'Find the right part of the pharmacy' }];
+    if (s.ev.line) G.obj.push({ id: 'line', secret: true, text: 'Respect the privacy line' });
+    G.obj.push({ id: 'explain', text: 'Explain your symptoms to the pharmacist' }, { id: 'allergy', text: 'Tell the pharmacist about your allergy' }, { id: 'label', text: 'Read the instructions on the label' });
+    if (s.ev.offer) G.obj.push({ id: 'offer', secret: true, text: 'Understand a special offer' });
+    if (s.ev.cap) G.obj.push({ id: 'cap', secret: true, text: 'Ask for help opening the packet' });
+    G.obj.push({ id: 'pay', text: 'Pay and check your change' }, { id: 'teacher', text: 'Tell your teacher' });
+  }
+  function e1() {
+    paperQuiz('BEACON PHARMACY · AISLES', `You've got ${sym.what}. Where do you look first?`, 'COLD &amp; FLU · SUN CARE · FIRST AID · ALLERGY · PHARMACY COUNTER (ask the pharmacist)', [
+      ['Which aisle is for your problem?', sym.aisle, PH_SYM.filter(x => x.k !== sym.k).map(x => x.aisle).slice(0, 2)],
+      ['You aren\'t sure what to buy. Who can you ask?', 'The pharmacist, at the pharmacy counter', ['Another customer', 'Nobody: just take something']]
+    ], right => {
+      okS(right === 2, 10); complete('aisle', right < 2);
+      if (s.ev.line) { reveal('line'); return choice(null, 'At the pharmacy counter, another customer is talking quietly to the pharmacist. There\'s a yellow line on the floor: "PLEASE WAIT HERE FOR PRIVACY".', 'En el mostrador, otro cliente habla en voz baja con la farmacéutica. Hay una línea amarilla en el suelo: «ESPERE AQUÍ, POR FAVOR, PARA RESPETAR LA PRIVACIDAD».', [
+        { t: 'Wait behind the yellow line until they finish.', say: false, fn: () => { complete('line'); notify('👍 Good', 'Health is private. Always wait behind the line.', 'good'); later(1.5, () => { walkTo(other, [[0, 14]], () => other.av.visible = false); toCounter(); }); } },
+        { t: 'Go right up to the counter: you\'re in a hurry.', say: false, fn: () => { complete('line', true); G.manners = Math.max(0, G.manners - 15); pop('Manners −15', 'bad'); G.mistakes.push({ said: 'I went up to the counter while someone was talking.', tip: 'Health is private: wait behind the yellow line.' }); line(ph, 'Excuse me, could you wait behind the yellow line, please? I\'ll be with you in a moment.', 'Perdona, ¿puedes esperar detrás de la línea amarilla, por favor? Enseguida te atiendo.', () => { walkTo(other, [[0, 14]], () => other.av.visible = false); toCounter(); }, 'Sorry!'); } }
+      ]); }
+      toCounter();
+    }, 'Go');
+  }
+  function toCounter() { s.next = e2; go('counter', 0, -6.6, ['💊 The pharmacist', 'Go to the pharmacy counter.']); }
+  function e2() {
+    askR(ph, [['Hi there! What can I do for you?', '¡Hola! ¿Qué puedo hacer por ti?', sym.say]], [], [
+      { t: 'I am ill. Give me medicine.', kind: 'rude', tip: 'Explain your symptoms politely: "' + sym.say[0] + '"' },
+      { t: { throat: 'I have pain of throat.', sun: 'I am burned of the sun.', bites: 'The mosquitoes have eaten me.', hay: 'I have the allergy of the flowers.' }[sym.k], kind: 'grammar', tip: { throat: '"I\'ve got a sore throat" / "My throat hurts."', sun: '"I\'ve got sunburn."', bites: '"I\'ve got mosquito bites."', hay: '"I\'ve got hay fever" / "I\'m allergic to pollen."' }[sym.k] },
+      { t: 'I feel me bad.', kind: 'grammar', tip: '"Sentirse" = feel, without "me": "I don\'t feel well."' }
+    ], () => { complete('explain'); e3(); });
+  }
+  function e3() {
+    askR(ph, [['OK. How old are you? And are you allergic to anything, or taking any other medicine?', 'Vale. ¿Cuántos años tienes? ¿Eres alérgico/a a algo o tomas algún otro medicamento?', ['I\'m fifteen. I\'m allergic to ibuprofen, and I\'m not taking any other medicine.', 'I\'m fifteen, and I\'m allergic to ibuprofen. No other medicine.']]], [], [
+      { t: 'I\'m fifteen. No allergies.', kind: 'fact', fn: () => { okS(false, 40); complete('allergy', true); G.mistakes.push({ said: 'No allergies.', tip: 'You ARE allergic to ibuprofen! Always tell a pharmacist about allergies.' }); line(ph, 'Great. Then I\'d also suggest some ibuprofen for the pain.', 'Genial. Entonces te recomiendo también un poco de ibuprofeno para el dolor.', () => choice(null, '⚠️ Wait! What do you do?', '⚠️ ¡Espera! ¿Qué haces?', [{ t: '"Oh, sorry! I forgot: I\'m allergic to ibuprofen!"', say: false, fn: () => { notify('😅 Phew!', 'Always say your allergies FIRST.', 'warn'); e4(); } }]), 'Er…'); } },
+      { t: 'I have fifteen years. I am allergic of ibuprofen.', kind: 'grammar', tip: '"I\'m fifteen" (verb be), and "allergic TO".' },
+      { t: 'Fifteen. I can\'t to take ibuprofen.', kind: 'grammar', tip: 'No "to" after "can\'t": "I can\'t take ibuprofen."' }
+    ], () => { complete('allergy'); e4(); });
+  }
+  function e4() {
+    line(ph, `Thanks for telling me. Then no ibuprofen for you! I'd recommend ${sym.prod.toLowerCase()}. They're ${D(sym.price)}. Read the label carefully.`, `Gracias por decírmelo. ¡Entonces nada de ibuprofeno! Te recomiendo esto. Cuesta ${D(sym.price)}. Lee bien la etiqueta.`, () => paperQuiz(`LABEL · ${sym.prod.toUpperCase()}`, 'Read the directions.', `<b>Directions:</b> ${sym.label}<br>Keep out of reach of children.`, [sym.q], right => {
+      okS(right === 1, 20); complete('label', !right);
+      if (!right) notify('📖 Read it again', sym.label, 'warn');
+      if (s.ev.offer) return offer();
+      if (s.ev.cap) return cap_();
+      toPay();
+    }, 'OK'), 'Thank you');
+  }
+  function offer() {
+    reveal('offer');
+    paperQuiz('SPECIAL OFFER', 'A sign next to the product.', `⭐ <b>BUY ONE, GET ONE 50% OFF</b> ⭐<br>${sym.prod}: ${D(sym.price)} each`, [
+      ['How much would two cost?', D(sym.price * 1.5), [D(sym.price * 2), D(sym.price)]],
+      ['Do you need two?', 'No: one is enough, so I\'ll buy one', ['Yes: offers are always a good idea']]
+    ], right => { okS(true); complete('offer', right < 2); if (right < 2) notify('🛒 Careful', 'An offer is only a good deal if you need it!', 'warn'); s.ev.cap ? cap_() : toPay(); }, 'OK');
+  }
+  function cap_() {
+    reveal('cap');
+    askR(ph, [['Everything OK?', '¿Todo bien?', ['Sorry, I can\'t open it. Can you help me, please?', 'Excuse me, how do I open this? It\'s difficult.']]], [], [
+      { t: 'This is broken. Give me another.', kind: 'rude', tip: 'It\'s not broken! Ask: "How do I open it?"' },
+      { t: 'I can\'t open it. Is very difficult.', kind: 'grammar', tip: '"It\'s very difficult."' },
+      { t: 'How I open this?', kind: 'grammar', tip: '"How DO I open this?"' }
+    ], () => line(ph, 'It\'s child-resistant, so kids can\'t open it. Push down and turn at the same time. There you go!', 'Tiene cierre de seguridad para que los niños no lo abran. Aprieta y gira a la vez. ¡Ya está!', () => { complete('cap'); toPay(); }, 'Thanks!'));
+  }
+  function toPay() { s.next = e5; go('checkout', 12.6, 7, ['🧾 Checkout', 'Pay at the checkout near the door.']); }
+  function e5() {
+    const ch = Math.round((20 - sym.price) * 100) / 100;
+    paperQuiz('CHECKOUT', `The cashier says: "That's ${D(sym.price)}." You give a $20 bill.`, '', [
+      ['How much change should you get?', D(ch), [D(ch + 1), D(ch - 1)]]
+    ], right => {
+      okS(true); complete('pay', !right); pay(sym.price);
+      askR(teacher, [['Hi! Did you find something at the pharmacy?', '¡Hola! ¿Has encontrado algo en la farmacia?', ['Yes, thank you. The pharmacist gave me something without ibuprofen.', `Yes! I bought ${sym.prod.toLowerCase()}. I'm going back to the hotel now.`]]], [], [
+        { t: 'Yes, I buyed some medicine.', kind: 'grammar', tip: 'Buy – bought – bought: "I bought some medicine."' },
+        { t: 'Yes, the pharmacist has given me one thing.', kind: 'grammar', tip: 'More natural: "The pharmacist gave me something."' }
+      ], () => line(teacher, 'Great! Rest in your room, and tell me if you feel worse.', '¡Genial! Descansa en la habitación y avísame si te encuentras peor.', () => { complete('teacher'); fin(); }, 'OK, thanks!'));
+    }, 'Pay');
+  }
+
+  /* ============ NORMAL: picking up a prescription ============ */
+  if (G.diff === 'normal') {
+    G.inv = [{ emoji: '🛂', label: 'Passport', info: () => `${profile.name} ${s.sur} · born ${s.dob[0]}` }, { emoji: '💵', label: 'Cash', info: () => D(s.cash) }, { emoji: '📄', label: 'Travel insurance', info: () => 'Pay, keep an itemized receipt, claim online.' }]; renderHotbar();
+    G.obj = [{ id: 'window', text: 'Go to the right window' }, { id: 'id', text: 'Give your name and date of birth (US style!)' }];
+    if (s.ev.name) G.obj.push({ id: 'name', secret: true, text: 'Explain your two surnames' });
+    if (s.ev.notready) G.obj.push({ id: 'notready', secret: true, text: 'Deal with a wait politely' });
+    if (s.ev.generic) G.obj.push({ id: 'generic', secret: true, text: 'Ask about a generic medicine' });
+    G.obj.push({ id: 'insurance', text: 'Explain your insurance and ask for the right receipt' }, { id: 'instructions', text: 'Understand the pharmacist\'s instructions' }, { id: 'pay', text: 'Pay for your prescription' });
+  }
+  function n1() {
+    paperQuiz('PHARMACY COUNTER', 'Three windows at the back. Your prescription was sent by the doctor yesterday.', '<b>DROP-OFF</b>: bring a new prescription · <b>PICK-UP</b>: collect your medicine · <b>CONSULTATION</b>: talk privately to the pharmacist', [
+      ['Which window?', 'PICK-UP', ['DROP-OFF', 'CONSULTATION']]
+    ], right => { okS(right === 1, 5); complete('window', !right); s.next = n2; go('pickup', -1, -6.6, ['💊 Pick-up', 'Go to the pick-up window.']); }, 'Go');
+  }
+  function n2() {
+    askR(tech, [['Hi! Picking up?', '¡Hola! ¿Vienes a recoger?', [`Yes, please. It should be under ${profile.name} ${s.sur}. The doctor sent it yesterday.`, `Hi, yes. I'm here to pick up a prescription for ${profile.name} ${s.sur}.`]]], [
+      { t: 'Yeah. Medicine. For me.', kind: 'blunt', tip: 'Too short. "I\'m here to pick up a prescription for…"', react: 'O…K. Name?' },
+      { t: 'Obviously. Why else would I be here?', kind: 'blunt', tip: 'Sarcastic and rude. Just say: "Yes, please."', react: 'Just asking…' }
+    ], [
+      { t: 'Yes, I come to collect my recipe.', kind: 'grammar', tip: 'False friend! "Receta" (medical) = prescription. A recipe is for cooking!' },
+      { t: 'Yes, the doctor sended it yesterday.', kind: 'grammar', tip: 'Send – sent – sent.' }
+    ], () => paperQuiz('DATE OF BIRTH', `The technician asks: "And your date of birth?" Your passport says ${s.dob[0]} (day/month/year). How do you say it in the US?`, '', [
+      ['You say:', s.dob[1], [s.dob[3], s.dob[0].split('/').join(', ')]]
+    ], right => { okS(right === 1, 10); complete('id', !right); if (!right) notify('📅 US dates', `In the US: month/day/year. ${s.dob[0]} = ${s.dob[2]} = ${s.dob[1]}.`, 'warn'); s.ev.name ? nameEv() : s.ev.notready ? notReady() : s.ev.generic ? generic() : insurance(); }, 'Say it'));
+  }
+  function nameEv() {
+    reveal('name');
+    askR(tech, [[`Hmm, I can't find anything under ${sur2}… Is ${sur2} your last name?`, `Mmm, no encuentro nada a nombre de ${sur2}… ¿${sur2} es tu apellido?`, [`Sorry, in Spain we have two last names. Could you try ${sur1}, or "${sur1} ${sur2}" together?`, `Ah, it's a bit confusing: ${sur1} and ${sur2} are both last names. Try searching for ${sur1}.`]]], [
+      { t: 'Your system is stupid.', kind: 'blunt', tip: 'Explain the Spanish system politely: "In Spain we have two last names."', react: 'Hey, I\'m trying to help.' }
+    ], [
+      { t: `In Spain we have two surnames: of the father and of the mother.`, kind: 'grammar', tip: '"Our father\'s and our mother\'s" (possessive \'s).' },
+      { t: `Search for ${sur1}, is my first surname.`, kind: 'grammar', tip: '"…It\'s my first surname."' }
+    ], () => line(tech, `${sur1}… there you are! The system put ${sur2} as your middle name. Got it.`, `${sur1}… ¡aquí está! El sistema había puesto ${sur2} como segundo nombre. Ya está.`, () => { complete('name'); s.ev.notready ? notReady() : s.ev.generic ? generic() : insurance(); }, 'Great'));
+  }
+  function notReady() {
+    reveal('notready');
+    askR(tech, [['Ah, it\'s not ready yet, I\'m sorry. We\'ve been really busy. It\'ll be about twenty minutes.', 'Ay, todavía no está lista, lo siento. Hemos tenido mucho lío. Serán unos veinte minutos.', ['No problem. I\'ll wait over there. Will you call my name?', 'That\'s fine. Is it OK if I wait on those chairs?']]], [
+      { t: 'Twenty minutes? That\'s ridiculous!', kind: 'blunt', tip: 'Stay polite: "No problem. I\'ll wait."', react: 'I\'m sorry, it\'s a busy day.' }
+    ], [
+      { t: 'No problem, I wait.', kind: 'grammar', tip: 'A decision now: "I\'ll wait."' },
+      { t: 'You will call to me?', kind: 'grammar', tip: '"Will you call my name?"' }
+    ], () => { notify('⏳ 20 minutes later…', 'You wait on the chairs and read a leaflet about vaccines.'); later(2, () => line(tech, `${profile.name}? Your prescription's ready!`, `¿${profile.name}? ¡Tu receta está lista!`, () => { complete('notready'); s.ev.generic ? generic() : insurance(); }, 'Thank you!')); });
+  }
+  function generic() {
+    reveal('generic');
+    askR(ph, [['Just so you know, the doctor prescribed "Amoxil", but we\'re out of the brand. I can give you the generic, amoxicillin. It\'s cheaper.', 'Para que lo sepas, el médico recetó «Amoxil», pero no nos queda la marca. Te puedo dar el genérico, amoxicilina. Es más barato.', ['Is it exactly the same medicine? If so, the generic is fine.', 'What\'s the difference between them? Does it work the same way?']]], [
+      { t: 'No. I want what the doctor said.', kind: 'blunt', tip: 'Ask before you refuse: "Is it the same medicine?"', react: 'It IS what the doctor said, just without the brand.' }
+    ], [
+      { t: 'Is the same medicament?', kind: 'grammar', tip: '"Is it the same medicine?"' },
+      { t: 'Which is the difference?', kind: 'grammar', tip: '"What\'s the difference?"' }
+    ], () => line(ph, 'Same active ingredient, same dose, same effect. Only the name and the box are different.', 'El mismo principio activo, la misma dosis, el mismo efecto. Solo cambian el nombre y la caja.', () => { complete('generic'); s.gen = true; insurance(); }, 'Great, then the generic'));
+  }
+  function insurance() {
+    askR(tech, [['Do you have insurance with you?', '¿Tienes seguro?', ['I don\'t have US insurance, but I have travel insurance from Spain. I\'ll pay now. Could I have an itemized receipt for my claim?', 'Only travel insurance from Spain, so I\'ll pay myself. Could you give me a detailed receipt, please?']]], [
+      { t: 'No. Just tell me the price.', kind: 'blunt', tip: 'Explain your situation and ask for the receipt you need.', react: 'OK… it\'s self-pay, then.' }
+    ], [
+      { t: 'I have an insurance of travel.', kind: 'grammar', tip: '"Travel insurance" (uncountable: no "an").' },
+      { t: 'Can you give me a ticket with all the details?', kind: 'grammar', tip: '"Ticket" here = receipt: "an itemized receipt".' }
+    ], () => { complete('insurance'); line(ph, 'Before you go, let me explain how to take it.', 'Antes de que te vayas, te explico cómo tomarlo.', counsel, 'OK'); });
+  }
+  function counsel() {
+    line(ph, 'Take one capsule every twelve hours, so twice a day, with food. It\'s a ten-day course. Even if you feel better after three days, finish the whole course. It might upset your stomach a little. But if you get a rash or any swelling, stop taking it and call us or a doctor straight away: that could be an allergy.', 'Toma una cápsula cada doce horas, o sea, dos veces al día, con comida. Es un tratamiento de diez días. Aunque te encuentres mejor a los tres días, termínalo entero. Puede que te siente un poco mal al estómago. Pero si te sale un sarpullido o se te hincha algo, déjalo y llámanos o llama a un médico enseguida: podría ser una alergia.', () => paperQuiz('WHAT DID THE PHARMACIST SAY?', 'Answer from memory.', '', [
+      ['How often?', 'Every 12 hours, with food', ['Every 2 hours', 'Once a day, without food']],
+      ['You feel better after three days. What do you do?', 'Keep taking it until the 10 days are over', ['Stop taking it', 'Take double']],
+      ['You get a rash. What do you do?', 'Stop and call the pharmacy or a doctor', ['Take another capsule', 'Nothing: it\'s normal']]
+    ], (right, n) => { okS(right === n, 15 * (n - right)); complete('instructions', right < n); const price = s.gen ? 14.5 : 28; s.price = price; line(tech, `That's ${D(price)}. Here's your itemized receipt. Can you sign here, please?`, `Son ${D(price)}. Aquí tienes el recibo detallado. ¿Firmas aquí, por favor?`, () => { pay(price); complete('pay'); G.inv.push({ emoji: '💊', label: s.gen ? 'Amoxicillin (generic)' : 'Amoxil', info: () => '1 capsule every 12 hours with food · 10 days' }, { emoji: '🧾', label: 'Itemized receipt', info: () => D(price) }); renderHotbar(); fin(); }, 'Sure. Thanks!'); }, 'Done'), 'Got it');
+  }
+
+  /* ============ HARD: the inhaler on a Sunday ============ */
+  if (G.diff === 'hard') {
+    G.inv = [{ emoji: '🫁', label: 'Empty inhaler', info: () => 'Ventolin 100 micrograms (salbutamol) · made in Spain · EMPTY' }, { emoji: '💵', label: 'Cash', info: () => D(s.cash) }, { emoji: '📄', label: 'Travel insurance', info: () => `Policy ${s.pol}` }]; renderHotbar();
+    G.obj = [{ id: 'explain', text: 'Explain the situation clearly and precisely' }, { id: 'honest', text: 'Describe your symptoms honestly' }, { id: 'danger', text: 'Learn the emergency warning signs' }];
+    if (s.ev.upsell) G.obj.push({ id: 'upsell', secret: true, text: 'Politely refuse unsafe advice' });
+    G.obj.push({ id: 'plan', text: 'Choose a safe way to get a prescription' });
+    if (s.ev.worse) G.obj.push({ id: 'worse', secret: true, text: 'Ask for help when you feel worse' });
+    if (s.ev.spell) G.obj.push({ id: 'spell', secret: true, text: 'Give your details precisely' });
+    G.obj.push({ id: 'names', text: 'Understand the US name of your medicine' }, { id: 'cost', text: 'Ask tactfully about a cheaper option' }, { id: 'technique', text: 'Check how to use the inhaler' });
+    if (s.ev.teacher) G.obj.push({ id: 'teacher', secret: true, text: 'Let your teacher know' });
+    if (s.ev.insurance) G.obj.push({ id: 'insurance', secret: true, text: 'Call your travel insurance' });
+  }
+  function h1() { s.next = h2; go('counter', 0, -6.6, ['🫁 The pharmacist', 'Go to the pharmacy counter.']); }
+  function h2() {
+    askR(ph, [['Hi, what can I help you with?', 'Hola, ¿en qué te puedo ayudar?', ['Hi. I\'m visiting from Spain and I\'ve just run out of my asthma reliever inhaler. I was wondering whether you could help me get a replacement.', 'Hello. I have asthma, and my blue inhaler ran out this morning. I\'m only here for a week, so I\'m not sure what the procedure is.']]], [
+      { t: 'I need an inhaler. Give me one.', kind: 'blunt', tip: 'Explain the situation first: who you are, what\'s happened, what you need.', react: 'Hold on, let\'s start from the beginning.' },
+      { t: 'Asthma. Inhaler. Empty. Help.', kind: 'blunt', tip: 'Too telegraphic for a C1 speaker. Use full sentences: "I\'ve run out of my inhaler…"', react: 'OK… tell me more.' },
+      { t: 'I find myself in a most unfortunate respiratory predicament.', kind: 'stiff', tip: 'Pompous and vague! Be precise: "I\'ve run out of my asthma inhaler."', react: 'A… respiratory predicament?' }
+    ], [
+      { t: 'I have finished my inhaler and I need other.', kind: 'grammar', tip: '"I\'ve run out of my inhaler, and I need another one."' }
+    ], () => { complete('explain'); h3(); });
+  }
+  function h3() {
+    ask(ph, 'OK, first things first: how are you feeling right now?', 'Vale, lo primero es lo primero: ¿cómo te encuentras ahora mismo?', phr(['I\'m a bit wheezy and my chest feels tight, but I can speak in full sentences and I\'m not getting worse.'], [{ t: 'I feel me a bit tight in the chest.', kind: 'grammar', tip: '"My chest feels a bit tight" (no "me").' }], 1).concat([
+      { t: 'Totally fine! No problem at all.', kind: 'fact', fn: () => { okS(false, 25); complete('honest', true); G.mistakes.push({ said: 'Totally fine!', tip: 'Don\'t downplay symptoms with a health professional. Be honest and precise.' }); notify('⚠️ Be honest', 'You ARE wheezy. Health professionals need the real picture.', 'warn'); later(0.5, h4); } },
+      { t: 'I think I\'m dying! I can\'t breathe at all!', kind: 'fact', fn: () => { okS(false, 15); complete('honest', true); G.mistakes.push({ said: 'I can\'t breathe at all!', tip: 'Don\'t exaggerate: if you really couldn\'t breathe, you\'d need 911. Describe what you feel precisely.' }); notify('⚠️ Be precise', 'You can speak normally, so it isn\'t an emergency. Describe your symptoms accurately.', 'warn'); later(0.5, h4); } }
+    ]), () => { complete('honest'); h4(); });
+  }
+  function h4() {
+    line(ph, 'OK, good. Listen carefully, because this is important. If you can\'t finish a sentence, if your lips or fingernails turn blue or grey, or if your inhaler doesn\'t help, call 911 right away. Don\'t wait.', 'Vale, bien. Escucha con atención, porque esto es importante. Si no puedes terminar una frase, si los labios o las uñas se te ponen azules o grises, o si el inhalador no te ayuda, llama al 911 enseguida. No esperes.', () => paperQuiz('ASTHMA: WARNING SIGNS', 'When do you call 911?', '', [
+      ['Which of these is an emergency?', 'I can\'t finish a sentence and my lips look blue', ['I cough a little at night', 'I feel a bit tired after the gym']],
+      ['What do you do then?', 'Call 911 immediately', ['Wait until Monday', 'Drink some water and lie down']]
+    ], right => { okS(right === 2, 20); complete('danger', right < 2); s.ev.upsell ? upsell() : h5(); }, 'Understood'), 'I understand');
+  }
+  function upsell() {
+    reveal('upsell'); other.av.visible = true; other.pos.set(3, 0, -4.4); faceTo(other, P.pos.x, P.pos.z);
+    askR(other, [['Sorry, I couldn\'t help overhearing. You don\'t need all those chemicals! Try this "Breathe-Easy" herbal tea. It cured my cousin\'s asthma completely. No prescription needed!', 'Perdona, no he podido evitar oírte. ¡No necesitas tantos químicos! Prueba este té de hierbas «Breathe-Easy». Curó del todo el asma de mi primo. ¡Sin receta!', ['That\'s kind of you, but I\'d rather stick to what my doctor prescribed. Asthma can be quite serious.', 'Thanks, but I\'ll follow the pharmacist\'s advice. Herbal tea can\'t replace a reliever inhaler, I\'m afraid.']]], [
+      { t: 'Mind your own business.', kind: 'blunt', tip: 'Firm is good, rude isn\'t. "That\'s kind of you, but I\'d rather stick to my medicine."', react: 'Well! I was only trying to help!' },
+      { t: 'That\'s nonsense, and you know it.', kind: 'blunt', tip: 'Decline politely: "Thanks, but I\'ll follow my doctor\'s advice."', react: 'How rude!' },
+      { t: 'I must respectfully decline your unsolicited pharmacological counsel.', kind: 'stiff', tip: 'Too pompous. "That\'s kind of you, but no, thanks."', react: 'My… what?' }
+    ], [
+      { t: 'Thank you, but I prefer to follow with my medicine.', kind: 'grammar', tip: '"I\'d rather stick to my medicine" / "I prefer to keep taking my medicine."' }
+    ], p => { complete('upsell', p.kind === 'blunt'); walkTo(other, [[0, 14]], () => other.av.visible = false); h5(); });
+  }
+  function h5() {
+    choice(ph, 'Now, the tricky part: albuterol inhalers are prescription-only here, and I can\'t accept a Spanish prescription. You have two good options. MinuteCare, the urgent care clinic next door, is open until eight tonight; they can see you and send a prescription straight to me. Or you can do a video visit with a doctor on an app, for about eighty dollars. What would you like to do?', 'Ahora la parte complicada: aquí los inhaladores de albuterol solo se venden con receta, y no puedo aceptar una receta española. Tienes dos buenas opciones. MinuteCare, el centro de urgencias de al lado, abre hasta las ocho; te pueden ver y mandarme la receta directamente. O puedes hacer una videoconsulta con un médico en una app, por unos ochenta dólares. ¿Qué prefieres?', [
+      { t: 'I\'ll go to the urgent care clinic next door.', fn: () => { complete('plan'); s.plan = 'clinic'; if (s.ev.spell) return spell(clinic); clinic(); } },
+      { t: 'I\'ll do the video visit on the app.', fn: () => { complete('plan'); s.plan = 'video'; notify('💳 $79', 'You pay for the video visit with your parents\' emergency card. Keep the receipt!'); if (s.ev.spell) return spell(video); video(); } },
+      { t: 'I\'ll just wait until Monday and call my doctor in Spain.', fn: () => { okS(false, 30); complete('plan', true); G.mistakes.push({ said: 'I\'ll wait until Monday.', tip: 'With asthma symptoms and no reliever, don\'t wait: get a prescription today.' }); line(ph, 'I really wouldn\'t wait, not with symptoms and no reliever. Please go next door: it\'s two minutes away.', 'Yo de verdad no esperaría, con síntomas y sin inhalador. Por favor, ve al centro de al lado: está a dos minutos.', () => { s.plan = 'clinic'; s.ev.spell ? spell(clinic) : clinic(); }, 'OK, you\'re right'); } }
+    ]);
+  }
+  function spell(next) {
+    reveal('spell');
+    paperQuiz('REGISTRATION FORM', 'Fill in your details exactly. Look at your passport.', `Passport: <b>${profile.name.toUpperCase()} ${s.sur.toUpperCase()}</b> · born <b>${s.dob[0]}</b> (day/month/year)`, [
+      ['Last name(s)', s.sur, [sur2, sur1 + '-Lopez']],
+      ['Date of birth (MM/DD/YYYY)', s.dob[2], [s.dob[0], s.dob[0].split('/').reverse().join('/')]]
+    ], right => { okS(right === 2, 10); complete('spell', right < 2); if (right < 2) notify('📅 US dates', `MM/DD/YYYY: ${s.dob[2]}.`, 'warn'); next(); }, 'Submit');
+  }
+  function clinic() {
+    tp(CX, 4); s.next = clinic2; go('doctor', CX, -1.6, ['🏥 MinuteCare', 'Talk to the doctor.']);
+  }
+  function clinic2() {
+    askR(doctor, [['Hi, I\'m the doctor on duty. So, you\'ve run out of your inhaler?', 'Hola, soy la médica de guardia. ¿Así que te has quedado sin inhalador?', ['That\'s right. I normally use Ventolin, which is salbutamol, two puffs when I need it, a few times a week. It ran out this morning.', 'Yes. I use a salbutamol inhaler, a hundred micrograms, when I\'m wheezy. Here\'s the empty one, so you can see the dose.']]], [
+      { t: 'Yes. Write the prescription so I can go.', kind: 'blunt', tip: 'Give the doctor useful details: name, dose, how often you use it.', react: 'I need a bit more information first.' },
+      { t: 'Indeed. My bronchodilatory apparatus has been exhausted.', kind: 'stiff', tip: 'Ha! Too formal. "Yes, my inhaler ran out this morning."', react: 'Your… inhaler, you mean?' }
+    ], [
+      { t: 'Yes, I use it when I have the asthma.', kind: 'grammar', tip: 'No "the": "when I have asthma symptoms".' }
+    ], () => { notify('💳 $150', 'The visit costs $150. You pay with your parents\' emergency card. Keep the receipt for your travel insurance!'); line(doctor, 'Your chest sounds OK. I\'ve sent a prescription for albuterol to Beacon Pharmacy. Head back over there.', 'Tu pecho suena bien. He mandado una receta de albuterol a Beacon Pharmacy. Vuelve allí.', back, 'Thank you, doctor'); });
+  }
+  function video() {
+    notify('📱 Video visit', 'You do a 10-minute video call with a doctor, who sends a prescription to Beacon Pharmacy.'); later(2, back);
+  }
+  function back() {
+    tp(0, -3); if (s.ev.worse) return worse();
+    names();
+  }
+  function worse() {
+    reveal('worse');
+    choice(null, 'While you wait for the prescription, you start to feel more wheezy. You can still talk, but it\'s getting harder.', 'Mientras esperas la receta, empiezas a notar más pitos al respirar. Todavía puedes hablar, pero te cuesta más.', [
+      { t: 'Tell the pharmacist straight away.', say: false, fn: () => askR(ph, [['Is everything OK?', '¿Todo bien?', ['Sorry, I\'m feeling a bit more wheezy than before. Could I sit down somewhere, and could you keep an eye on me?', 'I\'m getting a little worse, I think. It\'s harder to breathe than ten minutes ago.']]], [
+        { t: 'Hurry up with my inhaler!', kind: 'blunt', tip: 'Say what\'s happening clearly; don\'t just give orders.', react: 'Tell me how you feel first.' }
+      ], [
+        { t: 'I am worst than before.', kind: 'grammar', tip: '"Worse" (comparative), not "worst": "I\'m worse than before."' }
+      ], () => line(ph, 'Sit here. Your prescription has just arrived, so let\'s get you your inhaler right now. If it doesn\'t help in a few minutes, I\'ll call 911.', 'Siéntate aquí. Tu receta acaba de llegar, así que te doy el inhalador ahora mismo. Si no te ayuda en unos minutos, llamo al 911.', () => { complete('worse'); notify('🫁 Better', 'You take two puffs. After a few minutes, you can breathe normally again.', 'good'); names(); }, 'Thank you')) },
+      { t: 'Say nothing: you don\'t want to make a fuss.', say: false, fn: () => { okS(false, 30); complete('worse', true); G.mistakes.push({ said: 'I said nothing when I felt worse.', tip: 'Never stay quiet when your breathing gets worse. Tell someone immediately.' }); notify('⚠️ Speak up!', 'The pharmacist notices you\'re struggling and helps you. Next time, tell someone straight away!', 'bad'); names(); } }
+    ]);
+  }
+  function names() {
+    line(ph, 'Here we are. Your prescription says albuterol. Don\'t worry: it\'s the same thing as your Ventolin.', 'Aquí está. Tu receta dice albuterol. No te preocupes: es lo mismo que tu Ventolin.', () => paperQuiz('ONE MEDICINE, MANY NAMES', 'Match the names.', 'Spain/UK: <b>salbutamol</b> (brand: Ventolin) · USA: <b>albuterol</b> (brands: ProAir, Ventolin HFA)', [
+      ['Albuterol is…', 'The US name for salbutamol', ['A stronger medicine', 'A herbal remedy']],
+      ['Why is it useful to know the generic name?', 'Brand names change from country to country', ['Generic names are always cheaper', 'Doctors don\'t understand brand names']]
+    ], right => { okS(right === 2, 10); complete('names', right < 2); cost(); }, 'OK'), 'Good to know');
+  }
+  function cost() {
+    askR(ph, [['Without US insurance, this inhaler is sixty-eight dollars, I\'m afraid.', 'Sin seguro estadounidense, este inhalador cuesta sesenta y ocho dólares, me temo.', ['I see. Is there a generic version, or any kind of discount card I could use?', 'That\'s quite a lot. Would there be a cheaper generic, by any chance?']]], [
+      { t: 'Sixty-eight dollars? That\'s daylight robbery!', kind: 'blunt', tip: 'Not the pharmacist\'s fault. Ask tactfully: "Is there a cheaper generic?"', react: 'I don\'t set the prices…' },
+      { t: 'I refuse to pay that.', kind: 'blunt', tip: 'You need it! Ask about options instead.', react: 'Well… let me see what I can do.' },
+      { t: 'Might I enquire as to the availability of a more economical alternative?', kind: 'stiff', tip: 'A bit too formal. "Is there a cheaper generic, by any chance?"', react: 'Ha, you mean a generic? Yes!' }
+    ], [
+      { t: 'Is there a more cheap generic?', kind: 'grammar', tip: '"Cheaper" (one syllable + -er).' }
+    ], () => { complete('cost'); pay(22); line(ph, 'Good question! The generic with a free discount coupon is twenty-two dollars. Much better. Keep the receipt for your insurance.', '¡Buena pregunta! El genérico con un cupón de descuento gratuito sale por veintidós dólares. Mucho mejor. Guarda el recibo para el seguro.', technique, 'Great, thank you'); });
+  }
+  function technique() {
+    paperQuiz('HOW TO USE YOUR INHALER', 'The pharmacist checks your technique. Put the steps in order.', 'Remove the cap · <b>Shake</b> the inhaler · <b>Breathe out</b> fully · Put it in your mouth, <b>press once and breathe in slowly and deeply</b> · <b>Hold your breath</b> for about 10 seconds · Wait 30–60 seconds before a second puff', [
+      ['What do you do just before you press?', 'Breathe out fully', ['Breathe in fast', 'Drink some water']],
+      ['After breathing in, you…', 'Hold your breath for about 10 seconds', ['Breathe out immediately', 'Press again straight away']]
+    ], right => {
+      okS(right === 2, 10); complete('technique', right < 2);
+      G.inv = G.inv.filter(i => i.label !== 'Empty inhaler'); G.inv.push({ emoji: '🫁', label: 'Albuterol inhaler', info: () => '2 puffs when needed · keep it with you!' }); renderHotbar();
+      if (s.ev.teacher) return teacherCall();
+      if (s.ev.insurance) return insCall();
+      fin();
+    }, 'Show the pharmacist');
+  }
+  function teacherCall() {
+    reveal('teacher');
+    askR(teacher, [['Hi! You\'ve been gone a while. Is everything all right?', '¡Hola! Llevas un rato fuera. ¿Va todo bien?', ['Sorry I didn\'t call earlier. My inhaler ran out, so I had to get a prescription, but it\'s all sorted now and I feel fine.', 'Yes, don\'t worry. I ran out of my inhaler, but I\'ve seen a doctor and got a new one. I\'m on my way back.']]], [
+      { t: 'Yeah, chill. I\'m fine.', kind: 'blunt', tip: 'Too casual with a teacher who is responsible for you. Explain what happened.', react: 'Hmm. I\'d like a few more details, please.' },
+      { t: 'I wish to notify you of a minor medical incident, now satisfactorily resolved.', kind: 'stiff', tip: 'Very stiff. Speak naturally: "My inhaler ran out, but it\'s all sorted."', react: 'Er… OK? What happened?' }
+    ], [
+      { t: 'Yes, I had a problem with my inhaler but now is all OK.', kind: 'grammar', tip: '"…but now everything\'s OK."' }
+    ], () => line(teacher, 'Oh, well done for sorting it out. Come straight back, and next time call me first!', '¡Bien hecho por solucionarlo! Vuelve directamente, ¡y la próxima vez llámame antes!', () => { complete('teacher'); s.ev.insurance ? insCall() : fin(); }, 'I will. Sorry!'));
+  }
+  function insCall() {
+    reveal('insurance');
+    askR(insurer, [['Good afternoon, Global Travel Assistance. How may I help you?', 'Buenas tardes, Global Travel Assistance. ¿En qué puedo ayudarle?', [`Good afternoon. My policy number is ${s.pol}. I had to see a doctor and buy medication in Boston today, and I'd like to know how to claim the costs back.`, `Hello. I'd like to open a claim, please. My policy number is ${s.pol}. I've paid for a medical visit and a prescription in the US.`]]], [
+      { t: 'Yeah, hi. I need money back. Sort it out.', kind: 'blunt', tip: 'Too casual and demanding. Give your policy number and explain clearly.', react: 'I\'ll need some details first.' },
+      { t: 'Give me my money back.', kind: 'blunt', tip: 'Explain the situation first: policy number, what happened, what you paid.', react: 'Could I have your policy number?' }
+    ], [
+      { t: `My number of policy is ${s.pol}.`, kind: 'grammar', tip: '"My policy number is…" (noun + noun).' }
+    ], () => line(insurer, 'Thank you. Please keep all your receipts and upload them in our app within thirty days, with your policy number. Get well soon!', 'Gracias. Guarde todos los recibos y súbalos a nuestra app en un plazo de treinta días, con su número de póliza. ¡Que se mejore!', () => { complete('insurance'); fin(); }, 'Thank you. Goodbye'));
+  }
+
+  function fin() {
+    const safe = clamp(s.safe, 0, 100), eng = engPct();
+    const overall = 0.35 * safe + 0.3 * eng + 0.35 * G.manners;
+    const good = [], bad = [];
+    if (G.diff === 'easy') {
+      if (!obj('allergy').failed) good.push('You told the pharmacist about your ibuprofen allergy: that kept you safe.'); else bad.push('ALWAYS mention allergies first: "I\'m allergic to ibuprofen."');
+      if (!obj('label').failed) good.push('You read the dosage instructions on the label.'); else bad.push('Read the directions: how much, how often, and the maximum per day.');
+      if (s.ev.line) { if (!obj('line').failed) good.push('You waited behind the privacy line.'); else bad.push('Wait behind the yellow line: health is private.'); }
+    } else if (G.diff === 'normal') {
+      if (!obj('id').failed) good.push(`You gave your date of birth the US way: ${s.dob[1]}.`); else bad.push('US dates are month/day/year.');
+      if (s.ev.name) good.push('You explained Spanish double surnames clearly.');
+      if (s.ev.generic) good.push('You asked about the generic before deciding: same medicine, lower price.');
+      if (!obj('instructions').failed) good.push('You understood the instructions: every 12 hours, with food, finish the course.'); else bad.push('With antibiotics: take them as prescribed and finish the whole course.');
+    } else {
+      if (!obj('honest').failed) good.push('You described your symptoms honestly and precisely.'); else bad.push('Don\'t downplay or exaggerate symptoms: be precise.');
+      if (!obj('danger').failed) good.push('You know the asthma warning signs and when to call 911.');
+      if (!obj('plan').failed) good.push('You chose a safe, fast way to get a US prescription.'); else bad.push('With symptoms and no reliever, don\'t wait until Monday.');
+      if (!obj('names').failed) good.push('You learnt that salbutamol is called albuterol in the US.');
+      if (s.ev.worse) { if (!obj('worse').failed) good.push('When you felt worse, you told the pharmacist straight away.'); else bad.push('Never stay quiet when your breathing gets worse.'); }
+      if (s.ev.upsell && !obj('upsell').failed) good.push('You refused a "miracle cure" politely but firmly.');
+    }
+    if (!G.reg) good.push('Perfect register with everyone you spoke to.');
+    if (G.manners === 100) good.push('Perfect manners. Take care! 💊');
+    showResults({ title: { easy: 'Feeling better already!', normal: 'Prescription collected!', hard: 'Breathing easy!' }[G.diff] || 'Done!', overall, metrics: [['Health & safety', safe], ['English', eng], ['Manners', G.manners]], good, bad });
   }
 }
 
