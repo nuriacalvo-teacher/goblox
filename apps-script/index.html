@@ -1008,9 +1008,19 @@ const GAMES = [
     desc: 'You are starting a six-month school exchange in Sydney and you need a student bank account. Take a ticket for the right service, show your documents, compare accounts and choose the best one for a student, set a safe PIN, change your euros at the currency exchange counter (read the rates board and count your money!) and use the ATM safely outside.',
     goals: ['Banking requests: I\'d like to open an account, please.', 'Money sense: fees, interest, exchange rates and commission', 'Security: PINs, phishing texts and ATM safety', 'Register: polite and formal with bank staff, relaxed with your host family'],
     chips: ['🏦 Bank', '🦘 Sydney', '🎲 New surprises every game', '⏱ 10–15 min'] },
-  /* in development: sport, events, shows, art and everyday life */  { id: 'theft', soon: true, title: 'Report a Theft', emoji: '🚓', bg: 'linear-gradient(150deg,#5c6bc0,#1a237e)' },  { id: 'neighbours', soon: true, title: 'Noisy Neighbours', emoji: '🔊', bg: 'linear-gradient(150deg,#8d6e63,#4e342e)' },  { id: 'printshop', soon: true, title: 'At the Print Shop', emoji: '🖨', bg: 'linear-gradient(150deg,#90a4ae,#37474f)' },
-  { id: 'date', soon: true, title: 'First Date', emoji: '💌', bg: 'linear-gradient(150deg,#f48fb1,#ad1457)' },
-  { id: 'supermarket', soon: true, title: 'At the Supermarket', emoji: '🛒', bg: 'linear-gradient(150deg,#9ccc65,#33691e)' },
+  { id: 'printshop', title: 'At the Print Shop', emoji: '🖨', bg: 'linear-gradient(150deg,#81c784,#2e7d32 55%,#263238)', level: 'A2–C1',
+    desc: 'You are on a school exchange in Wellington, New Zealand, and your group presents its project at the Science Fair tomorrow at 9 am. Read your teacher\'s email, order the right poster from the price list, check the proof for typos, proofread the bake-sale flyer, order 40 copies (not 14!), use the self-service copier, get your report bound and ask for a student discount.',
+    goals: ['Ordering a service: I\'d like to print…, Could I get this bound?', 'Reading a price list: per side, matte or gloss, express service', 'Proofreading: there / their / they\'re, buy / by, than / then', 'Kiwi English: Kia ora, sweet as, chur'],
+    chips: ['🖨 Copy shop', '🥝 Wellington', '🎲 New surprises every game', '⏱ 10–15 min'] },
+  { id: 'date', title: 'First Date', emoji: '💌', bg: 'linear-gradient(150deg,#f48fb1,#ad1457 55%,#3d0a22)', level: 'A2–C1',
+    desc: 'A Saturday afternoon in Brighton, UK: your first date with someone from drama club! Read the texts, tell your host family where you\'re going, order drinks at a café, keep the conversation going with good questions, sort out who pays, choose something fun on the pier and always respect what your date wants. Be warm and natural: not too formal, not too pushy.',
+    goals: ['Making plans: Do you fancy…? Shall we…?', 'Small talk: follow-up questions and showing interest', 'Respect and consent: Is it OK if…? / No worries!', 'British teen English: skint, cheers, my treat'],
+    chips: ['💌 First date', '🎡 Brighton', '🎲 New surprises every game', '⏱ 10–15 min'] },
+  { id: 'supermarket', title: 'At the Supermarket', emoji: '🛒', bg: 'linear-gradient(150deg,#9ccc65,#33691e 55%,#102010)', level: 'A2–C1',
+    desc: 'Your host family in Cardiff, Wales, sends you to buy the ingredients for a veggie cawl. Read the bilingual Welsh–English signs, compare prices per kilo, ask where things are, order cheese by weight at the deli, check "use by" dates and vegetarian labels, and pay at the till. Watch out for sold-out bread, wrong prices and slippery eggs!',
+    goals: ['Asking for things: Where can I find…? Could I have 200 grams of…?', 'Smart shopping: price per kilo, offers and "use by" dates', 'Reading labels: Suitable for vegetarians', 'Wales: Croeso, diolch, lush'],
+    chips: ['🛒 Supermarket', '🏴 Cardiff', '🎲 New surprises every game', '⏱ 10–15 min'] },
+  /* in development: sport, events, shows, art and everyday life */
   { id: 'florist', soon: true, title: 'At the Florist', emoji: '💐', bg: 'linear-gradient(150deg,#f06292,#880e4f)' },
   { id: 'garden', soon: true, title: 'Garden Centre', emoji: '🌱', bg: 'linear-gradient(150deg,#81c784,#1b5e20)' },
   { id: 'pharmacy', soon: true, title: 'At the Pharmacy', emoji: '💊', bg: 'linear-gradient(150deg,#4db6ac,#00695c)' },
@@ -8671,6 +8681,1228 @@ function buildBank() {
     if (!G.reg) good.push('Perfect register: polite with the bank staff, relaxed with your host family and the friendly clerk.');
     if (G.manners === 100) good.push('Perfect manners at the bank. No worries!');
     showResults({ title: 'Banking in Sydney: sorted!', overall, metrics: [['Money sense', ms], ['Security', sec], ['English', eng], ['Manners', G.manners]], good, bad });
+  }
+}
+
+/* =====================================================================
+   SCENARIO — AT THE PRINT SHOP (a copy shop on Cuba Street, Wellington, New Zealand)
+   ===================================================================== */
+const PRINT = { a2m: 18, a2g: 24, a1m: 30, a3: 10, express: 7, side: 0.25, comb: 5, disc: 10 };
+SCEN.printshop = {
+  title: 'At the Print Shop', cardTitle: 'Your group project',
+  vocab: [['I\'d like to print a poster, please.', 'Quisiera imprimir un póster, por favor.'], ['How much is it per page?', '¿Cuánto cuesta por página?'], ['black and white / colour', 'en blanco y negro / en color'], ['single-sided / double-sided', 'a una cara / a doble cara'], ['matte / gloss paper', 'papel mate / brillo'], ['a proof', 'una prueba (antes de imprimir)'], ['a typo', 'una errata'], ['to bind (comb binding)', 'encuadernar (con canutillo)'], ['The photocopier has jammed.', 'Se ha atascado la fotocopiadora.'], ['Do you do a student discount?', '¿Hacéis descuento de estudiante?'], ['Kia ora! / Sweet as! / Chur!', '¡Hola! (maorí) / ¡Genial! / ¡Gracias! (Nueva Zelanda)']],
+  board() { const s = G.s; return [['Spent', 'NZ$' + nz2(s.spent)], ['Order', s.okN ? Math.round(100 * s.ok / s.okN) + '%' : '–'], ['English', engPct() + '%'], ['Manners', G.manners]]; },
+  card() {
+    const s = G.s;
+    return `<div class="cs">You are <b>${escH(profile.name)}</b>, 15, from Spain, on a school exchange at <b>Harbour View College</b> in <b>Wellington</b>, New Zealand. Tomorrow at <b>9 am</b> your group presents its project, <i>Wind Power in Wellington</i>, at the <b>Science Fair</b>.</div>
+      <div class="cs">🖨 <b>Your job:</b> go to <b>Kiwi Print &amp; Copy</b> on Cuba Street and get everything ready: the <b>poster</b>, <b>40 flyers</b> for the class bake sale and <b>one bound copy</b> of your 10-page report. Your teacher's email has the details: read it carefully!</div>
+      <div class="cs">💵 <b>Money:</b> a <b>NZ$${s.budget}</b> note from the class fund. If you spend more, the rest comes out of your own pocket money. Your <b>student card</b> is in your wallet.</div>
+      <div class="cs">🥝 In New Zealand you'll hear <b>"Kia ora!"</b> (hello, in Māori), <b>"Sweet as!"</b> (great) and <b>"Chur!"</b> (thanks). Wellington is famous for its wind, so it's called <b>"Windy Welly"</b>. Difficulty: <b>${DIFF[G.diff].label}</b>.</div>`;
+  },
+  build: buildPrintshop
+};
+const nz2 = n => Number.isInteger(n) ? String(n) : n.toFixed(2);
+
+function buildPrintshop() {
+  const s = G.s = { budget: 50, spent: 0, phase: 'enter', ev: {}, ok: 0, okN: 0, poster: null, express: false, disc: false, copies: 0, typo: pick1(['Enegry', 'Eletricity', 'Turbins']), fix: '' };
+  s.fix = { Enegry: 'Energy', Eletricity: 'Electricity', Turbins: 'Turbines' }[s.typo];
+  sample(['queue', 'file', 'proof', 'wrong', 'jam'], { easy: 1, normal: 2, hard: 4 }[G.diff] || 2).forEach(k => s.ev[k] = true);
+  const lv = o => o[G.diff] || o.normal;
+  const okM = ok => { s.okN++; if (ok) s.ok++; updateBoard(); };
+  const N = n => 'NZ$' + nz2(Math.round(n * 100) / 100);
+  const spend = n => { s.spent = Math.round((s.spent + n) * 100) / 100; updateBoard(); };
+  G.money = s.budget;
+
+  /* ---- world: Cuba Street (z > 10) and the shop (30 × 20) */
+  W.bounds = { minX: -26, maxX: 26, minZ: -14, maxZ: 26 };
+  ground('#78909c'); part(0, 0, 16, 52, 0.05, 11, '#b0bec5', { solid: false }); part(0, 0, 23.5, 52, 0.06, 4, '#37474f', { solid: false });
+  room(0, 0, 30, 20, { wall: '#fafafa', floor: '#d7ccc8', roof: '#263238', door: 's', gap: 4, h: 6 });
+  sign('KIWI PRINT & COPY', 0, 7.2, 10.3, 11, 1.2, 0, { bg: '#2e7d32', fg: '#fff' });
+  sign('Kia ora! Open 8:30–5:30', -7, 3.6, 10.3, 5, 0.6, 0, { bg: '#fff', fg: '#1b5e20' });
+  sign('CUBA STREET', -18, 3.2, 21, 4, 0.6, 0, { bg: '#1565c0', fg: '#fff' }); part(-18, 0, 21, 0.2, 3, 0.2, '#424242');
+  // the Bucket Fountain on Cuba Street
+  part(14, 0, 18, 3, 0.6, 3, '#90a4ae');
+  [['#e53935', 0.6], ['#fdd835', 1.6], ['#43a047', 2.6], ['#1e88e5', 3.6]].forEach(([c, y], k) => part(14 + (k % 2 ? 0.4 : -0.4), y, 18, 0.9, 0.8, 0.9, c, { solid: false }));
+  part(13.6, 0.6, 18, 0.15, 3.8, 0.15, '#607d8b', { solid: false });
+  [[-22, 14], [22, 14]].forEach(([x, z]) => { part(x, 0, z, 0.5, 2.2, 0.5, '#6d4c41'); part(x, 2.2, z, 2.4, 2, 2.4, '#2e7d32', { solid: false }); });
+  // the counter, the big printers and the price board
+  part(0, 0, -5, 11, 1.2, 1.2, '#37474f'); part(3.8, 1.2, -5, 1, 0.5, 0.7, '#212121', { solid: false });
+  part(-5, 0, -8.6, 3.2, 1.7, 1.6, '#eceff1'); part(-5, 1.7, -8.6, 3.2, 0.2, 1.6, '#90a4ae', { solid: false });
+  part(5, 0, -8.6, 3.2, 1.7, 1.6, '#eceff1'); part(5, 1.7, -8.6, 3.2, 0.2, 1.6, '#90a4ae', { solid: false });
+  const priceTex = canvasTex(700, 330, g => {
+    g.fillStyle = '#1b5e20'; g.fillRect(0, 0, 700, 330); g.fillStyle = '#ffeb3b'; g.font = '900 32px Montserrat, Arial'; g.fillText('PRICE LIST', 24, 44);
+    g.fillStyle = '#fff'; g.font = '700 23px Montserrat, Arial';
+    [`A4 black & white · NZ$${PRINT.side.toFixed(2)} per side`, `Posters (colour): A3 $${PRINT.a3} · A2 matte $${PRINT.a2m} · A2 gloss $${PRINT.a2g} · A1 matte $${PRINT.a1m}`, `Ready in 24 hours · EXPRESS: ready in 1 hour, +$${PRINT.express}`, `Comb binding: $${PRINT.comb} per document`, `Self-service copier: pay at the counter`].forEach((t, k) => g.fillText(t, 24, 96 + k * 46));
+    g.fillStyle = '#b9f6ca'; g.font = '900 24px Montserrat, Arial'; g.fillText(`STUDENT? ASK ABOUT OUR ${PRINT.disc}% DISCOUNT`, 24, 314);
+  });
+  plane(0, 4, -9.7, 7.4, 3.5, 0, priceTex);
+  // the self-service copier and the binding machine (east)
+  part(12.4, 0, -1, 1.6, 1.3, 1.4, '#cfd8dc'); part(12.4, 1.3, -1, 1.6, 0.15, 1.4, '#78909c', { solid: false });
+  sign('SELF-SERVICE COPIER', 14.7, 3.4, -1, 4, 0.6, -Math.PI / 2, { bg: '#1565c0', fg: '#fff' });
+  // paper shelves and a poster display (west)
+  part(-13.8, 0, -3, 1, 3, 8, '#8d6e63');
+  ['#fff59d', '#ffab91', '#80deea', '#c5e1a5', '#f8bbd0'].forEach((c, k) => part(-13.2, 0.4 + k * 0.5, -3, 0.5, 0.3, 6, c, { solid: false }));
+  plane(-14.7, 3.3, 4, 4, 2.6, Math.PI / 2, canvasTex(400, 260, g => { g.fillStyle = '#0277bd'; g.fillRect(0, 0, 400, 260); g.fillStyle = '#fff'; g.font = '900 34px Montserrat, Arial'; g.fillText('BIG IDEAS?', 30, 70); g.font = '700 22px Montserrat, Arial'; g.fillText('We print them BIG.', 30, 120); g.fillText('Posters · Flyers · Banners', 30, 170); }));
+  for (let k = 0; k < 3; k++) chair(-3 + k * 1.4, 4.5, Math.PI, '#43a047');
+  W.walk = (x, z) => (x > -14.6 && x < 14.6 && z > -9.6 && z < 24) || (x > -25 && x < 25 && z > 10.4 && z < 24);
+
+  /* ---- people */
+  const cgd = gPick(), clerk = staff('Print shop', cgd, { shirt: '#2e7d32', apron: '#1b5e20', pants: '#263238' }, 0, -6.6, 0, '#2e7d32');
+  const qg = gPick(), cutter = npc(`${NPC_NAME[qg]} (Customer)`, Object.assign({ shirt: '#6a1b9a', pants: '#37474f', sleeves: true, shoes: true }, pick1(STAFF_LOOKS[qg])), 6, 6, -Math.PI / 2, { color: '#ce93d8', voice: NPC_VOICE[qg] });
+  cutter.gender = qg; cutter.badge = '#6a1b9a'; cutter.av.visible = !!s.ev.queue;
+  npc('Customer', { skin: pick1(SKINS), shirt: pick1(SHIRTS), pants: '#455a64', hair: '#3e2723', sleeves: true, shoes: true }, -12.6, -5, Math.PI / 2);
+  const mg = gPick(), mate = { name: `${NPC_NAME[mg]} (Classmate) 📱`, badge: '#ef6c00', gender: mg, color: '#ffcc80', voice: NPC_VOICE[mg] };
+
+  G.inv = [{ emoji: '💾', label: 'USB stick', info: () => 'Your group\'s files: the poster, the flyer and the report.' }, { emoji: '💵', label: 'Class fund', info: () => `A NZ$${s.budget} note from the class fund` }, { emoji: '🪪', label: 'Student card', info: () => `${profile.name} · Harbour View College · Wellington` }];
+  renderHotbar();
+  spawnPlayer(0, 19, Math.PI, 0);
+  G.obj = [{ id: 'email', text: 'Read your teacher\'s email' }];
+  if (s.ev.queue) G.obj.push({ id: 'queue', secret: true, text: 'Deal politely with someone who jumps the queue' });
+  G.obj.push({ id: 'ask', text: 'Explain what you need at the counter' });
+  if (s.ev.file) G.obj.push({ id: 'file', secret: true, text: 'Solve a problem with your file' });
+  G.obj.push({ id: 'order', text: 'Order the right poster' }, { id: 'proof', text: 'Check the proof before it is printed' });
+  if (s.ev.proof) G.obj.push({ id: 'typo', secret: true, text: 'Ask for a typo to be corrected' });
+  G.obj.push({ id: 'flyer', text: 'Proofread the flyer' }, { id: 'copies', text: 'Order 40 flyers' });
+  if (s.ev.wrong) G.obj.push({ id: 'wrong', secret: true, text: 'Point out a mistake with your order' });
+  G.obj.push({ id: 'copier', text: 'Copy your report at the self-service copier' });
+  if (s.ev.jam) G.obj.push({ id: 'jam', secret: true, text: 'Ask for help with the photocopier' });
+  G.obj.push({ id: 'pay', text: 'Pay and ask about a student discount' }, { id: 'mate', text: 'Tell your classmate that everything is ready' });
+  setMarker(0, 3.2, 12);
+
+  inter({ obj: 'Your phone', label: 'Read the email', at: () => ({ x: 0, y: 0, z: 12.5 }), r: 3, when: () => s.phase === 'enter', act: email });
+  inter({ obj: cutter.name, label: 'Talk', at: () => cutter.pos, r: 2.6, when: () => s.phase === 'queue', act: queueTalk });
+  inter({ obj: clerk.name, label: 'Talk', at: () => ({ x: 0, y: 0, z: -3.4 }), r: 2.8, when: () => ['counter', 'bind', 'pay'].includes(s.phase), act: () => s.phase === 'counter' ? greet() : s.phase === 'bind' ? bind() : pay() });
+  inter({ obj: 'Self-service copier', label: 'Copy your report', at: () => ({ x: 10.6, y: 0, z: -1 }), r: 2.4, when: () => s.phase === 'copier', act: copier });
+
+  /* ---- 1. the email and the queue */
+  function email() {
+    hideMarker(); s.phase = 'reading';
+    paperQuiz('📧 FROM: Ms Ngata · SCIENCE FAIR', 'Your teacher\'s email. Read it before you go in.', 'Kia ora team! For tomorrow:<br>• The poster must be <b>A2</b> and printed on <b>matte</b> paper: gloss reflects the lights in the hall.<br>• The fair starts at <b>9 am</b>. Kiwi Print opens at 8:30 and their normal service takes <b>24 hours</b>.<br>• <b>40 flyers</b> for the bake sale: <b>black and white</b>, one side only.<br>• Hand in <b>one bound copy</b> of your report.<br>• Keep the receipt for the class fund. Ka pai! 🙂', [
+      ['What size must the poster be?', 'A2, on matte paper', ['A1, on gloss paper', 'A2, on gloss paper']],
+      ['The normal service takes 24 hours. What do you need?', 'The express service: ready in 1 hour', ['The normal service', 'Nothing: they open at 8:30, so it\'s fine']]
+    ], (right, n, ans) => {
+      okM(ans[0] === 'A2, on matte paper'); okM(/^The express/.test(ans[1]));
+      s.readOk = right === 2; complete('email', right < 2);
+      if (right < 2) notify('📧 Read it again', 'A2, matte paper, and the express service: the fair starts at 9 am tomorrow!', 'warn');
+      G.inv.push({ emoji: '📧', label: 'Teacher\'s email', info: () => 'Poster: A2, matte, needed by 9 am tomorrow · 40 flyers, B&W, one side · 1 bound report · keep the receipt' }); renderHotbar();
+      if (s.ev.queue) { s.phase = 'q0'; P.pos.set(0, 0, 7); walkTo(cutter, [[1.4, -2.8]], () => faceTo(cutter, 0, -6.6)); later(1, queue); return; }
+      toCounter();
+    }, 'Go in');
+  }
+  function toCounter() { s.phase = 'counter'; setMarker(0, 3.2, -3.4); notify('🖨 The counter', 'Go to the counter and explain what you need.'); }
+  function queue() {
+    reveal('queue');
+    choice(null, 'You were waiting next to the counter, but a customer has just walked in and gone straight to the front!', 'Estabas esperando junto al mostrador, ¡pero un cliente acaba de entrar y se ha ido directo al principio!', [
+      { t: 'Talk to them politely.', say: false, fn: () => { s.phase = 'queue'; setMarker(1.4, 3.2, -2.8); } },
+      { t: 'Push in front of them.', say: false, fn: () => { G.manners = Math.max(0, G.manners - 15); pop('Manners −15', 'bad'); complete('queue', true); G.mistakes.push({ said: 'I pushed in front of them.', tip: 'Speak up politely instead: "Excuse me, I think I was next."' }); notify('😬 Not nice', 'Pushing never helps. Say politely: "Excuse me, I think I was next."', 'bad'); walkTo(cutter, [[-5, 0]]); toCounter(); } }
+    ]);
+  }
+  function queueTalk() {
+    hideMarker(); s.phase = 'queueing';
+    askR(cutter, lv({
+      easy: [['Hi! I just need one photocopy. It\'s quick!', '¡Hola! Solo necesito una fotocopia. ¡Es rápido!', ['Sorry, I think I was first. There\'s a queue.', 'Excuse me, I was here first. The queue starts here.']]],
+      normal: [['Hi there. Is anyone being served?', 'Hola. ¿Están atendiendo a alguien?', ['Excuse me, I think I was next. I\'ve been waiting for a few minutes.', 'Sorry, I was actually next. The queue starts here.']]],
+      hard: [['Oh, sorry, are you waiting? I\'m in a terrible rush.', 'Ay, perdona, ¿estás esperando? Tengo muchísima prisa.', ['I am, actually. I don\'t mind letting you go first if it\'s just one copy, though.', 'Sorry, I think I was next. Mind if I go first? I\'ve got quite a big order, though.']]]
+    }), [
+      { t: 'Hey! Back of the queue!', kind: 'blunt', tip: 'Too aggressive with a stranger. "Excuse me, I think I was next."', react: 'Whoa, OK, OK…' },
+      { t: 'Can\'t you see I\'m waiting?', kind: 'blunt', tip: 'Sounds angry. Try: "Sorry, I think I was next."', react: 'Sorry… I didn\'t see you.' },
+      { t: 'I would be most grateful if you would kindly proceed to the end of the line.', kind: 'stiff', tip: 'Too formal for a quick chat. "Sorry, I think I was next."', react: 'Er… right. Sorry.' }
+    ], [
+      { t: 'Sorry, I was before.', kind: 'grammar', tip: '"Antes" here = first / next: "I was here first."' },
+      { t: 'Excuse me, you must to wait the queue.', kind: 'grammar', tip: 'No "to" after "must", and "wait IN the queue". Better: "I think I was next."' },
+      { t: 'Excuse, I am first than you.', kind: 'grammar', tip: '"Excuse me, I think I was first."' }
+    ], p => {
+      complete('queue');
+      const letGo = /go first if it\'s just one/.test(p.t);
+      line(cutter, letGo ? 'Oh, that\'s so kind of you! Chur! I\'ll be super quick.' : 'Oh, sorry! I didn\'t see you there. You go ahead.', letGo ? '¡Ay, qué amable! ¡Gracias! Seré superrápido/a.' : '¡Ay, perdona! No te había visto. Pasa tú.', () => {
+        walkTo(cutter, letGo ? [[-5, 0]] : [[2.6, 0.5]]); toCounter();
+      }, 'No worries');
+    });
+  }
+
+  /* ---- 2. the counter: what you need, the file and the order form */
+  function greet() {
+    hideMarker(); s.phase = 'ordering';
+    askR(clerk, lv({
+      easy: [['Kia ora! How can I help you?', '¡Hola! ¿En qué te puedo ayudar?', ['Hi! I\'d like to print a poster, please.', 'Hello! Can I print a poster for school, please?']]],
+      normal: [['Kia ora! What can I do for you today?', '¡Hola! ¿Qué puedo hacer por ti hoy?', ['Hi! I\'d like to print a poster for a science fair, please.', 'Hi there. I need to print a poster and some flyers, please.']]],
+      hard: [['Kia ora! What can I help you with?', '¡Hola! ¿En qué te ayudo?', ['Hi! I was hoping to get a poster printed for a science fair tomorrow morning.', 'Hi. I\'ve got a few things to print for a school project. Could you help me with a poster first?']]]
+    }), [
+      { t: 'Print this. It\'s on the USB.', kind: 'blunt', tip: 'An order. "I\'d like to print a poster, please."', react: 'Er… sure. What is it?' },
+      { t: 'I need a poster. Quickly.', kind: 'blunt', tip: 'Don\'t rush the staff. "Could I print a poster, please?"', react: 'I\'ll do my best.' },
+      { t: 'Good afternoon. I wish to commission the printing of a scientific poster.', kind: 'stiff', tip: 'Too formal for a friendly shop. "Hi! I\'d like to print a poster, please."', react: 'Ha, very official! Sure.' }
+    ], [
+      { t: 'I want to imprime a poster.', kind: 'grammar', tip: '"Imprimir" = print: "I\'d like to print a poster."' },
+      { t: 'Can you print me a poster of my USB?', kind: 'grammar', tip: '"FROM my USB stick": "Could you print a poster from my USB stick?"' },
+      { t: 'I would like that you print my poster.', kind: 'grammar', tip: '"I\'d like you TO print my poster."' }
+    ], () => { complete('ask'); line(clerk, lv({ easy: 'Sure! Give me your USB stick, please.', normal: 'Sweet as. Pop your USB stick in here and I\'ll have a look.', hard: 'Sweet as. If you plug your USB stick in here, I\'ll bring the file up on screen.' }), lv({ easy: '¡Claro! Dame tu USB, por favor.', normal: 'Genial. Mete aquí tu USB y le echo un vistazo.', hard: 'Genial. Si conectas aquí tu USB, abro el archivo en pantalla.' }), () => s.ev.file ? fileProblem() : orderForm(), 'Here you are'); });
+  }
+  function fileProblem() {
+    reveal('file');
+    askR(clerk, lv({
+      easy: [['Hmm. I can\'t open this file. Do you have a PDF?', 'Mmm. No puedo abrir este archivo. ¿Tienes un PDF?', ['Oh no! My classmate has the PDF. Can I ask them to email it to you?', 'Sorry! Can my classmate send you the PDF by email?']]],
+      normal: [['Ah, I\'m afraid this file won\'t open: it\'s a Pages file. Have you got it as a PDF?', 'Vaya, me temo que este archivo no se abre: es de Pages. ¿Lo tienes en PDF?', ['Oh, sorry about that. My classmate has the PDF. Could I ask them to email it to you?', 'Sorry! Is there an email address I can send the PDF to?']]],
+      hard: [['Bad news, I\'m afraid: it\'s a Pages file, and our machines won\'t open it. Any chance you\'ve got a PDF version?', 'Malas noticias, me temo: es un archivo de Pages y nuestras máquinas no lo abren. ¿Tienes por casualidad una versión en PDF?', ['Ah, sorry, that\'s my fault. My classmate should have one. Would it be OK if they emailed it to you?', 'Oh no. My classmate made it, so I\'ll ask them to export it. What\'s the best email address to send it to?']]]
+    }), [
+      { t: 'That\'s your problem. Just print it.', kind: 'blunt', tip: 'Not the clerk\'s fault! "Sorry. Could my classmate email you the PDF?"', react: 'I really can\'t open it, sorry.' },
+      { t: 'Your computer is useless.', kind: 'blunt', tip: 'Rude. Find a solution together: "Could I send you a PDF?"', react: 'Well… it doesn\'t open Pages files.' },
+      { t: 'I humbly beg your pardon for this regrettable inconvenience.', kind: 'stiff', tip: 'Far too formal. "Oh, sorry about that!" is enough.', react: 'Ha! No worries at all.' }
+    ], [
+      { t: 'I will send you it for mail.', kind: 'grammar', tip: '"BY email": "I\'ll send it to you by email."' },
+      { t: 'My partner has the file in PDF format in his computer.', kind: 'grammar', tip: '"ON his computer" (and "partner" can mean boyfriend/girlfriend: say "classmate").' },
+      { t: 'Can you to open it in other program?', kind: 'grammar', tip: '"Can you open it in another program?"' }
+    ], () => line(clerk, 'Sure, send it to print@kiwiprint.co.nz.', 'Claro, mándalo a print@kiwiprint.co.nz.', mateFile, 'Call your classmate'));
+  }
+  function mateFile() {
+    askR(mate, lv({
+      easy: [['Hey! What\'s up?', '¡Eh! ¿Qué pasa?', ['Hi! The shop can\'t open the poster. Can you send the PDF to print@kiwiprint.co.nz, please?', 'Hey! Can you email the poster as a PDF to the shop? It\'s print@kiwiprint.co.nz.']]],
+      normal: [['Hey! How\'s it going at the print shop?', '¡Eh! ¿Qué tal en la imprenta?', ['Not great! They can\'t open the poster file. Could you email them the PDF? It\'s print@kiwiprint.co.nz.', 'Bit of a problem: they need the poster as a PDF. Can you send it to print@kiwiprint.co.nz?']]],
+      hard: [['Hey! All sorted?', '¡Eh! ¿Todo listo?', ['Not quite! Their computer won\'t open the Pages file. Could you export it as a PDF and email it to print@kiwiprint.co.nz?', 'Nearly! Can you do me a favour? Send the poster as a PDF to print@kiwiprint.co.nz. Their machines can\'t open Pages.']]]
+    }), [
+      { t: 'Dear colleague, I kindly request that you forward the document in PDF format.', kind: 'stiff', tip: 'This is your classmate! Keep it relaxed: "Can you send me the PDF?"', react: 'Ha! "Dear colleague"? You OK?' },
+      { t: 'I should be most obliged if you could email the shop at your earliest convenience.', kind: 'stiff', tip: 'Too formal for a friend. "Could you email it to them?"', react: 'Er… sure, Your Highness!' }
+    ], [
+      { t: 'You can send the PDF for the shop?', kind: 'grammar', tip: 'Question word order and "to": "Can you send the PDF to the shop?"' },
+      { t: 'The direction is print@kiwiprint.co.nz.', kind: 'grammar', tip: 'False friend! An email address is an "address": "The address is…"' },
+      { t: 'Send it quick, the shop wait for us.', kind: 'grammar', tip: '"Send it quickly. The shop IS waiting."' }
+    ], () => line(mate, 'Sorry, my bad! Sending it now… Done!', '¡Perdona, culpa mía! Lo mando ahora… ¡Hecho!', () => { complete('file'); line(clerk, 'Got it! It opens perfectly. Right, let\'s fill in the order form.', '¡Ya está! Se abre perfectamente. Bien, rellenemos el formulario del pedido.', orderForm, 'Great'); }, 'Chur!'));
+  }
+  function orderForm() {
+    paperQuiz('ORDER FORM · POSTERS', 'Look at the price list behind the counter and your teacher\'s email.', `Posters (colour): A3 <b>$${PRINT.a3}</b> · A2 matte <b>$${PRINT.a2m}</b> · A2 gloss <b>$${PRINT.a2g}</b> · A1 matte <b>$${PRINT.a1m}</b><br>Normal service: ready in 24 hours · <b>EXPRESS</b>: ready in 1 hour, <b>+$${PRINT.express}</b>`, [
+      ['Size and paper', 'A2 matte', ['A2 gloss', 'A1 matte'], 'keep'],
+      ['Service', `Express (+$${PRINT.express})`, ['Normal (24 hours)'], 'keep'],
+      ['How much will the poster cost?', N(PRINT.a2m + PRINT.express), [N(PRINT.a2m), N(PRINT.a2g + PRINT.express)]]
+    ], (right, n, ans) => {
+      const p = { 'A2 matte': PRINT.a2m, 'A2 gloss': PRINT.a2g, 'A1 matte': PRINT.a1m }[ans[0]];
+      s.poster = ans[0]; s.express = /^Express/.test(ans[1]);
+      okM(ans[0] === 'A2 matte'); okM(s.express); okM(ans[2] === N(PRINT.a2m + PRINT.express));
+      spend(p);
+      if (ans[0] !== 'A2 matte') { G.mistakes.push({ said: `I ordered ${ans[0]}.`, tip: 'Your teacher asked for A2 on matte paper: gloss reflects the lights.' }); notify('📧 Check the email', `Your teacher asked for A2 matte. ${ans[0]} costs ${N(p)}.`, 'warn'); }
+      complete('order', ans[0] !== 'A2 matte' || !s.express);
+      if (!s.express) return askR(clerk, [['Just so you know, normal service means it\'ll be ready tomorrow at about 4 pm. Is that OK?', 'Para que lo sepas, el servicio normal significa que estará listo mañana sobre las 4 de la tarde. ¿Te va bien?', lv({ easy: ['Oh no! I need it tomorrow at 9. Can I have express, please?'], normal: ['Oh, no, the fair is at 9 am. Could I change it to express, please?'], hard: ['Ah, that\'s too late: the fair starts at nine. Would it be possible to switch to express?'] })]], [
+        { t: 'Whatever. Just do express.', kind: 'blunt', tip: '"Whatever" sounds rude. "Could I have express, please?"', react: 'OK…' },
+        { t: 'Why didn\'t you tell me before?', kind: 'blunt', tip: 'It was on the price list! "Oh, could I change it to express, please?"', react: 'It\'s on the board, but no worries.' }
+      ], [
+        { t: 'No, I need it for tomorrow at nine o\'clock in the morning of tomorrow.', kind: 'grammar', tip: 'Too repetitive: "I need it by 9 am tomorrow."' },
+        { t: 'Is too late. I want the express.', kind: 'grammar', tip: '"It\'s too late. Could I have express, please?"' }
+      ], () => { s.express = true; spend(PRINT.express); proof(); });
+      spend(PRINT.express); proof();
+    }, 'Order');
+  }
+  function proof() {
+    const title = s.ev.proof ? `Wind ${s.typo} in Wellington` : 'Wind Energy in Wellington';
+    line(clerk, lv({ easy: 'Here is the proof. Please check it before I print.', normal: 'Before I print it, here\'s a proof. Have a good look at it.', hard: 'Before it goes to print, have a proper look at the proof. Once it\'s printed, it\'s printed!' }), lv({ easy: 'Aquí tienes la prueba. Revísala antes de que imprima.', normal: 'Antes de imprimirlo, aquí tienes una prueba. Mírala bien.', hard: 'Antes de imprimir, mira bien la prueba. ¡Lo que se imprime, impreso se queda!' }), () => paperQuiz('PROOF · A2 POSTER', 'Your group\'s poster on the screen.', `<b style="font-size:20px">${title}</b><br>Harbour View College · Science Fair<br>Wellington is one of the windiest cities in the world. Wind turbines near the city make enough electricity for about 30,000 homes.`, [
+      ['Is the title correct?', s.ev.proof ? `No: "${s.typo}" should be "${s.fix}"` : 'Yes, it\'s correct', s.ev.proof ? ['Yes, it\'s correct', 'No: "Wellington" is wrong'] : [`No: "Energy" should be "Enegry"`, 'No: "Wellington" is wrong']]
+    ], right => {
+      okM(right === 1); complete('proof', right < 1);
+      if (!s.ev.proof) { if (!right) notify('🔍 It was fine', '"Wind Energy in Wellington" was spelt correctly.', 'warn'); return printing(); }
+      reveal('typo');
+      if (!right) { complete('typo', true); G.mistakes.push({ said: 'I didn\'t see the typo.', tip: `Always read the proof! "${s.typo}" should be "${s.fix}".` }); notify('😱 A typo!', `Your poster says "${s.typo}" instead of "${s.fix}" in giant letters!`, 'bad'); return printing(); }
+      typoTalk();
+    }, 'Check'), 'Look at the proof');
+  }
+  function typoTalk() {
+    askR(clerk, lv({
+      easy: [['Is it OK?', '¿Está bien?', [`Sorry, there's a mistake in the title. It should say "${s.fix}". Can you change it, please?`]]],
+      normal: [['All good?', '¿Todo bien?', [`Actually, there's a typo in the title: it should say "${s.fix}". Could you correct it, please?`, `Not quite. "${s.typo}" is spelt wrong: it should be "${s.fix}". Would you mind changing it?`]]],
+      hard: [['Happy with that?', '¿Te convence?', [`Almost! There's a typo in the title, I'm afraid: it should read "${s.fix}". Would you mind correcting it before you print?`, `Nearly. Sorry to be fussy, but "${s.typo}" ought to be "${s.fix}". Could you possibly fix that?`]]]
+    }), [
+      { t: 'You wrote it wrong. Fix it.', kind: 'blunt', tip: 'It was your group\'s mistake, not theirs! "Could you correct it, please?"', react: 'I didn\'t write it, but sure.' },
+      { t: 'Change the title. Now.', kind: 'blunt', tip: 'An order. "Would you mind changing the title?"', react: 'OK, OK…' },
+      { t: 'I regret to inform you of an orthographic irregularity.', kind: 'stiff', tip: 'Very formal! "There\'s a typo in the title."', react: 'A… what? Oh, a typo!' }
+    ], [
+      { t: 'There is a fault of orthography.', kind: 'grammar', tip: '"Falta de ortografía" = a spelling mistake (or a typo).' },
+      { t: 'The title is bad wrote.', kind: 'grammar', tip: '"The title is spelt wrong" / "There\'s a typo."' }
+    ], () => line(clerk, 'Good catch! Imagine that in giant letters! There, fixed.', '¡Bien visto! ¡Imagínate eso en letras gigantes! Ya está, corregido.', () => { complete('typo'); printing(); }, 'Thanks!'));
+  }
+  function printing() {
+    line(clerk, s.express ? 'Sweet as. It\'ll be ready in an hour. Have you got anything else?' : 'Sweet as. Have you got anything else?', s.express ? 'Genial. Estará listo en una hora. ¿Tienes algo más?' : 'Genial. ¿Tienes algo más?', flyer, 'Yes, the flyers');
+  }
+
+  /* ---- 3. the flyers: proofread, then the number of copies */
+  function flyer() {
+    const hard = G.diff === 'hard';
+    paperQuiz('FLYER · BAKE SALE', 'Your group wrote this flyer. Before you print 40 copies, find the mistakes!', 'BAKE SALE! 🧁<br>1. This Friday at lunchtime in the school hall.<br>2. Their will be cupcakes, brownies and pavlova.<br>3. Every dollar help Wellington Zoo.<br>4. Come and by something sweet!' + (hard ? '<br>5. Last year we raised more money then any other class.' : ''), [
+      ['Line 2 should say:', 'There will be cupcakes…', ['They\'re will be cupcakes…', 'Their will be cupcakes… (it\'s correct)']],
+      ['Line 3 should say:', 'Every dollar helps Wellington Zoo.', ['Every dollars help Wellington Zoo.', 'Every dollar help Wellington Zoo. (it\'s correct)']],
+      ['Line 4 should say:', 'Come and buy something sweet!', ['Come and bye something sweet!', 'Come and by something sweet! (it\'s correct)']]
+    ].concat(hard ? [['Line 5 should say:', '…more money than any other class.', ['…more money that any other class.', '…more money then any other class. (it\'s correct)']]] : []), (right, n) => {
+      for (let k = 0; k < n; k++) okM(k < right);
+      complete('flyer', right < n);
+      if (right < n) notify('✏️ Proofreading', 'there / their / they\'re · one dollar helps · buy (comprar) / by / bye' + (hard ? ' · than (comparing) / then' : ''), 'warn');
+      line(clerk, right === n ? 'Wow, sharp eyes! The flyer\'s perfect now.' : 'OK, I\'ve made the changes. Let\'s hope it\'s all right now!', right === n ? '¡Qué buen ojo! El folleto ya está perfecto.' : 'Vale, he hecho los cambios. ¡Esperemos que ya esté bien!', copies, 'Continue');
+    }, 'Correct it');
+  }
+  function copies() {
+    s.phase = 'copiesQ';
+    const b = lv({
+      easy: [['How many copies?', '¿Cuántas copias?', ['Forty, please. Black and white, one side.', 'Forty copies, please. In black and white.']]],
+      normal: [['How many copies would you like, and in colour or black and white?', '¿Cuántas copias quieres, y en color o en blanco y negro?', ['Forty, please: black and white, single-sided.', 'Forty copies, please. Black and white, and only on one side.']]],
+      hard: [['And how many of those are you after? Colour, or black and white?', '¿Y cuántas necesitas? ¿En color o en blanco y negro?', ['Forty, please: black and white, single-sided. It\'s for a bake sale, so nothing fancy.', 'We need forty, single-sided and in black and white, please. We\'re trying to keep costs down.']]]
+    });
+    const [q, es, ok] = pick1(b), d = DIFF[G.diff];
+    const facts = [
+      { t: 'Fourteen, please. In colour.', kind: 'fact', fn: () => { okM(false); G.mistakes.push({ said: 'Fourteen, please. In colour.', tip: 'Read the email: FORTY flyers, black and white.' }); notify('📧 Check the email', 'Forty (40) flyers, black and white. Fourteen is 14!', 'warn'); later(0.6, () => made(true)); } },
+      { t: 'Forty, please. In colour, double-sided.', kind: 'fact', fn: () => { okM(false); G.mistakes.push({ said: 'Forty, in colour, double-sided.', tip: 'The email said black and white, one side only. Colour costs much more!' }); notify('📧 Check the email', 'Black and white, one side only: colour is much more expensive.', 'warn'); later(0.6, () => made(true)); } }
+    ];
+    ask(clerk, q, es, rphr(ok, [
+      { t: 'Forty. Black and white. Go.', kind: 'blunt', tip: 'Too short and bossy. "Forty, please. Black and white."', react: 'Right you are…' },
+      { t: 'I should like forty reproductions in monochrome, if you please.', kind: 'stiff', tip: 'Way too formal. "Forty copies in black and white, please."', react: 'Forty… monochrome. Sure!' }
+    ], [
+      { t: 'Forty copies in white and black.', kind: 'grammar', tip: 'In English the order is fixed: "black and white".' },
+      { t: 'I want forty photocopies of one face.', kind: 'grammar', tip: '"Una cara" = one side: "single-sided" or "on one side only".' },
+      { t: 'Forty copys, please.', kind: 'grammar', tip: 'Plural: copy → "copies".' }
+    ]).concat(d.reg ? facts.slice(0, 1) : []), () => { okM(true); made(false); });
+  }
+  function made(wrongReq) {
+    const n = 40; spend(n * PRINT.side); s.copies = s.ev.wrong ? 14 : n;
+    line(clerk, wrongReq ? 'No worries, I\'ll do the forty black-and-white ones on the email, then. Here they are!' : 'Here you go, hot off the press!', wrongReq ? 'Sin problema, haré las cuarenta en blanco y negro del email. ¡Aquí las tienes!' : '¡Aquí tienes, recién salidas de la imprenta!', () => {
+      complete('copies', wrongReq);
+      paperQuiz('COUNT YOUR FLYERS', 'Count them before you leave the counter.', `🗂 ${s.copies === 14 ? 'One pile of 10 flyers + 4 flyers' : 'Four piles of 10 flyers'}`, [
+        ['How many flyers are there?', String(s.copies), s.copies === 14 ? ['40', '4'] : ['14', '44']],
+        ['Is that right?', s.copies === 14 ? 'No: we asked for forty, not fourteen' : 'Yes, forty: perfect', s.copies === 14 ? ['Yes, it\'s right'] : ['No: we asked for fourteen']]
+      ], right => {
+        okM(right === 2);
+        if (!s.ev.wrong) return toCopier();
+        reveal('wrong');
+        if (right < 2) { complete('wrong', true); G.mistakes.push({ said: 'I didn\'t count the flyers.', tip: 'Always check your order: forty (40) and fourteen (14) sound similar!' }); notify('😬 Only 14 flyers!', 'At school you see there are only fourteen flyers. Always count before you leave!', 'bad'); return toCopier(); }
+        wrongTalk();
+      }, 'Check');
+    }, 'Count them');
+  }
+  function wrongTalk() {
+    askR(clerk, lv({
+      easy: [['Is everything OK?', '¿Todo bien?', ['Sorry, there are only fourteen. I need forty, four-zero.', 'Excuse me, I asked for forty, not fourteen.']]],
+      normal: [['Everything all right?', '¿Todo bien?', ['Sorry, I think there\'s been a mix-up: I asked for forty, not fourteen.', 'Sorry, there are only fourteen here. We need forty: four-zero.']]],
+      hard: [['All good there?', '¿Todo bien por ahí?', ['Sorry, I think there\'s been a bit of a mix-up. I said forty, four-zero, but there are only fourteen here.', 'I\'m afraid there are only fourteen. I think "forty" might have sounded like "fourteen".']]]
+    }), [
+      { t: 'You can\'t count. I said forty.', kind: 'blunt', tip: 'Rude! "Fourteen" and "forty" sound similar. "Sorry, I think there\'s been a mix-up."', react: 'Oh. Sorry.' },
+      { t: 'This is wrong. Do it again.', kind: 'blunt', tip: 'An order. "Could you print the other twenty-six, please?"', react: 'Right…' },
+      { t: 'I fear a grave numerical error has been committed.', kind: 'stiff', tip: 'Way too dramatic. "Sorry, I think there\'s been a mix-up."', react: 'A… grave error? Let me look.' }
+    ], [
+      { t: 'I said forteen, not forty.', kind: 'grammar', tip: 'Careful! Fourteen = 14 (stress at the end: four-TEEN). Forty = 40 (FOR-ty).' },
+      { t: 'Are missing twenty-six.', kind: 'grammar', tip: '"Twenty-six are missing" / "I\'m twenty-six short."' }
+    ], () => line(clerk, 'Oh, I\'m so sorry! Fourteen, forty… I\'ll print the other twenty-six right now. No extra charge, of course.', '¡Ay, lo siento mucho! Catorce, cuarenta… Imprimo las otras veintiséis ahora mismo. Sin coste extra, claro.', () => { complete('wrong'); s.copies = 40; toCopier(); }, 'Thank you!'));
+  }
+
+  /* ---- 4. the self-service copier, the paper jam and the binding */
+  function toCopier() { s.phase = 'copier'; setMarker(10.6, 3.2, -1); notify('📠 Self-service copier', 'Now copy your 10-page report at the self-service copier. Then bring it back to the counter for binding.'); }
+  function copier() {
+    hideMarker(); s.phase = 'copying';
+    paperQuiz('SELF-SERVICE COPIER', 'Your report has 10 pages. You need ONE copy to hand in.', `Copies: [ 1 ] [ 2 ] [ 10 ]<br>Sides: [ 1 → 1 single-sided ] [ 1 → 2 double-sided ]<br>Colour: [ Black &amp; white ] [ Colour ]<br>Price: <b>NZ$${PRINT.side.toFixed(2)} per side</b> (black &amp; white)`, [
+      ['Number of copies', '1', ['2', '10']],
+      ['To save paper, choose…', '1 → 2 (double-sided)', ['1 → 1 (single-sided)']],
+      ['How much will it cost (10 sides)?', N(10 * PRINT.side), [N(PRINT.side), N(20 * PRINT.side)]]
+    ], (right, n, ans) => {
+      okM(ans[0] === '1'); okM(/double/.test(ans[1])); okM(ans[2] === N(10 * PRINT.side));
+      const k = +ans[0]; spend(k * 10 * PRINT.side);
+      if (k > 1) notify('🖨 Too many!', `You printed ${k} copies: that\'s ${N(k * 10 * PRINT.side)} instead of ${N(10 * PRINT.side)}.`, 'warn');
+      complete('copier', right < 3);
+      if (s.ev.jam) { reveal('jam'); notify('📠 Beep beep!', 'Page 6… the copier stops. "PAPER JAM · OPEN DOOR B". Ask the clerk for help.', 'warn'); s.phase = 'jamming'; return later(0.6, jamTalk); }
+      toBind();
+    }, 'Start');
+  }
+  function jamTalk() {
+    askR(clerk, lv({
+      easy: [['Do you need help?', '¿Necesitas ayuda?', ['Yes, please. The photocopier has stopped. There\'s a paper jam.', 'Yes, please! The paper is stuck in the machine.']]],
+      normal: [['Everything OK over there?', '¿Todo bien por ahí?', ['Not really. I think the photocopier has jammed. Could you help me, please?', 'Sorry, the copier\'s stopped working: it says "paper jam". Could you have a look?']]],
+      hard: [['Uh-oh. Is it beeping at you?', 'Oh, oh. ¿Te está pitando?', ['I\'m afraid so: it\'s jammed halfway through my report. Would you mind taking a look?', 'It is! It\'s jammed on page six. Sorry, I hope I didn\'t break it.']]]
+    }), [
+      { t: 'Your machine is broken. Come here.', kind: 'blunt', tip: 'An order. "Could you help me, please? It\'s jammed."', react: 'Coming…' },
+      { t: 'Fix the copier. I\'m in a hurry.', kind: 'blunt', tip: 'Too bossy. "Would you mind having a look?"', react: 'Righto.' },
+      { t: 'Might I trouble you to examine this malfunctioning apparatus?', kind: 'stiff', tip: 'Very old-fashioned! "Could you have a look at the copier?"', react: 'The… apparatus? Ha! Sure.' }
+    ], [
+      { t: 'The fotocopy is jammed.', kind: 'grammar', tip: 'The machine is a "photocopier" (or "copier"); a "photocopy" is the paper.' },
+      { t: 'The paper is stucked.', kind: 'grammar', tip: '"Stuck" is irregular: "The paper is stuck."' },
+      { t: 'The machine has broken itself.', kind: 'grammar', tip: '"The machine has broken" / "It\'s jammed."' }
+    ], () => line(clerk, 'Ah, it happens all the time. Door B… there we go: one crumpled page. I\'ll reprint it for free. Sorted!', 'Ah, pasa constantemente. La puerta B… ya está: una página arrugada. Te la reimprimo gratis. ¡Arreglado!', () => { complete('jam'); toBind(); }, 'Chur!'));
+  }
+  function toBind() { s.phase = 'bind'; setMarker(0, 3.2, -3.4); notify('📚 Binding', 'Take your report to the counter and ask for it to be bound.'); }
+  function bind() {
+    hideMarker(); s.phase = 'binding';
+    askR(clerk, lv({
+      easy: [['Hi again! What do you need?', '¡Hola otra vez! ¿Qué necesitas?', ['Can you bind my report, please?', 'Hi! I\'d like to bind this report, please.']]],
+      normal: [['Back again! What else can I do for you?', '¡Otra vez por aquí! ¿Qué más puedo hacer por ti?', ['Could you bind this report for me, please?', 'I\'d like this report bound, please. How much is it?']]],
+      hard: [['Welcome back! What\'s next on the list?', '¡Bienvenido/a otra vez! ¿Qué es lo siguiente de la lista?', ['Could I get this report bound, please? Just a simple comb binding is fine.', 'Last thing, I promise! Would you be able to bind this report for me?']]]
+    }), [
+      { t: 'Bind this.', kind: 'blunt', tip: 'Too short. "Could you bind this report, please?"', react: 'Er… OK.' },
+      { t: 'I need this bound. And hurry.', kind: 'blunt', tip: 'Don\'t rush the staff. "Could I get this bound, please?"', react: 'Doing my best!' }
+    ], [
+      { t: 'Can you encuadernate my report?', kind: 'grammar', tip: '"Encuadernar" = bind: "Could you bind my report?"' },
+      { t: 'I want to bound my report.', kind: 'grammar', tip: 'Bind – bound – bound: "I\'d like to bind my report" / "I\'d like it bound."' }
+    ], () => { spend(PRINT.comb); G.inv.push({ emoji: '📘', label: 'Bound report', info: () => 'Wind Power in Wellington · 10 pages · comb binding' }); renderHotbar(); line(clerk, 'There you go: one bound report. And look, your poster\'s ready too!', 'Aquí tienes: un informe encuadernado. Y mira, ¡tu póster también está listo!', () => { G.inv.push({ emoji: '🖼', label: 'Poster', info: () => `${s.poster || 'A2 matte'} · Wind Energy in Wellington` }, { emoji: '🗂', label: `${s.copies} flyers`, info: () => `${s.copies} bake-sale flyers` }); renderHotbar(); s.phase = 'pay'; pay(); }, 'Great!'); });
+  }
+
+  /* ---- 5. paying: the student discount, the change and the receipt */
+  function pay() {
+    s.phase = 'paying';
+    const total = s.spent;
+    askR(clerk, lv({
+      easy: [[`That's ${N(total)} altogether.`, `Son ${N(total)} en total.`, ['Do you have a student discount? Here\'s my student card.', 'Is there a discount for students? I have my student card.']]],
+      normal: [[`OK, that comes to ${N(total)} altogether.`, `Vale, en total son ${N(total)}.`, ['Do you do a student discount? I\'ve got my student card here.', 'Before I pay, is there a discount for students? Here\'s my card.']]],
+      hard: [[`Right, all up that comes to ${N(total)}.`, `Bien, en total son ${N(total)}.`, ['I noticed the sign about a student discount. Would I be eligible? Here\'s my student card.', 'Is it too late to ask about the student discount? I\'ve got my student ID on me.']]]
+    }), [
+      { t: 'That\'s too expensive. Give me a discount.', kind: 'blunt', tip: 'Demanding. Ask: "Do you do a student discount?"', react: 'Well… are you a student?' },
+      { t: 'I\'m a student, so make it cheaper.', kind: 'blunt', tip: 'An order. "Is there a discount for students?"', react: 'I\'ll see what I can do.' },
+      { t: 'Would your esteemed establishment extend a concession to scholars?', kind: 'stiff', tip: 'Too formal! "Do you do a student discount?"', react: 'A concession to… oh, a student discount! Sure.' }
+    ], [
+      { t: 'Have you a discount of students?', kind: 'grammar', tip: '"Do you do a STUDENT discount?" (noun + noun).' },
+      { t: 'I am student. There is any discount?', kind: 'grammar', tip: '"I\'m A student. Is there a discount?"' }
+    ], () => {
+      s.disc = true; const d = Math.round(total * PRINT.disc) / 100; s.spent = Math.round((total - d) * 100) / 100; updateBoard();
+      line(clerk, `Of course! ${PRINT.disc}% off for students: that's ${N(s.spent)}.`, `¡Claro! Un ${PRINT.disc}% de descuento para estudiantes: son ${N(s.spent)}.`, change, `Hand over the NZ$${s.budget} note`);
+    });
+  }
+  function change() {
+    const own = Math.max(0, s.spent - s.budget), ch = Math.max(0, Math.round((s.budget - s.spent) * 100) / 100);
+    if (own) notify('💸 Over budget', `You need ${N(own)} of your own pocket money. Read prices carefully!`, 'bad');
+    G.money = ch;
+    paperQuiz('RECEIPT · KIWI PRINT & COPY', 'Check the receipt and your change. Keep it for the class fund!', `Poster ${s.poster || 'A2 matte'}${s.express ? ' + express' : ''} · 40 flyers B&amp;W · Report copies · Comb binding<br>Student discount −${PRINT.disc}%<br><b>TOTAL ${N(s.spent)}</b> · Paid: NZ$${s.budget} note`, [
+      ['How much change should you get?', N(ch), [N(Math.abs(ch - 5)), N(ch + 1)].filter(x => x !== N(ch)).slice(0, 2)],
+      ['What do you do with the receipt?', 'Keep it: the teacher needs it for the class fund', ['Leave it on the counter', 'Throw it in the bin']]
+    ], right => {
+      okM(right === 2); complete('pay', right < 2 || own > 0);
+      line(null, `💵 ${N(ch)} change, the receipt in your wallet and everything in your bag. Time to tell your group!`, `💵 ${N(ch)} de cambio, el recibo en la cartera y todo en la mochila. ¡Hora de avisar al grupo!`, mateDone, 'Call your classmate');
+    }, 'Check');
+  }
+  function mateDone() {
+    askR(mate, lv({
+      easy: [['Hey! Is everything ready?', '¡Eh! ¿Está todo listo?', ['Yes! I have the poster, the flyers and the report.', 'Yes, everything is ready! See you tomorrow!']]],
+      normal: [['Hey! How did it go?', '¡Eh! ¿Qué tal ha ido?', ['Really well! I\'ve got the poster, forty flyers and the bound report.', 'All done! The poster looks amazing. See you at the fair!']]],
+      hard: [['So? Did it all go to plan?', '¿Y bien? ¿Ha salido todo según lo previsto?', ['Pretty much! Poster, flyers and the bound report: all sorted. We even got a student discount.', 'Sweet as! Everything\'s sorted, and I\'ve kept the receipt for the class fund.']]]
+    }), [
+      { t: 'I hereby confirm that all items have been duly collected.', kind: 'stiff', tip: 'You sound like a robot! With a friend: "All done! See you tomorrow!"', react: 'Ha ha! OK, robot. Thanks!' },
+      { t: 'Please be advised that the printing has been completed.', kind: 'stiff', tip: 'Too formal for a classmate. "Everything\'s ready!"', react: 'Er… cool. Thanks, I guess!' }
+    ], [
+      { t: 'Yes, I have printed everything yesterday.', kind: 'grammar', tip: 'It happened today, and with "yesterday" you\'d need the past simple. "I\'ve printed everything!"' },
+      { t: 'All is ready. The poster is very beautiful.', kind: 'grammar', tip: 'More natural: "Everything\'s ready. The poster looks great!"' }
+    ], () => line(mate, 'You legend! Chur! See you at the fair at nine!', '¡Eres un crack! ¡Gracias! ¡Nos vemos en la feria a las nueve!', () => { complete('mate'); finish(); }, 'See you!'));
+  }
+
+  function finish() {
+    const order = s.okN ? Math.round(100 * s.ok / s.okN) : 100, eng = engPct();
+    const ideal = Math.round((PRINT.a2m + PRINT.express + 40 * PRINT.side + 10 * PRINT.side + PRINT.comb) * (100 - PRINT.disc)) / 100;
+    const moneyScore = s.spent > s.budget ? 30 : clamp(Math.round(100 - (s.spent - ideal) * 5), 0, 100);
+    const overall = 0.3 * order + 0.2 * moneyScore + 0.25 * eng + 0.25 * G.manners;
+    const good = [], bad = [];
+    if (!obj('email').failed) good.push('You read your teacher\'s email carefully.'); else bad.push('Read instructions carefully before you go in: size, paper and deadline.');
+    if (!obj('order').failed) good.push('You ordered the right poster: A2 matte, express.'); else bad.push('The poster had to be A2, matte, with the express service (the fair starts at 9 am).');
+    if (s.ev.proof) { if (!obj('typo').failed) good.push(`You found the typo on the proof ("${s.typo}") and asked politely for it to be fixed.`); else bad.push(`Always check the proof: "${s.typo}" should have been "${s.fix}".`); }
+    if (!obj('flyer').failed) good.push('Perfect proofreading: there / their, helps, buy.'); else bad.push('Proofread before you print: there / their / they\'re, "every dollar helps", buy / by / bye.');
+    if (s.ev.wrong) { if (!obj('wrong').failed) good.push('You counted the flyers and sorted out the forty / fourteen mix-up politely.'); else bad.push('Forty (40) and fourteen (14) sound similar. Always count your copies!'); }
+    if (s.ev.file) good.push('Your file wouldn\'t open, so you asked your classmate to send a PDF.');
+    if (s.ev.jam) good.push('The copier jammed and you asked for help politely.');
+    if (s.ev.queue && !obj('queue').failed) good.push('Someone jumped the queue and you dealt with it calmly and politely.');
+    if (s.disc) good.push(`You asked for the student discount and saved ${PRINT.disc}%.`);
+    if (s.spent > s.budget) bad.push('You spent more than the class fund. Compare prices before you order.');
+    if (!G.reg) good.push('Perfect register: polite with the staff, relaxed with your classmate.');
+    if (G.manners === 100) good.push('Perfect manners. Sweet as! 🥝');
+    showResults({ title: 'Ready for the Science Fair!', overall, metrics: [['Order', order], ['Money', moneyScore], ['English', eng], ['Manners', G.manners]], good, bad });
+  }
+}
+
+/* =====================================================================
+   SCENARIO — FIRST DATE (a Saturday afternoon in Brighton, UK)
+   ===================================================================== */
+SCEN.date = {
+  title: 'First Date', cardTitle: 'Your Saturday plan',
+  vocab: [['Do you fancy…? / Shall we…?', '¿Te apetece…? / ¿Vamos a…?'], ['I\'m running a bit late.', 'Llego un poco tarde.'], ['What are you into?', '¿Qué te gusta? / ¿Qué cosas te molan?'], ['No way! / That\'s so cool!', '¡No me digas! / ¡Qué guay!'], ['Shall we split it? / My treat!', '¿Lo pagamos a medias? / ¡Invito yo!'], ['How much do I owe you?', '¿Cuánto te debo?'], ['Is it OK if…?', '¿Te parece bien si…?'], ['No worries, we can do something else.', 'Tranquilo/a, podemos hacer otra cosa.'], ['I had a really good time.', 'Me lo he pasado muy bien.'], ['skint / cheers / mate', 'sin blanca / gracias / colega (Reino Unido)']],
+  board() { const s = G.s; return [['Money', '£' + nz2(s.cash)], ['Connection', clamp(Math.round(s.vibe), 0, 100)], ['English', engPct() + '%'], ['Manners', G.manners]]; },
+  card() {
+    const s = G.s;
+    return `<div class="cs">You are <b>${escH(profile.name)}</b>, 15, from Spain, on a three-month exchange in <b>Brighton</b>, on the south coast of England. At drama club you met <b>${NPC_NAME[s.dg]}</b>, and this week ${s.he} asked you to hang out on <b>Saturday afternoon</b>. It's your first date! 💌</div>
+      <div class="cs">📱 Read ${s.his} texts to find out <b>where and when</b> you're meeting. Your host family wants you home by <b>7 pm</b>.</div>
+      <div class="cs">💷 <b>Pocket money:</b> £${s.budget}. Brighton has a famous <b>pier</b> with an arcade and rides, and lots of cafés.</div>
+      <div class="cs">💡 <b>Tips:</b> be friendly and relaxed (not too formal!), ask questions and listen to the answers, and always respect what the other person wants. Meet in a <b>public place</b> and tell someone where you're going. British teens say <b>"Do you fancy…?"</b>, <b>"Cheers!"</b> and <b>"I'm skint"</b> (I've got no money). Difficulty: <b>${DIFF[G.diff].label}</b>.</div>`;
+  },
+  build: buildDate
+};
+
+function buildDate() {
+  const dg = gPick(), hg = gPick(), bg = gPick(), fg = gPick();
+  const P3 = dg === 'f' ? { he: 'she', him: 'her', his: 'her' } : { he: 'he', him: 'him', his: 'his' };
+  const budget = { easy: 15, normal: 12, hard: 10 }[G.diff] || 12;
+  const s = G.s = Object.assign({ dg, budget, cash: budget, phase: 'home', ev: {}, vibe: 100, cn: 0, cnN: 0, safe: 100, told: false, owe: 0, held: '', pushy: false }, P3);
+  sample(['late', 'spill', 'friend', 'phone', 'rain'], { easy: 1, normal: 2, hard: 4 }[G.diff] || 2).forEach(k => s.ev[k] = true);
+  const lv = o => o[G.diff] || o.normal;
+  const cnOk = ok => { s.cnN++; if (ok) s.cn++; else s.vibe -= 12; updateBoard(); };
+  // a register slip also cools the mood a little
+  const reg = next => p => { if (p && p.kind === 'blunt') s.vibe -= 10; if (p && p.kind === 'stiff') s.vibe -= 6; updateBoard(); next(p); };
+  const L = n => '£' + nz2(Math.round(n * 100) / 100);
+  const tp = (x, z, yaw, cy) => { P.pos.set(x, 0, z); P.yaw = yaw; cam.yaw = cy; P.spawn = [x, z, yaw, cy]; };
+  const DN = NPC_NAME[dg];
+  const drinks = [['hot chocolate', 3.2], ['strawberry smoothie', 3.8], ['chocolate milkshake', 4], ['lemonade', 2.5]];
+  s.dDrink = pick1(drinks); s.dCake = pick1([['chips', 2.5], ['a slice of carrot cake', 3.5], ['a cookie', 1.8]]);
+  G.money = budget;
+
+  /* ---- world: A. your host family's house (x = -70) · B. the street and the café (x = 0) · C. Brighton Palace Pier (x = 80) */
+  W.bounds = { minX: -86, maxX: 100, minZ: -30, maxZ: 30 };
+  ground('#9e9e9e');
+  // A. home
+  const HX = -70;
+  room(HX, 0, 18, 12, { wall: '#fff3e0', floor: '#a1887f', roof: '#6d4c41', door: 'x', h: 5 });
+  part(HX - 5, 0, -4.4, 4, 0.9, 1.6, '#8d6e63'); part(HX - 5, 0.9, -4.4, 4, 0.1, 1.6, '#eeeeee', { solid: false });
+  part(HX + 5, 0, -3.6, 3.6, 0.9, 1.4, '#3949ab'); part(HX + 5, 0.9, -4.2, 3.6, 0.8, 0.3, '#303f9f', { solid: false });
+  part(HX - 8.4, 0, 2, 0.6, 2.2, 1.4, '#795548'); sign('MIRROR', HX - 8.7, 2.8, 2, 1.2, 0.4, Math.PI / 2, { bg: '#b3e5fc', fg: '#01579b' });
+  plane(HX, 1.9, 5.72, 2.2, 3.8, Math.PI, canvasTex(128, 224, g => { g.fillStyle = '#c62828'; g.fillRect(0, 0, 128, 224); g.fillStyle = '#ffd54f'; g.beginPath(); g.arc(104, 116, 7, 0, 7); g.fill(); }));
+  sign('FRONT DOOR', HX, 4.2, 5.7, 2.2, 0.4, Math.PI, { bg: '#fff', fg: '#c62828' });
+  // B. the street: the Clock Tower, a bus stop and the café
+  part(0, 0, 0, 40, 0.05, 30, '#bdbdbd', { solid: false });
+  part(0, 0, -6, 2.6, 11, 2.6, '#8d6e63'); part(0, 11, -6, 3, 1.2, 3, '#ffd54f');
+  plane(0, 9.2, -4.68, 1.8, 1.8, 0, canvasTex(128, 128, g => { g.fillStyle = '#fff'; g.beginPath(); g.arc(64, 64, 60, 0, 7); g.fill(); g.strokeStyle = '#212121'; g.lineWidth = 7; g.beginPath(); g.moveTo(64, 64); g.lineTo(64, 22); g.moveTo(64, 64); g.lineTo(96, 64); g.stroke(); }));
+  sign('THE CLOCK TOWER', 0, 3.4, -4.66, 3, 0.5, 0, { bg: '#4e342e', fg: '#fff' });
+  part(-12, 0, 9, 0.3, 3, 0.3, '#424242'); sign('BUS STOP', -12, 3.3, 9, 1.6, 0.5, 0, { bg: '#e53935', fg: '#fff' });
+  const CX = 14;
+  room(CX, 0, 14, 12, { wall: '#f8bbd0', floor: '#d7ccc8', roof: '#ad1457', door: 'w', gap: 3, h: 5 });
+  sign('SEA SALT CAFÉ', CX - 7.3, 4.2, 0, 5, 0.8, -Math.PI / 2, { bg: '#ad1457', fg: '#fff' });
+  part(CX + 3, 0, -4.4, 6, 1.2, 1.2, '#6d4c41');
+  plane(CX + 3, 3.6, -5.72, 5.4, 2.4, 0, canvasTex(540, 240, g => {
+    g.fillStyle = '#263238'; g.fillRect(0, 0, 540, 240); g.fillStyle = '#fff'; g.font = '900 28px Montserrat, Arial'; g.fillText('MENU', 20, 38); g.font = '700 21px Montserrat, Arial';
+    drinks.map(d => `${d[0][0].toUpperCase() + d[0].slice(1)} £${d[1].toFixed(2)}`).concat(['Chips £2.50 · Carrot cake £3.50 · Cookie £1.80']).forEach((t, k) => g.fillText(t, 20, 78 + k * 34));
+  }));
+  [[CX - 3, 2.4], [CX + 1, 2.4]].forEach(([x, z]) => { part(x, 0, z, 1.6, 1, 1.6, '#fafafa'); chair(x - 1.3, z, Math.PI / 2, '#ec407a'); chair(x + 1.3, z, -Math.PI / 2, '#ec407a'); });
+  // C. Brighton Palace Pier
+  const PX = 80;
+  part(PX, 0, 0, 60, 0.04, 70, '#1e88e5', { solid: false });
+  part(PX, 0.05, 0, 10, 0.05, 56, '#8d6e63', { solid: false });
+  sign('BRIGHTON PALACE PIER', PX, 5.2, 26, 10, 1, Math.PI, { bg: '#1a237e', fg: '#ffeb3b' }); part(PX - 5, 0, 26, 0.4, 5.6, 0.4, '#eeeeee'); part(PX + 5, 0, 26, 0.4, 5.6, 0.4, '#eeeeee');
+  for (let z = -26; z <= 24; z += 5) { part(PX - 5, 0, z, 0.15, 1.1, 0.15, '#eeeeee', { solid: false }); part(PX + 5, 0, z, 0.15, 1.1, 0.15, '#eeeeee', { solid: false }); }
+  part(PX - 5, 1, 0, 0.12, 0.12, 52, '#eeeeee', { solid: false }); part(PX + 5, 1, 0, 0.12, 0.12, 52, '#eeeeee', { solid: false });
+  part(PX - 2.4, 0, 6, 4.4, 3.6, 4, '#7b1fa2'); sign('ARCADE', PX - 0.15, 3, 6, 3, 0.6, Math.PI / 2, { bg: '#ffeb3b', fg: '#7b1fa2' });
+  part(PX + 3, 0, -2, 2.6, 2.4, 2.6, '#f06292'); sign('ICE CREAM', PX + 1.65, 2.8, -2, 2.4, 0.5, -Math.PI / 2, { bg: '#fff', fg: '#d81b60' });
+  [0, 1, 2, 3, 4].forEach(k => part(PX + 2.4, k * 1.5, -16, 3.2 - k * 0.5, 1.5, 3.2 - k * 0.5, k % 2 ? '#ffeb3b' : '#e53935', { solid: k === 0 }));
+  sign('HELTER SKELTER', PX + 2.4, 8, -14.3, 3.4, 0.5, 0, { bg: '#e53935', fg: '#fff' });
+  part(PX - 3, 0, -20, 3, 4, 6, '#455a64'); sign('TURBO COASTER', PX - 1.4, 4.6, -20, 3.4, 0.6, Math.PI / 2, { bg: '#c62828', fg: '#fff' });
+  part(PX - 3.6, 0, 14, 1.8, 0.5, 0.6, '#6d4c41');
+  const rain = sign('🌧 RAIN 🌧', PX, 7, 0, 6, 0.8, Math.PI, { bg: '#546e7a', fg: '#fff' }); rain.visible = false;
+  W.walk = (x, z) => (x > HX - 8.6 && x < HX + 8.6 && z > -5.6 && z < 5.6) || (x > -19.5 && x < 19.5 && z > -14 && z < 14) || (x > PX - 4.6 && x < PX + 4.6 && z > -26 && z < 27);
+
+  /* ---- people */
+  const host = staff(`Host ${hg === 'f' ? 'mum' : 'dad'}`, hg, { shirt: '#ef6c00', pants: '#5d4037' }, HX + 4, -1.5, Math.PI, '#ef6c00');
+  const date = npc(`${DN} (Your date)`, Object.assign({ shirt: pick1(['#00897b', '#5e35b1', '#f4511e']), pants: '#1565c0', sleeves: true, shoes: true }, pick1(STAFF_LOOKS[dg])), 1.6, -3.6, Math.PI / 4, { color: '#f48fb1', voice: NPC_VOICE[dg] });
+  date.gender = dg; date.badge = '#ad1457'; date.av.visible = false;
+  const barista = staff('Café', bg, { shirt: '#ad1457', apron: '#fce4ec' }, CX + 3, -5.6, 0, '#ad1457');
+  const friend = staff('Classmate', fg, { shirt: '#43a047', pants: '#37474f', cap: '#1b5e20' }, PX + 1, 18, Math.PI, '#2e7d32'); friend.av.visible = false;
+  const datePh = { name: `${DN} (Your date) 📱`, badge: '#ad1457', gender: dg, color: '#f48fb1', voice: NPC_VOICE[dg] };
+  [[-8, 4, 1], [9, -9, -2], [-15, -4, 0.5], [PX - 2, 20, Math.PI], [PX + 2, 10, 0]].forEach(([x, z, y]) => npc('Passer-by', { skin: pick1(SKINS), shirt: pick1(SHIRTS), pants: '#263238', hair: '#5d4037', shoes: true }, x, z, y));
+
+  G.inv = [{ emoji: '📱', label: 'Phone', info: () => `Texts from ${DN}. Battery: 64%.` }, { emoji: '💷', label: 'Pocket money', info: () => `${L(s.cash)} in your wallet` }];
+  renderHotbar();
+  spawnPlayer(HX - 2, 2, Math.PI, 0);
+  G.obj = [{ id: 'texts', text: `Read ${DN}'s texts: where and when?` }, { id: 'host', text: 'Tell your host family where you\'re going' }];
+  if (s.ev.late) G.obj.push({ id: 'late', secret: true, text: 'Let your date know you\'re running late' });
+  G.obj.push({ id: 'meet', text: `Meet ${DN} and say hello` }, { id: 'order', text: 'Order drinks for you both at the café' }, { id: 'chat', text: 'Keep the conversation going: ask and listen' });
+  if (s.ev.spill) G.obj.push({ id: 'spill', secret: true, text: 'Sort out a little accident' });
+  if (s.ev.phone) G.obj.push({ id: 'phone', secret: true, text: 'Deal with your phone politely' });
+  G.obj.push({ id: 'bill', text: 'Sort out who pays' }, { id: 'pier', text: 'Choose something fun to do on the pier' });
+  if (s.ev.rain) G.obj.push({ id: 'rain', secret: true, text: 'Change your plans when the weather changes' });
+  if (s.ev.friend) G.obj.push({ id: 'friend', secret: true, text: 'Deal kindly with a surprise visitor' });
+  G.obj.push({ id: 'respect', text: 'Respect what your date wants' }, { id: 'bye', text: 'Say goodbye and get home by 7 pm' });
+  setMarker(HX - 5, 3.2, -3.2);
+  later(1, () => notify('📱 Bzzz!', `Your phone is on the kitchen table: ${DN} has texted you!`));
+
+  inter({ obj: 'Your phone', label: 'Read the texts', at: () => ({ x: HX - 5, y: 0, z: -2.8 }), r: 2.6, when: () => s.phase === 'home', act: texts });
+  inter({ obj: host.name, label: 'Talk', at: () => ({ x: HX + 4, y: 0, z: -0.2 }), r: 2.6, when: () => s.phase === 'tellHost', act: tellHost });
+  inter({ obj: 'Front door', label: 'Go out', at: () => ({ x: HX, y: 0, z: 4.4 }), r: 2.4, when: () => s.phase === 'out', act: goOut });
+  inter({ obj: date.name, label: 'Say hello', at: () => date.pos, r: 2.8, when: () => s.phase === 'meet', act: meet });
+  inter({ obj: barista.name, label: 'Order', at: () => ({ x: CX + 3, y: 0, z: -2.8 }), r: 2.6, when: () => s.phase === 'counter', act: order });
+  inter({ obj: date.name, label: 'Sit down and chat', at: () => ({ x: CX - 3, y: 0, z: 4.4 }), r: 2.8, when: () => s.phase === 'table', act: chat1 });
+  inter({ obj: 'Café door', label: 'Walk to the pier', at: () => ({ x: CX - 6, y: 0, z: 0 }), r: 2.4, when: () => s.phase === 'toPier', act: toPier });
+  inter({ obj: date.name, label: 'Talk', at: () => date.pos, r: 2.8, when: () => s.phase === 'pier', act: pierTalk });
+
+  /* ---- 1. at home: the texts and your host family */
+  function texts() {
+    hideMarker(); s.phase = 'reading';
+    paperQuiz(`📱 ${DN.toUpperCase()}`, 'Your messages.', `<b>${DN}:</b> heyy 👋 still up for tomorrow?<br><b>You:</b> yes!! 😊<br><b>${DN}:</b> great!! meet at the Clock Tower at 3? then Sea Salt café and the pier 🎡<br><b>${DN}:</b> oh and I'm saving up for a festival so I'm a bit skint lol 🙈`, [
+      ['Where are you meeting?', 'At the Clock Tower', ['At the pier', 'At the café']],
+      ['What time?', '3 pm', ['3 am', '1 pm']],
+      [`"I'm a bit skint" means ${s.he}…`, 'hasn\'t got much money', ['is a bit ill', 'is a bit shy']]
+    ], (right, n, ans) => {
+      for (let k = 0; k < n; k++) cnOk(k < right);
+      complete('texts', right < n);
+      if (right < n) notify('📱 Read it again', `The Clock Tower at 3 pm. "Skint" = with very little money.`, 'warn');
+      s.phase = 'tellHost'; setMarker(HX + 4, 3.2, -1.5); notify('🏡 Before you go', `Tell your host ${hg === 'f' ? 'mum' : 'dad'} where you're going.`);
+    }, 'OK');
+  }
+  function tellHost() {
+    hideMarker(); s.phase = 'telling';
+    askR(host, lv({
+      easy: [['Hi, love! Are you going out?', '¡Hola, cielo! ¿Vas a salir?', [`Yes! I'm meeting ${DN} from drama club at the Clock Tower at three. I'll be back by seven.`, `Yes, I'm going to the pier with ${DN}, a friend from school. I'll be home by seven.`]]],
+      normal: [['Ooh, you look nice! Where are you off to?', '¡Uy, qué guapo/a! ¿Adónde vas?', [`Thanks! I'm meeting ${DN} from drama club. We're going to a café and then the pier. I'll be back by seven.`, `I'm meeting ${DN} at the Clock Tower at three, then we're going to the pier. Back by seven, promise!`]]],
+      hard: [['Look at you, all dressed up! Big plans?', '¡Mírate, qué arreglado/a! ¿Grandes planes?', [`Sort of! I'm meeting ${DN} from drama club at the Clock Tower. We'll probably go to Sea Salt and then the pier. I'll be home by seven, and I've got my phone.`, `Ha, kind of! I'm hanging out with ${DN} from drama. Clock Tower at three, then the pier. I'll text you if anything changes.`]]]
+    }), [
+      { t: 'I am going out. That is all you need to know.', kind: 'blunt', tip: 'Your host family is responsible for you. Tell them where, who with and when you\'ll be back.', react: 'Hmm. I\'d still like to know where, please.' },
+      { t: 'None of your business!', kind: 'blunt', tip: 'Rude, and not safe! "I\'m meeting a friend at the Clock Tower. I\'ll be back by seven."', react: 'Excuse me? Where are you going, please?' },
+      { t: 'I wish to inform you that I shall be attending a social engagement.', kind: 'stiff', tip: 'Far too formal for home! Just say where you\'re going and with whom.', react: 'A "social engagement"? Ha! With who?' }
+    ], [
+      { t: `I go with ${DN} to the pier at three.`, kind: 'grammar', tip: 'Future plans: "I\'m going to the pier with… / I\'m meeting…".' },
+      { t: 'I will return at the seven.', kind: 'grammar', tip: 'No "the" with times: "I\'ll be back by seven."' },
+      { t: 'I have a date with a friend in the Clock Tower.', kind: 'grammar', tip: '"AT the Clock Tower" (a meeting point).' }
+    ], p => {
+      s.told = true; complete('host'); if (p.kind === 'blunt') s.safe -= 15;
+      line(host, `Lovely! Have fun, and keep your phone on. Here's a fiver in case you need the bus back. Back by seven, OK?`, '¡Qué bien! Pásalo bien y lleva el móvil encendido. Toma cinco libras por si necesitas el autobús de vuelta. A las siete en casa, ¿vale?', () => {
+        s.cash += 5; G.money = s.cash; updateBoard(); s.phase = 'out'; setMarker(HX, 3.2, 4.4); notify('🚪 Time to go', 'Head out of the front door.');
+      }, 'Thanks! Bye!');
+    });
+  }
+  function goOut() {
+    hideMarker(); s.phase = 'bus';
+    if (!s.ev.late) return arrive();
+    reveal('late');
+    notify('🚌 Oh no!', 'Your bus is stuck in traffic. You\'ll be about 10 minutes late!', 'warn');
+    choice(null, `It's 2:55 and the bus is stuck in traffic. You'll be ten minutes late. What do you text ${DN}?`, `Son las 14:55 y el autobús está atascado. Llegarás diez minutos tarde. ¿Qué le escribes a ${DN}?`, shuffle([
+      { t: 'Text: "So sorry, my bus is stuck in traffic! I\'ll be there in about 10 mins 🙈"', say: false, fn: () => { cnOk(true); complete('late'); line(datePh, 'no worries!! I\'ll grab a bench in the sun ☀️', '¡tranqui! cojo un banco al sol ☀️', arrive, 'Phew!'); } },
+      { t: 'Don\'t text. Just arrive late.', say: false, fn: () => { cnOk(false); complete('late', true); s.vibe -= 10; G.mistakes.push({ said: 'I arrived late without texting.', tip: 'If you\'re late, always text: "Sorry, I\'m running late! I\'ll be there in 10 minutes."' }); notify('⏰ Not cool', `${DN} waited for ten minutes without knowing where you were.`, 'bad'); arrive(); } },
+      { t: 'Text: "Please accept my apologies for the regrettable delay."', say: false, fn: () => { cnOk(false); complete('late'); G.manners = Math.max(0, G.manners - 10); G.reg = (G.reg || 0) + 1; pop('Manners −10', 'bad'); G.mistakes.push({ said: 'Please accept my apologies for the regrettable delay.', tip: 'Way too formal for a text to a friend. "Sorry, running late! 10 mins 🙈"' }); line(datePh, 'haha why are you texting like my headteacher 😂 ok see you soon', 'jaja por qué me escribes como mi director 😂 vale, hasta ahora', arrive, 'Oops'); } }
+    ]));
+  }
+  function arrive() {
+    tp(-6, 6, Math.PI * 0.75, -Math.PI / 4); date.av.visible = true;
+    s.phase = 'meet'; setMarker(date.pos.x, 3.4, date.pos.z);
+    notify('🕒 The Clock Tower', `There's ${DN}! Go and say hello.`);
+  }
+
+  /* ---- 2. meeting at the Clock Tower */
+  function meet() {
+    hideMarker(); s.phase = 'meeting'; faceTo(date, P.pos.x, P.pos.z);
+    askR(date, lv({
+      easy: [['Hi! You came!', '¡Hola! ¡Has venido!', ['Hi! Of course! It\'s really nice to see you.', 'Hey! Yes! How are you?']]],
+      normal: [['Hey! You found it OK, then?', '¡Hola! ¿Lo has encontrado sin problema?', ['Hey! Yeah, no problem. It\'s really good to see you!', 'Hi! Yeah, easy. You look nice, by the way!']]],
+      hard: [['Hiya! I was starting to think you\'d got lost!', '¡Hola! ¡Empezaba a pensar que te habías perdido!', ['Ha, nearly! It\'s really good to see you. Have you been waiting long?', 'Hey! No, I just took the scenic route. Nice jacket, by the way!']]]
+    }), [
+      { t: 'Hello. Let\'s go. I\'m hungry.', kind: 'blunt', tip: 'A bit cold for a first date! Smile and say: "Hi! It\'s really nice to see you."', react: 'Oh… OK. Hi to you too.' },
+      { t: 'Yeah, yeah. Where\'s the café?', kind: 'blunt', tip: 'Sounds like you don\'t care. Greet them first: "Hey! How are you?"', react: 'Er… this way.' },
+      { t: `Good afternoon, ${DN}. It is a pleasure to make your acquaintance.`, kind: 'stiff', tip: 'Way too formal: you already know each other! "Hey! It\'s so good to see you!"', react: 'Ha ha! Are you a butler now?' }
+    ], [
+      { t: 'Hi! I am very happy of see you.', kind: 'grammar', tip: '"Happy TO see you" (or: "It\'s really nice to see you").' },
+      { t: 'Hello! You are very guapo today!', kind: 'grammar', tip: 'Use English! "You look nice!" / "You look great!"' },
+      { t: 'Hi! Do you wait for a long time?', kind: 'grammar', tip: '"Have you been waiting long?"' }
+    ], reg(() => { complete('meet'); cnOk(true); line(date, 'So… shall we go to Sea Salt? It\'s just over there.', 'Bueno… ¿vamos a Sea Salt? Está justo ahí.', () => {
+      walkTo(date, [[CX - 9, 0], [CX - 3, 1], [CX - 1.7, 2.4]], () => { sitAv(date.av, CX - 1.7, 2.4, -Math.PI / 2); });
+      s.phase = 'counter'; setMarker(CX + 3, 3.2, -2.8); notify('☕ Sea Salt Café', 'Go into the café, on the right.');
+    }, 'Sounds good!'); }));
+  }
+
+  /* ---- 3. the café: listening, ordering and paying */
+  function order() {
+    hideMarker(); s.phase = 'ordering';
+    const [dd, dp] = s.dDrink, [cc, cp] = s.dCake;
+    line(date, `I'll find us a table! Could you get me a ${dd} and ${cc}? I'll pay you back.`, `¡Busco mesa! ¿Me pides un/a ${dd} y ${cc}? Luego te lo pago.`, () => askR(barista, lv({
+      easy: [['Hi! What can I get you?', '¡Hola! ¿Qué te pongo?', [`Hi! Can I have a ${dd} and ${cc}, please? And a lemonade for me.`]]],
+      normal: [['Hiya! What can I get you?', '¡Hola! ¿Qué te pongo?', [`Hi! Could I have a ${dd} and ${cc}, please? And a lemonade for me.`, `Hi. A ${dd} and ${cc}, please, and a lemonade for me.`]]],
+      hard: [['Hi there! What are you having?', '¡Hola! ¿Qué vais a tomar?', [`Hi! Could I get a ${dd} and ${cc}, please? Oh, and a lemonade for me.`, `Hi! We'll have a ${dd} and ${cc}, please, plus a lemonade.`]]]
+    }), [
+      { t: `Give me a ${dd} and ${cc}.`, kind: 'blunt', tip: 'Add "please"! "Could I have…, please?"', react: 'Right…' },
+      { t: 'Lemonade. And the other stuff. Quick.', kind: 'blunt', tip: 'Rude with staff. "Could I have a lemonade, please?"', react: 'Coming up…' },
+      { t: 'Might I possibly trouble you for a lemonade, kind barista?', kind: 'stiff', tip: 'Too much! "Could I have a lemonade, please?"', react: 'Ha! Kind barista? Sure.' }
+    ], [
+      { t: `I want a ${dd} and ${cc} for my date, and for me lemonade.`, kind: 'grammar', tip: '"I\'d like…" is more polite, and "a lemonade for me".' },
+      { t: 'Can you put me a lemonade?', kind: 'grammar', tip: '"Ponme" = Can I have…? / Could I get…?' },
+      { t: `A ${dd}, ${cc} and a lemonade, for favour.`, kind: 'grammar', tip: '"Por favor" = please.' }
+    ], () => {
+      const own = 2.5, tot = Math.round((dp + cp + own) * 100) / 100;
+      cnOk(true); complete('order');
+      paperQuiz('PAY AT THE COUNTER', 'Look at the menu board.', `${dd} £${dp.toFixed(2)} · ${cc[0].toUpperCase() + cc.slice(1)} £${cp.toFixed(2)} · Lemonade £${own.toFixed(2)}`, [
+        ['How much is it altogether?', L(tot), [L(tot + 1), L(tot - 0.5)]],
+        [`How much does ${DN} owe you?`, L(dp + cp), [L(tot), L(own)]]
+      ], (right, n, ans) => {
+        cnOk(right === 2); s.owe = dp + cp; s.cash = Math.round((s.cash - tot) * 100) / 100; G.money = s.cash; updateBoard();
+        if (right < 2) notify('🧮 Check the maths', `Total ${L(tot)}. ${DN}'s part: ${L(dp + cp)}.`, 'warn');
+        line(barista, 'Lovely. Take a seat and I\'ll bring it over.', 'Estupendo. Sentaos y os lo llevo.', () => { s.phase = 'table'; setMarker(CX - 3, 3.2, 4.4); }, 'Cheers!');
+      }, 'Pay');
+    }), 'OK!');
+  }
+  function chat1() {
+    hideMarker(); s.phase = 'chatting'; sitPlayer(CX - 4.3, 2.4, Math.PI / 2);
+    askR(date, lv({
+      easy: [['So, do you like Brighton?', 'Bueno, ¿te gusta Brighton?', ['Yes, I love it! The sea is beautiful. Do you live near here?', 'Yes! It\'s really cool. What do you like doing at the weekend?']]],
+      normal: [['So, what do you think of Brighton so far?', 'Bueno, ¿qué te parece Brighton de momento?', ['I love it! It\'s so different from my town. Have you always lived here?', 'It\'s amazing! The beach is really cool. What do you usually do at the weekend?']]],
+      hard: [['So, how are you finding Brighton? Be honest!', 'Bueno, ¿qué tal Brighton? ¡Sé sincero/a!', ['Honestly? I love it. It\'s so lively, and everyone\'s really friendly. What about you, have you always lived here?', 'It\'s brilliant, although the pebbles on the beach are a bit of a shock! What do you normally get up to at the weekend?']]]
+    }), [
+      { t: 'It\'s OK.', kind: 'blunt', tip: 'Too short: the conversation dies! Answer and ask a question back: "I love it! Have you always lived here?"', react: 'Oh. OK…' },
+      { t: 'It\'s fine. Anyway, let me tell you about my phone.', kind: 'blunt', tip: 'Don\'t change the subject to yourself. Show interest: ask a question back.', react: 'Er… your phone?' },
+      { t: 'The town is most agreeable, and its inhabitants are courteous.', kind: 'stiff', tip: 'You sound like a travel guide from 1850! "I love it! Everyone\'s so friendly."', react: 'Ha! "Courteous"!' }
+    ], [
+      { t: 'Yes, I like very much Brighton.', kind: 'grammar', tip: 'Word order: "I really like Brighton" / "I like Brighton very much."' },
+      { t: 'Is very beautiful, the sea.', kind: 'grammar', tip: 'English needs a subject: "The sea is really beautiful."' },
+      { t: 'Yes! And you, where do you live since always?', kind: 'grammar', tip: '"Have you always lived here?"' }
+    ], reg(() => { cnOk(true); s.ev.spill ? spill() : chat2(); }));
+  }
+  function spill() {
+    reveal('spill');
+    choice(null, `Oops! You knock ${DN}'s ${s.dDrink[0]} with your elbow, and it goes all over the table!`, `¡Uy! Le das con el codo al/a la ${s.dDrink[0]} de ${DN} y se derrama por toda la mesa.`, shuffle([
+      { t: `"Oh no, I'm so sorry! Are you OK? I'll get some napkins… and another ${s.dDrink[0]}!"`, say: false, fn: () => { cnOk(true); complete('spill'); s.cash = Math.round((s.cash - s.dDrink[1]) * 100) / 100; G.money = s.cash; updateBoard(); line(date, 'Ha! Don\'t worry, it missed me! That\'s really sweet of you, thanks.', '¡Ja! Tranqui, no me ha caído encima. Qué detalle, gracias.', chat2, 'Phew!'); } },
+      { t: '"Whatever, it\'s only a drink."', say: false, fn: () => { cnOk(false); complete('spill', true); G.manners = Math.max(0, G.manners - 15); pop('Manners −15', 'bad'); G.mistakes.push({ said: 'Whatever, it\'s only a drink.', tip: 'Apologise and help: "I\'m so sorry! I\'ll get some napkins and another drink."' }); line(date, 'Oh. OK. I\'ll… just get some napkins, then.', 'Ah. Vale. Pues… voy a por servilletas.', chat2, '…'); } },
+      { t: '"Your cup was in the wrong place."', say: false, fn: () => { cnOk(false); complete('spill', true); G.manners = Math.max(0, G.manners - 15); pop('Manners −15', 'bad'); G.mistakes.push({ said: 'Your cup was in the wrong place.', tip: 'Don\'t blame them! "I\'m so sorry, that was my fault."' }); line(date, 'Seriously? You knocked it over!', '¿En serio? ¡Lo has tirado tú!', chat2, '…'); } }
+    ]));
+  }
+  function chat2() {
+    const hobby = pick1([['I do surfing', 'hago surf'], ['I play the drums in a band', 'toco la batería en un grupo'], ['I do parkour', 'hago parkour']]);
+    askR(date, lv({
+      easy: [[`At the weekend ${hobby[0]}.`, `Los fines de semana ${hobby[1]}.`, ['Really? That\'s so cool! How long have you done it?', 'Wow, cool! Is it difficult?']]],
+      normal: [[`Well, when I'm not at drama club, ${hobby[0]}.`, `Bueno, cuando no estoy en teatro, ${hobby[1]}.`, ['No way! That\'s so cool. How long have you been doing it?', 'Really? I\'d love to try that. Is it hard to learn?']]],
+      hard: [[`Mostly drama, but I'm also really into something a bit random: ${hobby[0]}.`, `Sobre todo teatro, pero también me flipa algo un poco random: ${hobby[1]}.`, ['No way, that\'s not random at all, it\'s brilliant! How did you get into it?', 'That\'s so cool! I\'ve always wanted to try. What\'s the best thing about it?']]]
+    }), [
+      { t: 'OK. I prefer football.', kind: 'blunt', tip: 'Show interest first! "That\'s so cool! How long have you been doing it?"', react: 'Oh… right.' },
+      { t: 'Boring. What else?', kind: 'blunt', tip: 'Very rude on a date. Ask a follow-up question instead.', react: 'Wow. OK.' },
+      { t: 'How truly fascinating. Pray tell me more of this pastime.', kind: 'stiff', tip: 'Sounds sarcastic and old-fashioned. "No way! How did you get into it?"', react: '"Pray tell"?! Ha ha!' }
+    ], [
+      { t: 'Really? Since when you do it?', kind: 'grammar', tip: '"How long have you been doing it?"' },
+      { t: 'Cool! It is difficult to learn it?', kind: 'grammar', tip: 'Question word order: "Is it difficult to learn?"' },
+      { t: 'Wow! I am very interesting in it!', kind: 'grammar', tip: '"Interested" (how you feel), not "interesting": "I\'m really interested in it!"' }
+    ], reg(() => { cnOk(true); line(date, 'Ha, I love that you asked! Most people just say "cool" and change the subject. What about you, what are you into?', '¡Jaja, me encanta que preguntes! La mayoría dice "qué guay" y cambia de tema. ¿Y tú? ¿Qué te gusta?', () => s.ev.phone ? phone() : chat3(), 'Tell them about you'); }));
+  }
+  function phone() {
+    reveal('phone');
+    choice(null, 'Bzzz… bzzz… bzzz… Your phone won\'t stop buzzing: it\'s your group chat. What do you do?', 'Bzzz… bzzz… Tu móvil no para de vibrar: es el grupo de clase. ¿Qué haces?', shuffle([
+      { t: '"Sorry, let me just put it on silent." (put the phone away)', say: false, fn: () => { cnOk(true); complete('phone'); line(date, 'Thanks. Mine\'s on silent too. Group chats are the worst!', 'Gracias. El mío también está en silencio. ¡Los grupos son lo peor!', chat3, 'Ha, true!'); } },
+      { t: 'Read and answer all the messages while they wait.', say: false, fn: () => { cnOk(false); complete('phone', true); s.vibe -= 10; G.manners = Math.max(0, G.manners - 10); pop('Manners −10', 'bad'); G.mistakes.push({ said: 'I answered my messages on the date.', tip: 'Put your phone away. If you must look: "Sorry, just a sec, I\'ll put it on silent."' }); line(date, '…Hello? Am I boring you?', '…¿Hola? ¿Te aburro?', chat3, 'Sorry!'); } }
+    ]));
+  }
+  function chat3() {
+    askR(date, lv({
+      easy: [['What do you like doing?', '¿Qué te gusta hacer?', ['I love music and I play basketball. And I\'m in the drama club, like you!', 'I like films and music. And drama, of course!']]],
+      normal: [['So what are you into?', 'Y a ti, ¿qué te gusta?', ['I\'m really into music, and I play basketball at home in Spain. What music do you like?', 'I love films, especially comedies. Have you seen anything good lately?']]],
+      hard: [['Your turn! What are you into, apart from drama?', '¡Te toca! ¿Qué te gusta, aparte del teatro?', ['I\'m a bit of a film geek, to be honest. What\'s the last thing you watched?', 'I\'m really into music. I\'ve been trying to learn the guitar, but it\'s slow going! What kind of music are you into?']]]
+    }), [
+      { t: 'I don\'t know. Nothing.', kind: 'blunt', tip: 'Give them something to talk about! "I\'m really into music. What about you?"', react: 'Oh… nothing at all?' },
+      { t: 'Me? I\'m great at everything, to be honest.', kind: 'blunt', tip: 'Showing off is a turn-off. Be modest and ask a question back.', react: 'Ha… OK then.' },
+      { t: 'My principal recreational interests comprise cinema and music.', kind: 'stiff', tip: 'It sounds like a CV! "I\'m really into films and music."', react: 'Your… principal interests? Ha!' }
+    ], [
+      { t: 'I like very much the music and the films.', kind: 'grammar', tip: 'No "the" for things in general: "I really like music and films."' },
+      { t: 'I am fan of the basket.', kind: 'grammar', tip: '"I\'m A fan of basketball" / "I\'m really into basketball."' },
+      { t: 'I like to watching films.', kind: 'grammar', tip: '"I like watching films" or "I like to watch films".' }
+    ], reg(() => { cnOk(true); complete('chat'); bill(); }));
+  }
+  function bill() {
+    askR(date, lv({
+      easy: [[`That was nice! Here, I owe you ${L(s.owe)}.`, `¡Qué bien! Toma, te debo ${L(s.owe)}.`, ['Thanks! Next time it\'s your turn to get the drinks!', 'Oh, thanks! That\'s fine.']]],
+      normal: [['So how much do I owe you?', 'Bueno, ¿cuánto te debo?', [`It's ${L(s.owe)}. But don't worry, my treat this time!`, `${L(s.owe)}, but it's fine: you can get the ice creams later!`]]],
+      hard: [['Right, how much do I owe you? And don\'t say "nothing"!', 'Bueno, ¿cuánto te debo? ¡Y no digas "nada"!', [`OK, OK: it was ${L(s.owe)}. But honestly, how about you get the ice creams later and we call it even?`, `It was ${L(s.owe)}. Shall we just split everything today and not worry about it?`]]]
+    }), [
+      { t: `${L(s.owe)}. Pay me now.`, kind: 'blunt', tip: 'Sounds cold and greedy. "It\'s ' + L(s.owe) + ', but no rush!"', react: 'Oh… sure. Here.' },
+      { t: 'You should pay for everything. You invited me.', kind: 'blunt', tip: 'Not fair! Split it, or offer: "My treat this time!"', react: 'Er… I\'m a bit skint, remember?' },
+      { t: `The sum outstanding is ${L(s.owe)}, payable at your earliest convenience.`, kind: 'stiff', tip: 'Like a bank letter! "It\'s ' + L(s.owe) + '. No rush!"', react: 'Ha! Shall I send you a cheque?' }
+    ], [
+      { t: `You must me ${L(s.owe)}.`, kind: 'grammar', tip: '"Deber dinero" = owe: "You owe me…"' },
+      { t: 'Is not necessary, I invite you.', kind: 'grammar', tip: '"Te invito" = My treat! / It\'s on me!' },
+      { t: 'We pay in the half?', kind: 'grammar', tip: '"Pagar a medias" = split it: "Shall we split it?"' }
+    ], reg(p => {
+      const treat = /treat|ice creams/.test(p.t);
+      if (G.diff === 'easy' || !treat) { s.cash = Math.round((s.cash + s.owe) * 100) / 100; G.money = s.cash; }
+      complete('bill', p.kind === 'blunt'); updateBoard();
+      line(date, treat ? 'Aww, that\'s really kind. OK, the ice creams are on me! Shall we go to the pier?' : 'Cheers! Right, shall we go to the pier?', treat ? 'Oh, qué amable. ¡Vale, los helados los pago yo! ¿Vamos al muelle?' : '¡Gracias! Bueno, ¿vamos al muelle?', () => {
+        standPlayer(CX - 4.3, 3.6); walkTo(date, [[CX - 3, 0.5], [CX - 8, 0]]);
+        s.phase = 'toPier'; setMarker(CX - 6, 3.2, 0); notify('🎡 To the pier', 'Walk out of the café to go to the pier.');
+      }, 'Let\'s go!');
+    }));
+  }
+
+  /* ---- 4. the pier: plans, the weather, a visitor and respect */
+  function toPier() {
+    hideMarker(); tp(PX, 22, Math.PI, 0);
+    date.pos.set(PX + 1.4, 0, 20); date.path = []; faceTo(date, PX, 22);
+    if (s.ev.friend) { s.phase = 'friend'; return friendCome(); }
+    s.phase = 'pier'; setMarker(date.pos.x, 3.4, date.pos.z);
+  }
+  function friendCome() {
+    reveal('friend'); friend.av.visible = true; friend.pos.set(PX - 1.4, 0, 16); walkTo(friend, [[PX - 1, 19.6]], () => faceTo(friend, PX, 22));
+    later(1.2, () => askR(friend, lv({
+      easy: [[`Hey! What are you doing here? Can I come with you?`, '¡Eh! ¿Qué hacéis aquí? ¿Puedo ir con vosotros?', ['Hi! Sorry, we\'re kind of on a date today. See you on Monday?', 'Hey! Not today, sorry. We\'re on a date! See you at school!']]],
+      normal: [['No way, fancy seeing you two here! Mind if I tag along?', '¡Anda, qué casualidad veros aquí! ¿Os importa si me apunto?', ['Ah, sorry, mate, we\'re actually kind of on a date. Catch you on Monday?', 'Hey! It\'s a bit of a date thing today, to be honest. Let\'s hang out next week, though!']]],
+      hard: [['Well, well, well! What have we got here? Room for a third?', 'Vaya, vaya… ¿Qué tenemos aquí? ¿Hay sitio para uno más?', ['Ha, nice try! It\'s kind of a date, actually, so maybe another time? We should all hang out next week, though.', 'Not today, mate, sorry! It\'s a bit of a date. I\'ll message you about the weekend, yeah?']]]
+    }), [
+      { t: 'Go away. You\'re ruining everything.', kind: 'blunt', tip: 'Too harsh: they\'re your friend! "Sorry, we\'re kind of on a date. See you on Monday?"', react: 'Whoa! Sorry, I\'m going!' },
+      { t: 'No. Bye.', kind: 'blunt', tip: 'Cold. Say why, kindly: "We\'re on a date today. See you at school?"', react: 'Oh. OK… bye then.' },
+      { t: 'I regret that your company would be inopportune at present.', kind: 'stiff', tip: 'Ha! Way too formal for a mate. "Not today, sorry! See you Monday!"', react: 'In-what? OK, I get it, I\'m going!' }
+    ], [
+      { t: 'Sorry, today we are in a date.', kind: 'grammar', tip: '"ON a date": "We\'re on a date."' },
+      { t: 'You can come other day.', kind: 'grammar', tip: '"ANOTHER day": "Maybe another time?"' },
+      { t: 'Today no, sorry, we see on Monday.', kind: 'grammar', tip: '"Not today, sorry. See you on Monday!"' }
+    ], reg(p => {
+      complete('friend', p.kind === 'blunt'); cnOk(p.kind !== 'blunt');
+      line(friend, p.kind === 'blunt' ? 'Fine! Bye!' : 'Ha, got it! Have fun, you two! See you Monday!', p.kind === 'blunt' ? '¡Vale! ¡Adiós!' : '¡Ja, pillado! ¡Pasadlo bien! ¡Hasta el lunes!', () => {
+        walkTo(friend, [[PX - 1, 26]], () => friend.av.visible = false);
+        s.phase = 'pier'; setMarker(date.pos.x, 3.4, date.pos.z);
+      }, 'Bye!');
+    })));
+  }
+  function pierTalk() {
+    hideMarker(); s.phase = 'pierTalk';
+    if (s.ev.rain) return rain_();
+    plans();
+  }
+  function rain_() {
+    reveal('rain'); rain.visible = true; W.scene.background = new THREE.Color('#90a4ae'); if (W.scene.fog) W.scene.fog.color = W.scene.background;
+    askR(date, lv({
+      easy: [['Oh no, it\'s raining! What do we do?', '¡Oh, no, está lloviendo! ¿Qué hacemos?', ['Let\'s go inside the arcade! It\'s dry in there.', 'How about the arcade? It\'s inside!']]],
+      normal: [['Oh, great, it\'s starting to pour! Typical British summer!', '¡Genial, empieza a diluviar! ¡El típico verano británico!', ['Ha, typical! Shall we go into the arcade until it stops?', 'Why don\'t we go into the arcade? At least it\'s dry!']]],
+      hard: [['Brilliant, it\'s chucking it down. So much for the ice creams!', 'Genial, está cayendo una buena. ¡Adiós a los helados!', ['Ha, never mind! How about we head into the arcade until it blows over?', 'We could always duck into the arcade and come back for ice cream when it clears up?']]]
+    }), [
+      { t: 'This is the worst day ever. I want to go home.', kind: 'blunt', tip: 'Don\'t give up so fast! Suggest a plan B: "Shall we go into the arcade?"', react: 'Oh… OK. If you want…' },
+      { t: 'You chose the pier. This is your fault.', kind: 'blunt', tip: 'Nobody controls the weather! Suggest something: "How about the arcade?"', react: 'Wow. Sorry about the rain, I guess.' },
+      { t: 'Might I propose that we seek shelter within yonder amusement hall?', kind: 'stiff', tip: 'Ha, too formal! "Shall we go into the arcade?"', react: '"Yonder"?! Ha ha, OK!' }
+    ], [
+      { t: 'Is raining very much! We go inside?', kind: 'grammar', tip: '"It\'s raining a lot! Shall we go inside?"' },
+      { t: 'Let\'s to go to the arcade.', kind: 'grammar', tip: 'No "to" after "let\'s": "Let\'s go to the arcade."' },
+      { t: 'Why we don\'t go into the arcade?', kind: 'grammar', tip: 'Suggestion: "Why don\'t we go into the arcade?"' }
+    ], reg(p => { complete('rain', p.kind === 'blunt'); cnOk(p.kind !== 'blunt'); s.arcade = true; line(date, 'Good idea! And look, it\'s already stopping. Typical!', '¡Buena idea! Y mira, ya está parando. ¡Típico!', () => { rain.visible = false; W.scene.background = new THREE.Color('#a8dcff'); if (W.scene.fog) W.scene.fog.color = W.scene.background; plans(); }, 'Ha!'); }));
+  }
+  function plans() {
+    choice(date, 'So, what do you fancy doing? There\'s the arcade, the helter skelter, the Turbo Coaster…', 'Bueno, ¿qué te apetece hacer? Está el salón recreativo, el tobogán, la montaña rusa…', [
+      { t: 'Shall we go on the Turbo Coaster?', fn: coaster },
+      { t: 'Do you fancy the arcade? I\'m terrible at air hockey!', fn: () => { cnOk(true); complete('pier'); hand(); } },
+      { t: 'You decide. I don\'t care.', fn: () => { cnOk(false); s.vibe -= 8; complete('pier', true); G.mistakes.push({ said: 'You decide. I don\'t care.', tip: '"I don\'t care" sounds like you\'re bored. Make a suggestion: "Do you fancy the arcade?"' }); notify('😐 Hmm', '"I don\'t care" sounds bored. Suggest something!', 'warn'); line(date, 'Oh… OK. The arcade, then?', 'Ah… vale. ¿El recreativo, entonces?', hand, 'OK'); } }
+    ]);
+  }
+  function coaster() {
+    askR(date, lv({
+      easy: [['Hmm… I\'m scared of rollercoasters. Sorry!', 'Mmm… me dan miedo las montañas rusas. ¡Lo siento!', ['No problem! Let\'s go to the arcade.', 'That\'s OK! We can do something else.']]],
+      normal: [['Ooh… to be honest, I\'m not really a fan of rollercoasters.', 'Uy… la verdad es que no me gustan mucho las montañas rusas.', ['No worries! Shall we do the arcade instead?', 'That\'s totally fine! How about the arcade?']]],
+      hard: [['Um… I\'ll be honest, the last time I went on that, I nearly passed out.', 'Eh… te seré sincero/a: la última vez que me subí, casi me desmayo.', ['Ha, fair enough! Let\'s give it a miss. Fancy a game of air hockey instead?', 'Say no more! The arcade it is. I bet I can beat you at air hockey.']]]
+    }), [
+      { t: 'Come on, don\'t be a baby!', kind: 'blunt', tip: 'Never pressure anyone. "No worries! Shall we do the arcade instead?"', react: 'I said I don\'t want to…' },
+      { t: 'You have to come. I already chose.', kind: 'blunt', tip: 'Respect a "no". Offer another plan: "That\'s totally fine! How about the arcade?"', react: '…I really don\'t want to.' },
+      { t: 'Your apprehension is entirely comprehensible.', kind: 'stiff', tip: 'Kind, but far too formal. "No worries! That\'s totally fine."', react: 'Er… thanks? Ha!' }
+    ], [
+      { t: 'Don\'t worry, we can make other thing.', kind: 'grammar', tip: '"Hacer otra cosa" = do something else.' },
+      { t: 'Is OK! We go to the arcade?', kind: 'grammar', tip: '"It\'s OK! Shall we go to the arcade?"' }
+    ], p => {
+      const push = p.kind === 'blunt'; complete('pier'); cnOk(!push);
+      if (push) { s.pushy = true; s.safe -= 30; s.vibe -= 15; G.mistakes.push({ said: p.t, tip: 'When someone says no, respect it straight away and suggest something else.' }); }
+      line(date, push ? 'Let\'s just… go to the arcade, OK?' : 'Thanks for understanding! Right, air hockey: prepare to lose!', push ? 'Vamos al recreativo y ya, ¿vale?' : '¡Gracias por entenderlo! Bueno, hockey de aire: ¡prepárate para perder!', hand, push ? 'OK…' : 'Ha! We\'ll see!');
+    });
+  }
+  function hand() {
+    notify('🎮 The arcade', `You play air hockey and ${DN} wins 7–5. Then you walk to the end of the pier and watch the sea.`, 'good');
+    const yes = Math.random() < 0.5;
+    choice(null, `You're standing at the end of the pier with ${DN}, watching the waves. You'd like to hold ${s.his} hand. What do you do?`, `Estás al final del muelle con ${DN}, mirando las olas. Te gustaría darle la mano. ¿Qué haces?`, shuffle([
+      { t: 'Is it OK if I hold your hand?', fn: () => {
+        if (yes) { cnOk(true); s.held = 'yes'; return line(date, 'Yeah… I\'d like that. 😊', 'Sí… me gustaría. 😊', bye, '😊'); }
+        askR(date, [['Um… maybe not yet, if that\'s OK? I\'m having a really nice time, though.', 'Eh… mejor todavía no, si te parece bien. Pero me lo estoy pasando muy bien.', lv({ easy: ['Of course! No problem.', 'Sure, that\'s OK!'], normal: ['Of course, no problem at all! Me too.', 'Totally fine! I\'m having a great time too.'], hard: ['Of course, no pressure at all. I\'m having a really good time too.', 'That\'s absolutely fine. Thanks for being honest!'] })]], [
+          { t: 'Why not? It\'s just a hand.', kind: 'blunt', tip: 'Never push after a "no". "Of course, no problem!"', react: 'I just… don\'t want to yet.' },
+          { t: 'Fine. Whatever.', kind: 'blunt', tip: 'Sulking puts pressure on people. Smile: "Sure, that\'s fine!"', react: 'Oh… are you angry now?' },
+          { t: 'I fully accept your decision and shall not raise the matter again.', kind: 'stiff', tip: 'Respectful, but robotic! "Of course, no problem!"', react: 'Ha! OK, robot. Thank you.' }
+        ], [
+          { t: 'Of course, not problem.', kind: 'grammar', tip: '"No problem."' },
+          { t: 'Don\'t worry, is fine.', kind: 'grammar', tip: '"It\'s fine."' }
+        ], p => { s.held = p.kind === 'blunt' ? 'push' : 'no'; if (p.kind === 'blunt') { s.pushy = true; s.safe -= 30; } else cnOk(true); bye(); });
+      } },
+      { t: 'Just grab their hand without asking.', say: false, fn: () => { s.held = 'grab'; s.pushy = true; s.safe -= 20; cnOk(false); G.mistakes.push({ said: 'I grabbed their hand without asking.', tip: 'Ask first: "Is it OK if I hold your hand?" Everybody has the right to say yes or no.' }); notify('✋ Ask first', 'On a first date, ask before you touch someone: "Is it OK if I hold your hand?"', 'bad'); line(date, 'Oh! Um… I wasn\'t expecting that.', '¡Oh! Eh… no me lo esperaba.', bye, 'Sorry!'); } },
+      { t: 'Wait: it\'s only the first date. Just enjoy the view.', say: false, fn: () => { s.held = 'wait'; cnOk(true); line(null, 'You enjoy the sunset together. There\'s no rush.', 'Disfrutáis juntos de la puesta de sol. No hay prisa.', bye, 'Continue'); } }
+    ]));
+  }
+
+  /* ---- 5. goodbye */
+  function bye() {
+    notify('🕕 6:30 pm', 'Your phone buzzes. It\'s your host family: "Everything OK? See you at 7!"');
+    askR(date, lv({
+      easy: [['I have to go home soon. This was fun!', 'Tengo que irme pronto a casa. ¡Ha sido divertido!', ['I had a really good time! Do you want to meet again next week?', 'Me too! Can we do this again?']]],
+      normal: [['I should probably head home soon. I\'ve had a really nice time, though.', 'Debería irme a casa pronto. Pero me lo he pasado muy bien.', ['Me too! Do you fancy doing something again next weekend?', 'Yeah, me too. I\'d love to do this again sometime!']]],
+      hard: [['Ugh, I\'d better head off. Mum\'ll kill me if I\'m late. Today was really fun, though.', 'Uf, tengo que irme. Mi madre me mata si llego tarde. Pero hoy ha sido muy divertido.', ['Same, I need to be back by seven too. I had a brilliant time. Fancy doing it again soon?', 'Yeah, it was really fun. Same time next week? You still owe me an air hockey rematch!']]]
+    }), [
+      { t: 'OK. Bye.', kind: 'blunt', tip: 'Too cold after a nice date! "I had a really good time. Do you fancy doing this again?"', react: 'Oh… bye, then.' },
+      { t: 'Text me tonight. And tomorrow. And every day.', kind: 'blunt', tip: 'Too intense! Keep it relaxed: "I\'d love to do this again sometime."', react: 'Er… let\'s see…' },
+      { t: 'I wish to express my gratitude for a most delightful afternoon.', kind: 'stiff', tip: 'Like a letter from the Queen! "I had a really good time!"', react: 'Ha ha! You\'re so funny!' }
+    ], [
+      { t: 'I have passed a very good time.', kind: 'grammar', tip: '"Pasarlo bien" = have a good time: "I had a really good time."' },
+      { t: 'We can repeat it other day?', kind: 'grammar', tip: '"Can we do this again another time?"' },
+      { t: 'I enjoyed a lot.', kind: 'grammar', tip: '"Enjoy" needs an object: "I really enjoyed it" / "I enjoyed myself."' }
+    ], reg(p => {
+      complete('respect', s.pushy); complete('bye', p.kind === 'blunt'); if (p.kind !== 'blunt') cnOk(true);
+      line(date, s.vibe >= 70 ? 'Definitely! I\'ll text you. Get home safe! 😊' : 'Maybe… Get home safe, OK?', s.vibe >= 70 ? '¡Por supuesto! Te escribo. ¡Llega bien a casa! 😊' : 'Quizá… Llega bien a casa, ¿vale?', () => line(null, `You catch the 6:40 bus and you're home at 6:55. Your phone buzzes: "${s.vibe >= 70 ? 'had the best time today!! 😊 rematch next sat?' : 'thanks for today. see you at drama'}"`, `Coges el autobús de las 18:40 y llegas a casa a las 18:55. Te vibra el móvil: "${s.vibe >= 70 ? '¡¡me lo he pasado genial!! 😊 ¿revancha el sábado?' : 'gracias por hoy. nos vemos en teatro'}"`, finish, 'Finish'), 'Bye!');
+    }));
+  }
+
+  function finish() {
+    const conn = clamp(Math.round(s.cnN ? 0.5 * (100 * s.cn / s.cnN) + 0.5 * s.vibe : s.vibe), 0, 100), safe = clamp(s.safe, 0, 100), eng = engPct();
+    const overall = 0.25 * conn + 0.25 * safe + 0.25 * eng + 0.25 * G.manners;
+    const good = [], bad = [];
+    if (!obj('texts').failed) good.push('You read the texts carefully: the Clock Tower at 3. And now you know "skint"!'); else bad.push('Read messages carefully: where, when, and slang like "skint" (no money).');
+    if (s.told) good.push('You told your host family where you were going, who with and when you\'d be back.');
+    if (s.ev.late) { if (!obj('late').failed) good.push('You were late, so you texted to apologise.'); else bad.push('Running late? Always text: "Sorry, I\'ll be there in 10 minutes!"'); }
+    if (!obj('chat').failed) good.push('You kept the conversation going: you asked follow-up questions and listened.');
+    if (s.ev.spill) { if (!obj('spill').failed) good.push('You apologised for the spilt drink and bought another one.'); else bad.push('After an accident, apologise and help: "I\'m so sorry! I\'ll get some napkins."'); }
+    if (s.ev.phone) { if (!obj('phone').failed) good.push('You put your phone on silent: your date had your full attention.'); else bad.push('On a date, put your phone away.'); }
+    if (s.ev.friend && !obj('friend').failed) good.push('A friend turned up and you explained kindly that it was a date.');
+    if (s.ev.rain && !obj('rain').failed) good.push('It rained, and you suggested a plan B.');
+    if (!s.pushy) good.push('You respected your date\'s choices, and you never pressured them.'); else bad.push('Respect matters most: ask first ("Is it OK if…?") and accept a "no" with a smile.');
+    if (s.held === 'no') good.push('Your date said "not yet" and you accepted it kindly. That\'s real respect.');
+    if (s.held === 'yes') good.push('You asked "Is it OK if I hold your hand?" before doing it.');
+    if (!G.reg) good.push('Perfect register: relaxed and warm, never too formal or too blunt.');
+    if (G.manners === 100) good.push('Perfect manners. Cheers! 💌');
+    showResults({ title: s.vibe >= 70 ? 'A lovely first date!' : 'A first date to learn from', overall, metrics: [['Connection', conn], ['Respect & safety', safe], ['English', eng], ['Manners', G.manners]], good, bad });
+  }
+}
+
+/* =====================================================================
+   SCENARIO — AT THE SUPERMARKET (a supermarket in Cardiff, Wales, UK)
+   ===================================================================== */
+SCEN.supermarket = {
+  title: 'At the Supermarket', cardTitle: 'Your shopping list',
+  vocab: [['Excuse me, where can I find…?', 'Perdone, ¿dónde puedo encontrar…?'], ['It\'s in aisle four, next to the pasta.', 'Está en el pasillo cuatro, al lado de la pasta.'], ['Could I have 200 grams of…, please?', '¿Me pone 200 gramos de…, por favor?'], ['Is it suitable for vegetarians?', '¿Es apto para vegetarianos?'], ['loose / a pack of / a bag of', 'a granel / un paquete de / una bolsa de'], ['price per kilo / value', 'precio por kilo / relación calidad-precio'], ['use by / best before', 'consumir antes de (caduca) / consumo preferente'], ['They\'ve run out of…', 'Se les ha acabado…'], ['Could I just squeeze past?', '¿Me deja pasar un momento?'], ['I think that\'s scanned at the wrong price.', 'Creo que eso se ha cobrado a un precio equivocado.'], ['a bag for life / a loyalty card', 'una bolsa reutilizable / una tarjeta de cliente'], ['Croeso! / Diolch!', '¡Bienvenido/a! / ¡Gracias! (en galés)']],
+  board() { const s = G.s; return [['Basket', '£' + nz2(s.spent)], ['Smart shopping', s.smN ? Math.round(100 * s.sm / s.smN) + '%' : '–'], ['English', engPct() + '%'], ['Manners', G.manners]]; },
+  card() {
+    const s = G.s;
+    return `<div class="cs">You are <b>${escH(profile.name)}</b>, 14, from Spain, on an exchange in <b>Cardiff</b>, the capital of <b>Wales</b>. Tonight your host family is making <b>cawl</b>, a traditional Welsh stew, and they've sent you to the supermarket, <b>Dragon Fresh</b>, with a shopping list.</div>
+      <div class="cs">🥬 Your host sister <b>Cerys</b> is <b>vegetarian</b>, so this cawl has no meat: check every label!</div>
+      <div class="cs">💷 <b>Money:</b> a <b>£${s.budget} note</b>. Spend it wisely and bring back the change and the receipt.${s.ev.bag ? '' : ' You\'ve got your own shopping bag.'}</div>
+      <div class="cs">🏴󠁧󠁢󠁷󠁬󠁳󠁿 In Wales, signs are in <b>Welsh and English</b>. <b>Croeso</b> = welcome, <b>diolch</b> = thank you. Welsh people often say <b>"lush"</b> (great, lovely) and call you <b>"love"</b> or <b>"bud"</b>. Difficulty: <b>${DIFF[G.diff].label}</b>.</div>`;
+  },
+  build: buildSupermarket
+};
+
+function buildSupermarket() {
+  const s = G.s = { budget: 10, spent: 0, basket: [], phase: 'enter', ev: {}, sm: 0, smN: 0, change: 0 };
+  sample(['reach', 'squeeze', 'drop', 'out', 'price', 'bag'], { easy: 1, normal: 2, hard: 4 }[G.diff] || 2).forEach(k => s.ev[k] = true);
+  const lv = o => o[G.diff] || o.normal;
+  const smOk = ok => { s.smN++; if (ok) s.sm++; updateBoard(); };
+  const L = n => '£' + (Math.round(n * 100) / 100).toFixed(2);
+  const add = (name, price) => { s.basket.push({ name, price }); s.spent = Math.round((s.spent + price) * 100) / 100; G.inv = G.inv.filter(i => i.label !== 'Basket'); G.inv.push({ emoji: '🧺', label: 'Basket', info: () => s.basket.map(b => `${b.name} ${L(b.price)}`).join(' · ') }); renderHotbar(); updateBoard(); };
+  G.money = s.budget;
+
+  /* ---- world: the street (z > 14) and the shop (40 × 28) */
+  W.bounds = { minX: -30, maxX: 30, minZ: -18, maxZ: 28 };
+  ground('#8d9ea8'); part(0, 0, 19, 60, 0.05, 9, '#bdbdbd', { solid: false });
+  room(0, 0, 40, 28, { wall: '#f1f8e9', floor: '#eceff1', roof: '#1b5e20', door: 's', gap: 5, h: 6 });
+  sign('DRAGON FRESH', 0, 7.4, 14.3, 12, 1.3, 0, { bg: '#c62828', fg: '#fff' });
+  sign('CROESO · WELCOME', 0, 4.6, 14.3, 5, 0.6, 0, { bg: '#fff', fg: '#1b5e20' });
+  part(-20, 0, 22, 0.3, 4, 0.3, '#424242'); plane(-20, 4.4, 22.16, 1.6, 1, 0, canvasTex(160, 100, g => { g.fillStyle = '#fff'; g.fillRect(0, 0, 160, 100); g.fillStyle = '#00a651'; g.fillRect(0, 50, 160, 50); g.fillStyle = '#d30731'; g.font = '900 40px Arial'; g.fillText('🐉', 52, 70); }));
+  // fruit and veg (west, near the door)
+  sign('FFRWYTHAU A LLYSIAU · FRUIT & VEG', -13, 4.6, 0.6, 9, 0.6, 0, { bg: '#2e7d32', fg: '#fff' });
+  [['#43a047', -16], ['#ff9800', -13.6], ['#795548', -11.2], ['#e53935', -8.8]].forEach(([c, x]) => { part(x, 0, 5, 2, 0.9, 1.6, '#a1887f'); part(x, 0.9, 5, 1.8, 0.3, 1.4, c, { solid: false }); });
+  // the aisles
+  [-9, -3, 3, 9].forEach((x, k) => { part(x, 0, -3, 1.4, 2.6, 10, '#90a4ae'); for (let r = 0; r < 3; r++) part(x, 0.5 + r * 0.8, -3, 1.5, 0.35, 9.6, ['#ffca28', '#ef5350', '#42a5f5', '#66bb6a'][(k + r) % 4], { solid: false }); });
+  [[-12, 1], [-6, 2], [0, 3], [6, 4], [12, 5]].forEach(([x, n]) => sign(`EIL ${n} · AISLE ${n}`, x, 4.4, 2.2, 3, 0.5, 0, { bg: '#1b5e20', fg: '#fff' }));
+  sign('Pasta · Rice · Stock cubes · Tins', 6, 3.6, 2.2, 3, 0.4, 0, { bg: '#fff', fg: '#263238' });
+  // the deli counter, the bakery and the dairy fridges (north)
+  part(-13, 0, -11, 8, 1.3, 1.4, '#eceff1'); part(-13, 1.3, -11, 8, 0.6, 1.4, '#b3e5fc', { solid: false }); sign('DELI · CIGYDD A CHAWS', -13, 4.4, -13.7, 6, 0.6, 0, { bg: '#6d4c41', fg: '#fff' });
+  part(0, 0, -12, 6, 1.6, 1.6, '#d7a86e'); [-2, 0, 2].forEach(x => part(x, 1.6, -12, 1.2, 0.5, 0.8, '#a1662f', { solid: false })); sign('BECWS · BAKERY', 0, 4.4, -13.7, 5, 0.6, 0, { bg: '#e65100', fg: '#fff' });
+  part(13, 0, -12.8, 10, 2.8, 1.6, '#e3f2fd'); for (let k = 0; k < 4; k++) part(9.6 + k * 2.3, 0.4, -12, 1.8, 0.6, 0.1, '#ffffff', { solid: false }); sign('LLAETH · DAIRY', 13, 4.4, -13.7, 5, 0.6, 0, { bg: '#1565c0', fg: '#fff' });
+  // tills (east, near the door)
+  [[10, 9], [15, 9]].forEach(([x, z]) => { part(x, 0, z, 1.2, 1, 3.4, '#455a64'); part(x - 0.2, 1, z - 0.8, 0.6, 0.4, 0.6, '#212121', { solid: false }); });
+  sign('TILIAU · TILLS', 12.5, 4.4, 13.6, 5, 0.6, Math.PI, { bg: '#c62828', fg: '#fff' });
+  W.walk = (x, z) => (x > -19.6 && x < 19.6 && z > -13.6 && z < 23) || (x > -29 && x < 29 && z > 14.4 && z < 23);
+
+  /* ---- people */
+  const worker = staff('Shop assistant', gPick(), { shirt: '#c62828', pants: '#263238' }, -6, 1.2, Math.PI / 2, '#c62828');
+  const deli = staff('Deli counter', gPick(), { shirt: '#ffffff', apron: '#6d4c41', cap: '#ffffff' }, -13, -12.6, 0, '#6d4c41');
+  const cash = staff('Till', gPick(), { shirt: '#c62828', pants: '#263238' }, 11.2, 9, Math.PI / 2, '#c62828');
+  const og = gPick(), old = npc(`${NPC_NAME[og]} (Customer)`, Object.assign({ shirt: '#8e24aa', pants: '#5d4037', sleeves: true, shoes: true }, pick1(STAFF_LOOKS[og]), { hair: '#e0e0e0' }), -12, 7.2, Math.PI, { color: '#ce93d8', voice: NPC_VOICE[og] });
+  old.gender = og; old.badge = '#8e24aa'; old.av.visible = !!s.ev.reach;
+  const tg = gPick(), trolley = npc(`${NPC_NAME[tg]} (Customer)`, Object.assign({ shirt: '#00838f', pants: '#37474f', sleeves: true, shoes: true }, pick1(STAFF_LOOKS[tg])), 6, -4, Math.PI, { color: '#80deea', voice: NPC_VOICE[tg] });
+  trolley.gender = tg; trolley.badge = '#00838f'; const cart = part(6, 0, -5.6, 1.2, 1.1, 1.8, '#b0bec5', { solid: false });
+  trolley.av.visible = cart.visible = !!s.ev.squeeze;
+  const hg = gPick(), host = { name: `${NPC_NAME[hg]} (Host ${hg === 'f' ? 'mum' : 'dad'}) 📱`, badge: '#ef6c00', gender: hg, color: '#ffcc80', voice: NPC_VOICE[hg] };
+  [[2, 8, 0.4], [-16, -6, 1.2], [16, 2, -1]].forEach(([x, z, y]) => npc('Shopper', { skin: pick1(SKINS), shirt: pick1(SHIRTS), pants: '#37474f', hair: '#3e2723', sleeves: true, shoes: true }, x, z, y));
+
+  G.inv = [{ emoji: '📝', label: 'Shopping list', info: () => 'Cawl (veggie!): 3 leeks · about 2 kg potatoes · carrots · vegetable stock cubes · 200 g Caerphilly cheese · a crusty loaf · 2 pints of semi-skimmed milk' }, { emoji: '💷', label: '£10 note', info: () => `£${s.budget} from your host family` }];
+  if (!s.ev.bag) G.inv.push({ emoji: '👜', label: 'Shopping bag', info: () => 'Your host family\'s reusable bag' });
+  renderHotbar();
+  spawnPlayer(0, 20, Math.PI, 0);
+  G.obj = [{ id: 'list', text: 'Read the list and the Welsh signs' }, { id: 'veg', text: 'Choose the best-value fruit and veg' }];
+  if (s.ev.reach) G.obj.push({ id: 'reach', secret: true, text: 'Help another customer' });
+  G.obj.push({ id: 'ask', text: 'Ask a shop assistant where something is' }, { id: 'stock', text: 'Find vegetarian stock cubes' });
+  if (s.ev.squeeze) G.obj.push({ id: 'squeeze', secret: true, text: 'Get past a trolley politely' });
+  G.obj.push({ id: 'deli', text: 'Order 200 g of cheese at the deli counter' }, { id: 'milk', text: 'Choose milk with the right date' });
+  if (s.ev.drop) G.obj.push({ id: 'drop', secret: true, text: 'Own up to a little accident' });
+  G.obj.push({ id: 'bread', text: 'Get a loaf of bread' });
+  if (s.ev.out) G.obj.push({ id: 'out', secret: true, text: 'Call home when something has sold out' });
+  G.obj.push({ id: 'till', text: 'Pay at the till' });
+  if (s.ev.price) G.obj.push({ id: 'price', secret: true, text: 'Point out a wrong price politely' });
+  G.obj.push({ id: 'change', text: 'Check your change and receipt' });
+  setMarker(0, 3.2, 12);
+
+  inter({ obj: 'Entrance', label: 'Read your list', at: () => ({ x: 0, y: 0, z: 12.6 }), r: 3, when: () => s.phase === 'enter', act: listQuiz });
+  inter({ obj: 'Fruit & veg', label: 'Choose', at: () => ({ x: -12.4, y: 0, z: 7.2 }), r: 3, when: () => s.phase === 'veg', act: veg });
+  inter({ obj: old.name, label: 'Talk', at: () => old.pos, r: 2.6, when: () => s.phase === 'reach', act: reachTalk });
+  inter({ obj: worker.name, label: 'Ask', at: () => ({ x: -4.6, y: 0, z: 1.2 }), r: 2.6, when: () => s.phase === 'ask', act: askWorker });
+  inter({ obj: trolley.name, label: 'Talk', at: () => ({ x: 6, y: 0, z: -1.8 }), r: 2.6, when: () => s.phase === 'squeeze', act: squeeze });
+  inter({ obj: 'Aisle 4 shelf', label: 'Look for stock cubes', at: () => ({ x: 6, y: 0, z: -6 }), r: 2.4, when: () => s.phase === 'aisle4', act: stock });
+  inter({ obj: deli.name, label: 'Order', at: () => ({ x: -13, y: 0, z: -9 }), r: 2.8, when: () => s.phase === 'deli', act: deliTalk });
+  inter({ obj: 'Dairy fridge', label: 'Choose milk', at: () => ({ x: 13, y: 0, z: -10.6 }), r: 3, when: () => s.phase === 'milk', act: milk });
+  inter({ obj: 'Bakery', label: 'Choose bread', at: () => ({ x: 0, y: 0, z: -10 }), r: 2.8, when: () => s.phase === 'bread', act: bread });
+  inter({ obj: cash.name, label: 'Pay', at: () => ({ x: 12.6, y: 0, z: 9 }), r: 2.6, when: () => s.phase === 'till', act: till });
+
+  /* ---- 1. the list and the signs */
+  function listQuiz() {
+    hideMarker(); s.phase = 'reading';
+    paperQuiz('📝 SHOPPING LIST', 'Your host family\'s note, and the signs at the door.', 'Cawl tonight (veggie for Cerys!) 🥕<br>• 3 leeks · about 2 kg potatoes · carrots<br>• vegetable stock cubes<br>• 200 g Caerphilly cheese (deli)<br>• a crusty loaf<br>• 2 pints of semi-skimmed milk<br>Diolch! x<br><br>Signs: <b>CROESO</b> · <b>FFRWYTHAU A LLYSIAU</b> · <b>LLAETH</b> · <b>BECWS</b> · <b>TILIAU</b>', [
+      ['"Croeso" means…', 'Welcome', ['Exit', 'Special offer']],
+      ['Which stock cubes do you need?', 'Vegetable: Cerys is vegetarian', ['Chicken', 'Beef']],
+      ['How much cheese do you need?', '200 grams', ['2 kilos', '20 grams']]
+    ], (right, n) => {
+      for (let k = 0; k < n; k++) smOk(k < right);
+      complete('list', right < n);
+      if (right < n) notify('📝 Read it again', '"Croeso" = welcome. Vegetable stock for Cerys, and 200 g of cheese.', 'warn');
+      s.phase = 'veg'; setMarker(-12.4, 3.2, 5); notify('🥕 Fruit & veg', 'Start with the fruit and veg: "Ffrwythau a Llysiau".');
+    }, 'Go in');
+  }
+
+  /* ---- 2. fruit and veg: value for money */
+  function veg() {
+    hideMarker(); s.phase = 'choosing';
+    paperQuiz('FFRWYTHAU A LLYSIAU · FRUIT & VEG', 'Read the price labels. You need 3 leeks and about 2 kg of potatoes.', 'Leeks: loose <b>45p each</b> · pack of 3 <b>£1.60</b><br>Potatoes: 1 kg bag <b>£1.10</b> · 2.5 kg bag <b>£1.25</b> (50p per kg)<br>Carrots: 500 g bag <b>55p</b> · organic 500 g <b>£1.20</b>', [
+      ['Leeks', '3 loose leeks (£1.35)', ['A pack of 3 (£1.60)'], 'keep'],
+      ['Potatoes', 'A 2.5 kg bag (£1.25)', ['A 1 kg bag (£1.10)', 'Two 1 kg bags (£2.20)'], 'keep'],
+      ['Carrots', 'A 500 g bag (55p)', ['Organic 500 g (£1.20)'], 'keep']
+    ], (right, n, ans) => {
+      smOk(/^3 loose/.test(ans[0])); smOk(/2\.5/.test(ans[1])); smOk(/55p/.test(ans[2]));
+      add('Leeks', /^3 loose/.test(ans[0]) ? 1.35 : 1.6);
+      add('Potatoes', /2\.5/.test(ans[1]) ? 1.25 : /^Two/.test(ans[1]) ? 2.2 : 1.1);
+      add('Carrots', /55p/.test(ans[2]) ? 0.55 : 1.2);
+      if (/^A 1 kg/.test(ans[1])) notify('🥔 Not enough!', 'You need about 2 kg. The 2.5 kg bag is only 15p more and much better value.', 'warn');
+      complete('veg', right < 3);
+      if (right === 3) notify('💡 Smart shopping', 'Compare the price per kilo: bigger bags are often better value.', 'good');
+      if (s.ev.reach) { reveal('reach'); s.phase = 'reach'; old.av.visible = true; later(0.4, () => notify('👵 Excuse me…', 'An older customer is looking at you. Talk to them.')); setMarker(old.pos.x, 3.4, old.pos.z); return; }
+      toAsk();
+    }, 'Into the basket');
+  }
+  function reachTalk() {
+    hideMarker(); s.phase = 'reaching';
+    askR(old, lv({
+      easy: [['Excuse me, love. Can you help me? I can\'t reach the onions.', 'Perdona, cariño. ¿Me ayudas? No llego a las cebollas.', ['Of course! Here you are.', 'Yes, of course. Which ones do you want?']]],
+      normal: [['Sorry to bother you, bud. Could you reach me a bag of those red onions? They\'re right at the top.', 'Perdona que te moleste. ¿Me alcanzas una bolsa de esas cebollas rojas? Están arriba del todo.', ['Of course! This one? Here you go.', 'Sure, no problem. Here you are.']]],
+      hard: [['I don\'t suppose you could reach me those red onions, could you, love? They put everything on the top shelf these days!', '¿No podrías alcanzarme esas cebollas rojas, cariño? ¡Ahora lo ponen todo en la balda de arriba!', ['Of course! Is this bag all right, or would you prefer a different one?', 'No problem at all! There you go. Anything else you need from up there?']]]
+    }), [
+      { t: 'Ask a worker. I\'m busy.', kind: 'blunt', tip: 'It takes two seconds to help! "Of course! Here you are."', react: 'Oh. Right. Sorry I asked.' },
+      { t: 'Fine. Which one?', kind: 'blunt', tip: 'Sounds annoyed. Smile and say: "Of course! Which ones?"', react: 'Er… the red ones, please.' },
+      { t: 'It would be my honour to assist you, madam.', kind: 'stiff', tip: 'Very kind, but too formal! "Of course! Here you go."', react: 'Ooh, aren\'t you posh! Diolch!' }
+    ], [
+      { t: 'Yes, I take them for you.', kind: 'grammar', tip: 'Offers: "I\'ll get them for you."' },
+      { t: 'Of course. Here you have.', kind: 'grammar', tip: '"Here you are" / "Here you go."' },
+      { t: 'Which ones you want?', kind: 'grammar', tip: '"Which ones do you want?"' }
+    ], p => { complete('reach', p.kind === 'blunt'); line(old, 'Diolch, love! That means thank you in Welsh. Lush!', '¡Diolch, cariño! Significa gracias en galés. ¡Genial!', toAsk, 'You\'re welcome!'); });
+  }
+
+  /* ---- 3. asking where the stock cubes are, then aisle 4 */
+  function toAsk() { s.phase = 'ask'; setMarker(-4.6, 3.2, 1.2); notify('🔎 Stock cubes?', 'You can\'t see the stock cubes. Ask the shop assistant in aisle 2.'); }
+  function askWorker() {
+    hideMarker(); s.phase = 'asking';
+    askR(worker, lv({
+      easy: [['Hiya! Can I help?', '¡Hola! ¿Te ayudo?', ['Yes, please. Where are the stock cubes?', 'Excuse me, where can I find stock cubes, please?']]],
+      normal: [['Hiya, you all right there?', '¡Hola! ¿Todo bien?', ['Yes, thanks. Could you tell me where the stock cubes are?', 'Excuse me, where can I find stock cubes, please?']]],
+      hard: [['You look a bit lost, bud. Can I help you find something?', 'Pareces un poco perdido/a. ¿Te ayudo a encontrar algo?', ['Yes, please! I\'m looking for vegetable stock cubes. Do you know which aisle they\'re in?', 'That would be great, thanks. I can\'t seem to find the stock cubes anywhere.']]]
+    }), [
+      { t: 'Stock cubes. Where?', kind: 'blunt', tip: 'Too short. "Excuse me, where can I find stock cubes, please?"', react: 'Er… aisle four.' },
+      { t: 'Show me the stock cubes.', kind: 'blunt', tip: 'An order. "Could you tell me where the stock cubes are?"', react: 'Right…' },
+      { t: 'Might you be so kind as to direct me to the stock cubes?', kind: 'stiff', tip: 'Too formal for a quick question. "Where can I find stock cubes, please?"', react: 'Ooh, very fancy! Sure.' }
+    ], [
+      { t: 'Where are the cubes of broth?', kind: 'grammar', tip: '"Pastillas de caldo" = stock cubes.' },
+      { t: 'Where can I find the stock cubes is?', kind: 'grammar', tip: '"Where can I find the stock cubes?" (no extra "is").' },
+      { t: 'Do you know where are the stock cubes?', kind: 'grammar', tip: 'Indirect question: "Do you know where the stock cubes ARE?"' }
+    ], () => {
+      complete('ask');
+      line(worker, lv({ easy: 'They\'re in aisle four, next to the pasta.', normal: 'They\'re in aisle four, on the left, just after the pasta.', hard: 'Aisle four, bud, halfway down on the left: past the pasta, just before the tinned tomatoes.' }), lv({ easy: 'Están en el pasillo cuatro, al lado de la pasta.', normal: 'Están en el pasillo cuatro, a la izquierda, justo después de la pasta.', hard: 'En el pasillo cuatro, a mitad, a la izquierda: pasada la pasta, justo antes del tomate en lata.' }), () => paperQuiz('WHERE ARE THEY?', 'What did the shop assistant say?', '', [
+        ['Which aisle?', 'Aisle 4', ['Aisle 2', 'Aisle 5']],
+        ['Next to…', 'the pasta', ['the bread', 'the milk']]
+      ], right => {
+        smOk(right === 2); if (right < 2) notify('👂 Listen again', 'Aisle four, next to the pasta.', 'warn');
+        if (s.ev.squeeze) { s.phase = 'squeeze'; reveal('squeeze'); setMarker(6, 3.4, -1.8); notify('🛒 Blocked!', 'A trolley is blocking aisle 4. Ask the customer politely.', 'warn'); return; }
+        s.phase = 'aisle4'; setMarker(6, 3.2, -6);
+      }, 'Go'), 'Thanks!');
+    });
+  }
+  function squeeze() {
+    hideMarker(); s.phase = 'squeezing';
+    askR(trolley, lv({
+      easy: [['Hmm, tinned tomatoes or chopped tomatoes…', 'Mmm, ¿tomates enteros o troceados…?', ['Excuse me, can I go past, please?', 'Sorry, excuse me! Can I get past?']]],
+      normal: [['Hmm… which of these is cheaper…?', 'Mmm… ¿cuál de estos es más barato…?', ['Sorry, excuse me. Could I just squeeze past?', 'Excuse me, sorry. Could you move your trolley a little, please?']]],
+      hard: [['Honestly, why do they keep moving everything around?', 'De verdad, ¿por qué no paran de cambiarlo todo de sitio?', ['I know, it\'s so confusing! Sorry, could I just squeeze past you?', 'Tell me about it! Sorry to be a pain, but would you mind moving your trolley a little?']]]
+    }), [
+      { t: 'Move your trolley.', kind: 'blunt', tip: 'An order. "Excuse me, could I just squeeze past?"', react: 'Charming!' },
+      { t: 'You\'re in the way.', kind: 'blunt', tip: 'Sounds rude. Start with "Sorry, excuse me…"', react: 'Oh! Sorry, I\'m sure.' },
+      { t: 'I beseech you to relocate your conveyance.', kind: 'stiff', tip: 'Ha, way too formal! "Could I just squeeze past?"', react: 'My… conveyance? Oh, the trolley!' }
+    ], [
+      { t: 'Perdon, can I pass for here?', kind: 'grammar', tip: '"Excuse me, could I get past?"' },
+      { t: 'Sorry, you can move?', kind: 'grammar', tip: 'Question: "Could you move a little, please?"' },
+      { t: 'Excuse me, let me pass, thank.', kind: 'grammar', tip: '"Thanks" or "thank you".' }
+    ], p => { complete('squeeze', p.kind === 'blunt'); walkTo(trolley, [[6, -9.6]]); cart.position.z = -11; line(trolley, 'Oh, sorry, love! I was miles away. There you go.', '¡Ay, perdona, cariño! Estaba en las nubes. Pasa.', () => { s.phase = 'aisle4'; setMarker(6, 3.2, -6); }, 'Thanks!'); });
+  }
+  function stock() {
+    hideMarker(); s.phase = 'stocking';
+    paperQuiz('AISLE 4 · STOCK CUBES', 'Read the labels. Remember: Cerys is vegetarian.', 'Chicken stock cubes ×8 · <b>70p</b><br>Beef stock cubes ×8 · <b>70p</b><br>Vegetable stock cubes ×8 · <b>80p</b> · <span style="color:#2e7d32">✔ Suitable for vegetarians</span><br>Vegetable stock pots ×4 · <b>£1.75</b> · <span style="color:#2e7d32">✔ Suitable for vegetarians</span>', [
+      ['Which do you take?', 'Vegetable stock cubes, 80p', ['Chicken stock cubes, 70p: they\'re cheaper', 'Vegetable stock pots, £1.75']]
+    ], (right, n, ans) => {
+      smOk(right === 1); const p = /80p/.test(ans[0]) ? 0.8 : /£1\.75/.test(ans[0]) ? 1.75 : 0.7; add(/^Chicken/.test(ans[0]) ? 'Chicken stock' : 'Veg stock', p);
+      if (/^Chicken/.test(ans[0])) { s.meat = true; G.mistakes.push({ said: 'I bought chicken stock cubes.', tip: 'Cerys is vegetarian! Look for "Suitable for vegetarians".' }); notify('🐔 Oh no!', 'Chicken stock isn\'t vegetarian. Cerys can\'t eat it!', 'bad'); }
+      complete('stock', !right);
+      s.phase = 'deli'; setMarker(-13, 3.2, -9); notify('🧀 The deli counter', 'Now order the Caerphilly cheese at the deli (north-west corner).');
+    }, 'Into the basket');
+  }
+
+  /* ---- 4. the deli counter: weights and vegetarian cheese */
+  function deliTalk() {
+    hideMarker(); s.phase = 'delis';
+    askR(deli, lv({
+      easy: [['Hiya! What would you like?', '¡Hola! ¿Qué quieres?', ['Hi! Can I have 200 grams of Caerphilly cheese, please?', 'Hello! 200 grams of Caerphilly, please.']]],
+      normal: [['Morning! Who\'s next? What can I get you?', '¡Buenos días! ¿A quién le toca? ¿Qué te pongo?', ['Hi! Could I have 200 grams of Caerphilly, please?', 'Hi. Could I get 200 grams of the Caerphilly cheese, please?']]],
+      hard: [['Right, who\'s next? What can I do you for, bud?', 'Bueno, ¿quién va? ¿Qué te pongo?', ['Hi! Could I have about 200 grams of the Caerphilly, please? It\'s for a cawl.', 'Hiya. I\'m after roughly 200 grams of Caerphilly, if that\'s OK.']]]
+    }), [
+      { t: 'Cheese. 200 grams. Now.', kind: 'blunt', tip: 'Way too direct. "Could I have 200 grams of Caerphilly, please?"', react: 'All right, all right…' },
+      { t: 'Give me the white cheese.', kind: 'blunt', tip: 'An order, and not clear. "Could I have 200 grams of Caerphilly, please?"', react: 'Which one? We\'ve got six white ones…' },
+      { t: 'I should be grateful for two hundred grammes of your finest Caerphilly.', kind: 'stiff', tip: 'Too formal for the deli. "Could I have 200 grams of Caerphilly, please?"', react: 'Ooh, our finest! Very posh!' }
+    ], [
+      { t: 'I want two hundreds grams of cheese Caerphilly.', kind: 'grammar', tip: '"Two hundred" (no -s), and "Caerphilly cheese" (adjective first).' },
+      { t: 'Can you give me 200 grams of the Caerphilly, for favour?', kind: 'grammar', tip: '"Por favor" = please.' },
+      { t: 'Put me 200 grams of Caerphilly.', kind: 'grammar', tip: '"Ponme" = Could I have…?' }
+    ], () => {
+      const w = lv({ easy: 200, normal: 230, hard: 240 }), price = Math.round(w * 1.2) / 100;
+      if (w === 200) return line(deli, 'There you go: 200 grams exactly. That\'s £2.40. Anything else?', 'Aquí tienes: 200 gramos justos. Son 2,40 £. ¿Algo más?', () => { add('Caerphilly 200 g', 2.4); veggie(); }, 'Just one question…');
+      askR(deli, [[`Ooh, it's a bit over: ${w} grams. Is that OK?`, `Uy, me he pasado un poco: ${w} gramos. ¿Te vale?`, lv({ normal: ['Yes, that\'s fine, thanks.', 'That\'s OK, no problem.'], hard: ['That\'s fine, don\'t worry about it.', 'Yeah, that\'s close enough, thanks.'] })]], [
+        { t: 'No. I said 200. Do it again.', kind: 'blunt', tip: 'A little over is normal at the deli. "That\'s fine, thanks."', react: 'OK, OK, I\'ll cut it again…' },
+        { t: 'You can\'t cut cheese properly?', kind: 'blunt', tip: 'Rude! "That\'s fine, thanks."', react: 'Excuse me?' }
+      ], [
+        { t: 'Is OK, not problem.', kind: 'grammar', tip: '"That\'s OK, no problem."' },
+        { t: 'Yes, is good for me.', kind: 'grammar', tip: '"Yes, that\'s fine (for me)."' }
+      ], () => { add(`Caerphilly ${w} g`, price); veggie(); });
+    });
+  }
+  function veggie() {
+    askR(deli, lv({
+      easy: [['Anything else?', '¿Algo más?', ['Yes. Is this cheese OK for vegetarians?', 'Is it vegetarian, please?']]],
+      normal: [['Anything else for you?', '¿Algo más?', ['Just one question: is this cheese suitable for vegetarians?', 'Is the Caerphilly suitable for vegetarians? My host sister doesn\'t eat meat.']]],
+      hard: [['Anything else I can do for you?', '¿Algo más que pueda hacer por ti?', ['Actually, could you tell me whether it\'s suitable for vegetarians? It\'s for my host sister.', 'Just one thing: is it made with vegetarian rennet? My host sister\'s vegetarian.']]]
+    }), [
+      { t: 'Tell me if it\'s vegetarian.', kind: 'blunt', tip: 'An order. "Is it suitable for vegetarians, please?"', react: 'Let me check…' },
+      { t: 'It had better be vegetarian.', kind: 'blunt', tip: 'Sounds threatening! "Is it suitable for vegetarians?"', react: 'Er… let me check the label.' },
+      { t: 'I must enquire as to the vegetarian credentials of this cheese.', kind: 'stiff', tip: 'Too formal. "Is it suitable for vegetarians?"', react: 'Its… credentials? Ha!' }
+    ], [
+      { t: 'This cheese is vegetarian or not?', kind: 'grammar', tip: 'Question order: "Is this cheese vegetarian?"' },
+      { t: 'Is apt for vegetarians?', kind: 'grammar', tip: '"Apto" = suitable: "Is it suitable for vegetarians?"' }
+    ], () => line(deli, 'Good question! Some cheese is made with animal rennet. This one\'s fine: look, there\'s the green "V" on the label. Lush. Ta-ra!', '¡Buena pregunta! Algunos quesos se hacen con cuajo animal. Este está bien: mira, tiene la "V" verde en la etiqueta. ¡Genial! ¡Hasta luego!', () => {
+      smOk(true); complete('deli'); s.phase = 'milk'; setMarker(13, 3.2, -10.6); notify('🥛 Llaeth · Dairy', 'Now the milk, in the fridges on the right.');
+    }, 'Diolch!'));
+  }
+
+  /* ---- 5. milk dates, a little accident and the bread */
+  function milk() {
+    hideMarker(); s.phase = 'milking';
+    paperQuiz('LLAETH · DAIRY', 'Today is Monday 14th. You need 2 pints of semi-skimmed milk for the whole week.', 'A · Semi-skimmed 2 pints · <b>£0.95</b> · USE BY 15 MAR<br>B · Semi-skimmed 2 pints · <b>£0.95</b> · USE BY 21 MAR<br>C · Whole milk 2 pints · <b>£0.95</b> · USE BY 21 MAR<br>D · Semi-skimmed 2 pints · <b>£0.60</b> · <span style="color:#c62828">REDUCED · USE BY 14 MAR</span>', [
+      ['Which milk do you buy?', 'B: semi-skimmed, use by 21 March', ['D: it\'s reduced, so it\'s cheaper', 'C: whole milk, use by 21 March']],
+      ['"Use by 14 Mar" means…', 'Don\'t drink it after the 14th: it may not be safe', ['It\'s best before the 14th, but it\'s fine for weeks', 'You can only buy it on the 14th']]
+    ], (right, n, ans) => {
+      smOk(/^B/.test(ans[0])); smOk(/^Don\'t drink/.test(ans[1]));
+      add('Milk 2 pints', /^D/.test(ans[0]) ? 0.6 : 0.95);
+      if (!/^B/.test(ans[0])) notify('🥛 Check the label', /^D/.test(ans[0]) ? 'Reduced milk that must be drunk TODAY won\'t last the week!' : 'The list said semi-skimmed, not whole milk.', 'warn');
+      complete('milk', !/^B/.test(ans[0]));
+      if (s.ev.drop) { reveal('drop'); return dropEv(); }
+      toBread();
+    }, 'Into the basket');
+  }
+  function dropEv() {
+    choice(null, 'CRASH! As you take the milk, your elbow knocks a box of eggs onto the floor. There\'s egg everywhere!', '¡CRAC! Al coger la leche, le das con el codo a una caja de huevos y se cae al suelo. ¡Hay huevo por todas partes!', shuffle([
+      { t: 'Tell a shop assistant.', say: false, fn: () => askR(worker, lv({
+        easy: [['Hiya again! Everything OK?', '¡Hola otra vez! ¿Todo bien?', ['Sorry, I dropped some eggs by the milk. I\'m really sorry!', 'I\'m so sorry, I\'ve broken some eggs in the dairy section.']]],
+        normal: [['Hiya again! Everything OK?', '¡Hola otra vez! ¿Todo bien?', ['I\'m really sorry, I\'ve knocked a box of eggs off the shelf by the milk. Should I pay for them?', 'Sorry, I\'ve had a little accident: I\'ve dropped some eggs in the dairy aisle.']]],
+        hard: [['Oh dear, what\'s happened here?', 'Ay, madre, ¿qué ha pasado aquí?', ['I\'m so sorry: I knocked a box of eggs off the shelf by accident. Is there anything I can do? I\'m happy to pay for them.', 'Sorry, that was me, I\'m afraid. I caught them with my elbow. Should I pay for them?']]]
+      }), [
+        { t: 'There are eggs on the floor. Clean them.', kind: 'blunt', tip: 'Say sorry first! "I\'m really sorry, I dropped some eggs."', react: 'Right… thanks for telling me.' },
+        { t: 'It wasn\'t really my fault.', kind: 'blunt', tip: 'Own up: "I\'m so sorry, that was me."', react: 'Hmm. OK.' },
+        { t: 'I must confess to a most regrettable incident involving eggs.', kind: 'stiff', tip: 'Too dramatic! "Sorry, I\'ve dropped some eggs."', react: 'A regrettable incident! Ha!' }
+      ], [
+        { t: 'Sorry, I have fallen some eggs.', kind: 'grammar', tip: '"Se me han caído" = I\'ve dropped: "I\'ve dropped some eggs."' },
+        { t: 'Sorry, the eggs are broke.', kind: 'grammar', tip: '"Broken": "The eggs are broken."' }
+      ], p => { complete('drop', p.kind === 'blunt'); line(worker, 'Ah, don\'t worry, love, it happens ten times a day! Thanks for telling me. No, you don\'t have to pay. I\'ll grab the mop.', 'Ah, no te preocupes, cariño, ¡pasa diez veces al día! Gracias por avisar. No, no tienes que pagarlos. Voy a por la fregona.', toBread, 'Diolch!'); }) },
+      { t: 'Walk away quickly. Nobody saw.', say: false, fn: () => { complete('drop', true); G.manners = Math.max(0, G.manners - 15); pop('Manners −15', 'bad'); G.mistakes.push({ said: 'I walked away from the broken eggs.', tip: 'Someone could slip! Tell a member of staff: "Sorry, I\'ve dropped some eggs."' }); notify('😬 Not OK', 'Someone could slip on the eggs. Always tell a member of staff.', 'bad'); toBread(); } }
+    ]));
+  }
+  function toBread() { s.phase = 'bread'; setMarker(0, 3.2, -10); notify('🍞 Becws · Bakery', 'Now get a crusty loaf at the bakery.'); }
+  function bread() {
+    hideMarker(); s.phase = 'breading';
+    if (!s.ev.out) {
+      return paperQuiz('BECWS · BAKERY', 'The list says: a crusty loaf.', 'Crusty white loaf · <b>£1.20</b><br>Wholemeal loaf · <b>£1.35</b><br>Bara brith (Welsh fruit bread) · <b>£2.50</b>', [
+        ['Which do you take?', 'Crusty white loaf, £1.20', ['Bara brith, £2.50', 'Wholemeal loaf, £1.35']]
+      ], right => { smOk(right === 1); add(right ? 'Crusty loaf' : 'Other bread', right ? 1.2 : 2); complete('bread', !right); toTill(); }, 'Into the basket');
+    }
+    reveal('out');
+    notify('🍞 Sold out!', 'There are no crusty loaves left. Call home to ask what to get instead.', 'warn');
+    askR(host, lv({
+      easy: [['Hi, love! Is everything OK?', '¡Hola, cariño! ¿Todo bien?', ['Hi! There\'s no crusty bread. Do you want wholemeal bread?', 'Hi! They haven\'t got any crusty loaves. Is wholemeal OK?']]],
+      normal: [['Hiya! You all right? Found everything?', '¡Hola! ¿Todo bien? ¿Lo has encontrado todo?', ['Nearly! They\'ve run out of crusty loaves. Shall I get a wholemeal one instead?', 'Almost! There aren\'t any crusty loaves left. Is wholemeal OK?']]],
+      hard: [['Hiya, love! Don\'t tell me: they\'ve run out of something!', '¡Hola, cariño! No me lo digas: ¡se les ha acabado algo!', ['Ha, how did you guess? No crusty loaves. Shall I grab a wholemeal one, or would you rather have bara brith?', 'Spot on! They\'ve sold out of crusty bread. Would wholemeal do, or shall I get something else?']]]
+    }), [
+      { t: 'Dear host, I regret to inform you that the bread is unavailable.', kind: 'stiff', tip: 'It\'s your host family! "They\'ve run out of crusty bread. Is wholemeal OK?"', react: 'Ha! Dear host?! You\'re hilarious.' },
+      { t: 'Kindly advise which alternative loaf you would prefer.', kind: 'stiff', tip: 'Too formal for home. "Shall I get a wholemeal one instead?"', react: 'Er… wholemeal, Your Majesty!' }
+    ], [
+      { t: 'There is not crusty bread. I buy wholemeal?', kind: 'grammar', tip: '"There isn\'t any crusty bread. Shall I get wholemeal?"' },
+      { t: 'The crusty bread is finished it.', kind: 'grammar', tip: '"They\'ve run out of crusty bread."' },
+      { t: 'They have sold all the bread crusty.', kind: 'grammar', tip: 'Adjective first: "crusty bread".' }
+    ], () => line(host, 'Wholemeal\'s lush, yeah. Thanks for checking, love!', 'Integral está genial, sí. ¡Gracias por preguntar, cariño!', () => { complete('out'); complete('bread'); add('Wholemeal loaf', 1.35); toTill(); }, 'OK, see you soon!'));
+  }
+
+  /* ---- 6. the till: bags, a wrong price, the change */
+  function toTill() { s.phase = 'till'; setMarker(12.6, 3.2, 9); notify('🧾 Tiliau · Tills', 'Everything\'s in your basket. Go and pay at the till.'); }
+  function till() {
+    hideMarker(); s.phase = 'paying';
+    askR(cash, lv({
+      easy: [['Hiya! Do you need a bag?', '¡Hola! ¿Necesitas bolsa?', s.ev.bag ? ['Yes, please. How much is it?', 'Yes, please. I forgot my bag.'] : ['No, thanks. I have my bag.', 'No, thank you. I\'ve got a bag.']]],
+      normal: [['Hiya! Do you need a bag today?', '¡Hola! ¿Necesitas bolsa hoy?', s.ev.bag ? ['Yes, please. I\'ve forgotten mine. How much are they?', 'Oh, yes please: I left mine at home.'] : ['No, thanks, I\'ve brought my own.', 'No, thanks. I\'ve got one here.']]],
+      hard: [['Hiya, bud! Need a bag, or have you brought your own?', '¡Hola! ¿Necesitas bolsa o traes la tuya?', s.ev.bag ? ['I\'d better have one, please: I\'ve gone and forgotten mine. How much are they?', 'Yes please, I left mine on the kitchen table, would you believe!'] : ['No, I\'m fine, thanks: I\'ve brought my own.', 'I\'ve got my own, thanks. Every little helps!']]]
+    }), [
+      { t: 'Obviously not. I\'ve got eyes.', kind: 'blunt', tip: 'Sarcastic and rude. "No, thanks. I\'ve got my own."', react: 'Just asking…' },
+      { t: 'Just scan it.', kind: 'blunt', tip: 'Too abrupt. Answer the question politely first.', react: 'OK…' },
+      { t: 'I thank you for your solicitous enquiry regarding my bag.', kind: 'stiff', tip: 'Way too formal. "No, thanks" or "Yes, please".', react: 'Ha! You\'re welcome, I think!' }
+    ], [
+      { t: 'No, thank. I bring my bag.', kind: 'grammar', tip: '"No, thanks. I\'ve brought my bag."' },
+      { t: 'Yes, I have forgot my bag.', kind: 'grammar', tip: 'Forget – forgot – forgotten: "I\'ve forgotten my bag."' },
+      { t: 'Yes, give me one bag, please.', kind: 'grammar', tip: '"Could I have a bag, please?"' }
+    ], () => {
+      if (s.ev.bag) { reveal('bag'); add('Bag for life', 0.1); notify('👜 A bag for life', 'In Wales, shops charge for bags. Next time bring your own!'); }
+      line(cash, 'Lush. Have you got a Dragon Card? You get points.', 'Genial. ¿Tienes la Dragon Card? Acumulas puntos.', () => s.ev.price ? priceEv() : pay(), 'No, sorry!');
+    });
+  }
+  function priceEv() {
+    reveal('price');
+    const sp = (s.basket.find(b => /stock/.test(b.name)) || { price: 0.8 }).price, shelf = L(sp), wrong = L(sp + 0.5);
+    paperQuiz('THE TILL SCREEN', 'Watch the screen as the cashier scans your shopping.', s.basket.filter(b => !/^Bag/.test(b.name)).map(b => `${b.name} ${L(/stock/.test(b.name) ? b.price + 0.5 : b.price)}`).join('<br>'), [
+      ['Is everything the same price as on the shelf?', 'No: the stock cubes are 50p more', ['Yes, everything is correct', 'No: the milk is 50p more']]
+    ], right => {
+      smOk(right === 1);
+      if (!right) { complete('price', true); s.spent = Math.round((s.spent + 0.5) * 100) / 100; updateBoard(); G.mistakes.push({ said: 'I didn\'t check the screen.', tip: 'Watch the till screen. If a price is wrong, say: "Sorry, I think that\'s scanned at the wrong price."' }); notify('💸 50p lost', 'The stock cubes were scanned 50p too high. Always watch the screen!', 'bad'); return pay(); }
+      askR(cash, lv({
+        easy: [['Is everything OK?', '¿Todo bien?', [`Sorry, the stock cubes are ${shelf} on the shelf, not ${wrong}.`, `Excuse me, I think the stock cubes are ${shelf}.`]]],
+        normal: [['Everything OK?', '¿Todo bien?', ['Sorry, I think the stock cubes have scanned at the wrong price. They were ' + shelf + ' on the shelf.', 'Excuse me, the label on the shelf said ' + shelf + ' for the stock cubes.']]],
+        hard: [['Anything wrong, love?', '¿Pasa algo, cariño?', [`Sorry to be a pain, but I think the stock cubes have come up at the wrong price. The shelf label said ${shelf}.`, `I might be wrong, but weren't the stock cubes ${shelf}? The screen says ${wrong}.`]]]
+      }), [
+        { t: 'You\'re charging me too much.', kind: 'blunt', tip: 'Sounds like an accusation. "Sorry, I think that\'s scanned at the wrong price."', react: 'Let me check, love.' },
+        { t: 'Wrong price. Fix it.', kind: 'blunt', tip: 'An order. "Sorry, I think the stock cubes were cheaper on the shelf."', react: 'All right…' },
+        { t: 'I must protest at this pricing irregularity.', kind: 'stiff', tip: 'Too formal and dramatic. "Sorry, I think that\'s the wrong price."', react: 'Ooh! Let me look.' }
+      ], [
+        { t: 'The cubes of stock is more expensive that in the shelf.', kind: 'grammar', tip: '"The stock cubes are more expensive THAN ON the shelf."' },
+        { t: 'Is wrong the price.', kind: 'grammar', tip: '"The price is wrong" / "I think that\'s the wrong price."' }
+      ], () => line(cash, `You're right, love: the till hasn't caught up with the new price. Sorted: ${shelf}. Well spotted!`, `Tienes razón, cariño: la caja no tiene el precio nuevo. Arreglado: ${shelf}. ¡Bien visto!`, () => { complete('price'); pay(); }, 'Diolch!'));
+    }, 'Check');
+  }
+  function pay() {
+    const ch = Math.round((s.budget - s.spent) * 100) / 100; s.change = ch; G.money = ch;
+    line(cash, `That's ${L(s.spent)}, please.`, `Son ${L(s.spent)}, por favor.`, () => paperQuiz('YOUR CHANGE', `You pay with a £${s.budget} note.`, `Total: <b>${L(s.spent)}</b>`, [
+      ['How much change should you get?', L(ch), [L(ch + 1), L(Math.max(0, ch - 0.5))].filter(x => x !== L(ch))],
+      ['What do you take home?', 'The shopping, the change and the receipt', ['Just the shopping', 'The shopping and the change']]
+    ], right => {
+      smOk(right === 2); complete('till'); complete('change', right < 2);
+      line(cash, 'There you go, love. Diolch! Have a lush evening!', 'Aquí tienes, cariño. ¡Diolch! ¡Que pases una tarde estupenda!', finish, 'Diolch! Bye!');
+    }, 'Pay'), `Hand over the £${s.budget} note`);
+  }
+
+  function finish() {
+    const shop = s.smN ? Math.round(100 * s.sm / s.smN) : 100, eng = engPct();
+    const ideal = 1.35 + 1.25 + 0.55 + 0.8 + 2.4 + 0.95 + (s.ev.out ? 1.35 : 1.2) + (s.ev.bag ? 0.1 : 0);
+    const moneyScore = s.meat ? 40 : clamp(Math.round(100 - Math.max(0, s.spent - ideal - 0.4) * 30), 0, 100);
+    const overall = 0.3 * shop + 0.2 * moneyScore + 0.25 * eng + 0.25 * G.manners;
+    const good = [], bad = [];
+    if (!obj('veg').failed) good.push('You compared prices: loose leeks and the 2.5 kg bag of potatoes were the best value.'); else bad.push('Compare prices and the price per kilo: loose veg and bigger bags are often cheaper.');
+    if (!obj('stock').failed && !s.meat) good.push('You read the labels and chose vegetarian stock for Cerys.'); else bad.push('Check labels for "Suitable for vegetarians": chicken stock isn\'t veggie!');
+    if (!obj('deli').failed) good.push('You ordered at the deli by weight and asked if the cheese was vegetarian.');
+    if (!obj('milk').failed) good.push('You understood "use by": the milk will last all week.'); else bad.push('"Use by" is a safety date: don\'t eat or drink it after that day.');
+    if (s.ev.reach && !obj('reach').failed) good.push('You helped an older customer reach the top shelf.');
+    if (s.ev.squeeze && !obj('squeeze').failed) good.push('You got past a trolley politely: "Could I just squeeze past?"');
+    if (s.ev.drop) { if (!obj('drop').failed) good.push('You owned up when you dropped the eggs.'); else bad.push('If you break something in a shop, tell a member of staff.'); }
+    if (s.ev.out) good.push('The bread had sold out, so you called home to check before buying something else.');
+    if (s.ev.price) { if (!obj('price').failed) good.push('You spotted a wrong price on the till screen and said so politely.'); else bad.push('Watch the till screen: prices can be wrong.'); }
+    if (!G.reg) good.push('Perfect register: polite with staff and customers, relaxed with your host family.');
+    if (G.manners === 100) good.push('Perfect manners. Diolch yn fawr! 🏴󠁧󠁢󠁷󠁬󠁳󠁿');
+    showResults({ title: 'Shopping done: cawl tonight!', overall, metrics: [['Smart shopping', shop], ['Money', moneyScore], ['English', eng], ['Manners', G.manners]], good, bad });
   }
 }
 
