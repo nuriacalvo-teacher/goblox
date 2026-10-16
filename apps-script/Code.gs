@@ -27,6 +27,9 @@ const CONFIG = {
   REQUIRE_CLASS_CODE: true,
   // true: los alumnos no pueden cambiar su nombre; siempre se usa el de su cuenta (o el que ponga el profesor)
   LOCK_NAMES: true,
+  // Funciones nuevas de Mi Nación. false = el juego funciona exactamente como antes.
+  // mejoras: precio progresivo de edificios repetibles + mejoras de nivel 2 y 3 (casas y estadio)
+  FEATURES: { mejoras: false },
   // GOYUX por dificultad (la puntuación se multiplica por este valor)
   DIFFICULTY: { easy: 1, normal: 1.25, hard: 1.5 }
 };
@@ -552,6 +555,15 @@ const BUILD = {
   stonehenge: [130, 0, 4, 2, 0, 20, 2], newgrange: [130, 0, 4, 2, 0, 20, 2], inukshuk: [105, 0, 4, 0, 2, 16, 4], towerbridge: [145, 0, 6, 8, 0, 16, 0],
   hobbiton: [145, 0, 10, 6, 0, 16, 4], whitehouse: [155, 0, 6, 6, 8, 16, 0], goldengate: [155, 0, 6, 10, 0, 18, 0], harbourbridge: [155, 0, 6, 10, 0, 18, 0]
 };
+/* MIRROR (index.html: FEAT, REPEAT_B, bPrice): with FEATURES.mejoras on, every copy of a repeatable building
+   the nation already has makes the next one 10 % dearer. */
+const mejoras_ = () => !!(CONFIG.FEATURES && CONFIG.FEATURES.mejoras);
+const REPEAT = ['houses', 'farm', 'park', 'forest'];
+const buildPrice_ = (id, n) => {
+  const base = BUILD[id][0];
+  if (!mejoras_() || REPEAT.indexOf(id) < 0) return base;
+  return Math.round(base * Math.pow(1.1, Object.values(n.buildings || {}).filter(x => x === id).length));
+};
 const MONUMENTS = ['bigben', 'castle', 'stonehenge', 'newgrange', 'cntower', 'inukshuk', 'towerbridge', 'hobbiton', 'liberty', 'whitehouse', 'goldengate', 'opera', 'harbourbridge'];
 const UNIQUE = ['cityhall', 'parliament', 'embassy', 'port', 'stadium', 'airport', 'mine', 'lighthouse'].concat(MONUMENTS);
 /* The map:
@@ -669,7 +681,8 @@ function nationState_(email) {
   return {
     nation: n, stats, treaties: tr.acceptedList, inbox: tr.inbox, sent: tr.sent, summits: tr.summits, treatyPrize: TREATY_PRIZE, treatyPaid: TREATY_PAID,
     goyux: { xp: st.xp, granted: st.granted, nationNet: n ? n.income - n.spent : 0, total: st.xp + st.granted + (n ? n.income - n.spent : 0) },
-    taxReady: !!n && n.lastTax !== today_(), taxAmount: stats ? taxAmount_(stats) : 0
+    taxReady: !!n && n.lastTax !== today_(), taxAmount: stats ? taxAmount_(stats) : 0,
+    features: { mejoras: mejoras_() }
   };
 }
 function cleanText_(t, max) { return String(t || '').replace(/[^\p{L}\p{N} .,'!?&-]/gu, '').replace(/\s+/g, ' ').trim().slice(0, max); }
@@ -738,8 +751,9 @@ function nationBuild(i, id, guestCode) {
     if (!n.plots.includes(i) || n.buildings[i]) throw new Error('You cannot build there.');
     if (UNIQUE.includes(id) && Object.values(n.buildings).includes(id)) throw new Error('Your nation already has one.');
     if (!fitsPlot_(id, i)) throw new Error('That building cannot be built on this plot.');
-    if (available_(u.email, n) < b[0]) throw new Error('You need ' + b[0] + ' GOYUX for this building.');
-    n.buildings[i] = id; n.spent += b[0]; saveNation_(n);
+    const price = buildPrice_(id, n);
+    if (available_(u.email, n) < price) throw new Error('You need ' + price + ' GOYUX for this building.');
+    n.buildings[i] = id; n.spent += price; saveNation_(n);
     return nationState_(u.email);
   });
 }
@@ -780,7 +794,7 @@ function nationVisit(email, guestCode) {
   const n = getNation_(String(email || '').toLowerCase().trim());
   if (!n || !sameWorld_(u, n.email, studentClasses_(), classMap_())) throw new Error('That nation does not exist.');
   const tr = treatiesOf_(n.email).accepted;
-  return { nation: { leader: n.leader, name: n.name, capital: n.capital, motto: n.motto, flag: n.flag, plots: n.plots, buildings: n.buildings }, stats: nStats_(n, tr) };
+  return { nation: { leader: n.leader, name: n.name, capital: n.capital, motto: n.motto, flag: n.flag, plots: n.plots, buildings: n.buildings }, stats: nStats_(n, tr), features: { mejoras: mejoras_() } };
 }
 function nationSendTreaty(to, type, letter, guestCode) {
   const u = user_(guestCode);

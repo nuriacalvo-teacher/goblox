@@ -13079,6 +13079,15 @@ function nStats(n, treaties) {
 const plotPrice = owned => 31 + 2 * Math.max(0, owned - NR.start.length);   // the whole island ≈ 12,000 GOYUX of land
 const landPrice = (i, owned) => plotPrice(owned) + (SITES[i] ? 20 : 0);   // special sites cost a bit more
 const moveCost = id => Math.max(10, Math.round(BLD[id][2] / 2));
+/* MIRROR (Code.gs: mejoras_, REPEAT, buildPrice_). The server sends the real flag in every state; FEAT_OFFLINE is for play without the server. */
+const FEAT_OFFLINE = false;
+let FEAT = { mejoras: FEAT_OFFLINE };
+const REPEAT_B = ['houses', 'farm', 'park', 'forest'];
+const bPrice = (id, n) => {
+  const base = BLD[id][2];
+  if (!FEAT.mejoras || !REPEAT_B.includes(id)) return base;
+  return Math.round(base * Math.pow(1.1, Object.values(n.buildings || {}).filter(x => x === id).length));
+};
 const taxAmount = st => Math.min(30, 5 + Math.floor(Math.max(0, st.econ) / 10));
 const adjacentPlot = (i, plots) => { const r = Math.floor(i / NR.size), c = i % NR.size; return plots.some(p => Math.abs(Math.floor(p / NR.size) - r) + Math.abs(p % NR.size - c) === 1); };
 
@@ -14387,7 +14396,7 @@ const NAPI = {
   cloud: () => CLOUD && account,
   local() {
     const n = store.get('nation', null), st = n ? nStats(n, []) : null, net = n ? n.income - n.spent : 0;
-    return { nation: n, stats: st, treaties: [], inbox: [], sent: [], offline: true, taxReady: !!n && n.lastTax !== todayStr(), taxAmount: st ? taxAmount(st) : 0,
+    return { nation: n, stats: st, features: { mejoras: FEAT_OFFLINE }, treaties: [], inbox: [], sent: [], offline: true, taxReady: !!n && n.lastTax !== todayStr(), taxAmount: st ? taxAmount(st) : 0,
       goyux: { xp: profile.xp || 0, granted: profile.granted || 0, nationNet: net, total: (profile.xp || 0) + (profile.granted || 0) + net } };
   },
   async run(fn, args, offline) { if (NAPI.cloud()) return apiU(fn, ...args); offline(); return NAPI.local(); },
@@ -14413,8 +14422,9 @@ const NAPI = {
       if (!n.plots.includes(i) || n.buildings[i]) throw new Error('You cannot build there.');
       if (UNIQUE_B.includes(id) && Object.values(n.buildings).includes(id)) throw new Error('Your nation already has one.');
       if (!fitsPlot(id, i)) throw new Error(`${BLD[id][0]} can't be built there.`);
-      if (s.goyux.total < b[2]) throw new Error(`You need ${b[2]} GOYUX for this building.`);
-      n.buildings[i] = id; n.spent += b[2]; store.set('nation', n);
+      const price = bPrice(id, n);
+      if (s.goyux.total < price) throw new Error(`You need ${price} GOYUX for this building.`);
+      n.buildings[i] = id; n.spent += price; store.set('nation', n);
     });
   },
   move(from, to) {
@@ -14963,6 +14973,7 @@ function applyNation(st) {
   if (!G || G.id !== 'nation') return;
   const prevPlots = G.s.state && G.s.state.nation ? G.s.state.nation.plots.length + Object.keys(G.s.state.nation.buildings).length : -1;
   G.s.state = st;
+  if (st.features) FEAT = { mejoras: !!st.features.mejoras };
   if (st.goyux && !G.s.visit) { profile.xp = st.goyux.xp; profile.granted = st.goyux.granted; profile.nationNet = st.goyux.nationNet; store.set('profile', profile); }
   if (st.nation && !G.s.visit) store.set('nationCache', { name: st.nation.name, flag: st.nation.flag, score: st.stats.score, pop: st.stats.pop, buildings: Object.keys(st.nation.buildings).length });
   const now = st.nation ? st.nation.plots.length + Object.keys(st.nation.buildings).length : -1;
@@ -15188,11 +15199,11 @@ function buildMenu(i) {
   const st = G.s.state, n = st.nation, have = Object.values(n.buildings);
   const grid = el('div', 'bgrid');
   Object.entries(BLD).filter(([id]) => id !== 'cityhall' && fitsPlot(id, i)).forEach(([id, b]) => {
-    const done = UNIQUE_B.includes(id) && have.includes(id), poor = st.goyux.total < b[2];
+    const price = bPrice(id, n), done = UNIQUE_B.includes(id) && have.includes(id), poor = st.goyux.total < price;
     const topic = 'Mixed grammar (harder as your nation grows) + 🌍 culture';
-    const c = el('div', 'bcard' + (MONUMENTS.includes(id) ? ' mon' : ''), `<div class="b-top"><span class="b-emo">${b[1]}</span><b>${escH(b[0])}</b><span class="b-cost"><i class="gx">G</i>${b[2]}</span></div>
+    const c = el('div', 'bcard' + (MONUMENTS.includes(id) ? ' mon' : ''), `<div class="b-top"><span class="b-emo">${b[1]}</span><b>${escH(b[0])}</b><span class="b-cost"><i class="gx">G</i>${price}</span></div>
       <p>${escH(b[5])}</p><div class="fxs">${fxChips(b[3])}</div><small>📝 ${escH(topic)}</small>`);
-    const btn = el('button', 'btn ' + (done || poor ? '' : 'primary'), done ? 'Already built' : poor ? `Need ${b[2] - st.goyux.total} more GOYUX` : 'Take the test & build');
+    const btn = el('button', 'btn ' + (done || poor ? '' : 'primary'), done ? 'Already built' : poor ? `Need ${price - st.goyux.total} more GOYUX` : 'Take the test & build');
     btn.disabled = done || poor;
     btn.onclick = () => runQuiz({ title: `Build: ${b[0]}`, graded: true, culture: id, n: 4, onPass: async () => {
       try { applyNation(await NAPI.build(i, id)); notify('🏗 Built!', `${b[0]} is ready. ${N_KEYS.map((k, j) => b[3][j] ? `${N_LABEL[k]} ${b[3][j] > 0 ? '+' : ''}${b[3][j]}` : '').filter(Boolean).join(', ')}`, 'good'); }
