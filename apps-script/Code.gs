@@ -33,7 +33,7 @@ const CONFIG = {
 // ========================================
 
 // the order matters: it is the unlocking order (must match the order of GAMES in index.html)
-const GAMES = { diner: 'Healthy Bites Diner', mall: 'Back to School Rush', er: 'A&E: Emergency!', hotel: 'Hotel Trouble', london: 'Lost in London', airport: 'Airport Check-in', cinema: 'Movie Night', school: 'New School in Dublin', gym: 'Join the Gym', hostfam: 'My Host Family', safety: 'Stay Safe: Ask for Help', theft: 'Report a Theft', passport: 'Lost Passport', neighbours: 'Noisy Neighbours', bank: 'At the Bank', printshop: 'At the Print Shop', date: 'First Date', supermarket: 'At the Supermarket', florist: 'At the Florist', garden: 'Garden Centre', pharmacy: 'At the Pharmacy' };
+const GAMES = { diner: 'Healthy Bites Diner', mall: 'Back to School Rush', er: 'A&E: Emergency!', hotel: 'Hotel Trouble', london: 'Lost in London', airport: 'Airport Check-in', cinema: 'Movie Night', school: 'New School in Dublin', gym: 'Join the Gym', hostfam: 'My Host Family', safety: 'Stay Safe: Ask for Help', theft: 'Report a Theft', passport: 'Lost Passport', neighbours: 'Noisy Neighbours', bank: 'At the Bank', printshop: 'At the Print Shop', date: 'First Date', supermarket: 'At the Supermarket', florist: 'At the Florist', garden: 'Garden Centre', pharmacy: 'At the Pharmacy', party: 'Birthday Party Plans', phone: 'Phone Shop Problem', tour: 'Guided City Tour' };
 const GAME_IDS = Object.keys(GAMES);
 const SHEETS = {
   students: 'Alumnos',
