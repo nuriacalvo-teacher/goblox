@@ -14685,7 +14685,7 @@ function addWindows(m, col, size = 1.5) {
 function waveFlags(t) {
   (W.flags || []).forEach(f => { const p = f.m.geometry.attributes.position; for (let k = 0; k < p.count; k++) { const u = p.getX(k); p.setZ(k, Math.sin(u * 3.2 - t * 5 + f.ph) * 0.13 * u); } p.needsUpdate = true; });
 }
-function drawBuilding(id, x, z, g, flag, river, site) {
+function drawBuilding(id, x, z, g, flag, river, site, lvl = 1) {
   const B = (dx, y, dz, w, h, d, col, solid = true) => part(x + dx, y, z + dz, w, h, d, col, { parent: g, solid });
   const Mx = (geo, col, dx, y, dz, rot, mat) => { const m = new THREE.Mesh(geo, mat || M(col)); m.position.set(x + dx, y, z + dz); if (rot) m.rotation.set(rot[0], rot[1], rot[2]); m.castShadow = true; g.add(m); return m; };
   const roof = (dx, y, dz, w, d, h, col) => { const r = Math.max(w, d); const m = Mx(new THREE.ConeGeometry(r * 0.72, h, 4), col, dx, y + h / 2, dz, [0, Math.PI / 4, 0]); m.scale.set(w / r, 1, d / r); };
@@ -14709,6 +14709,17 @@ function drawBuilding(id, x, z, g, flag, river, site) {
       B(0, 3.5, -0.3, 7.6, 0.4, 5.8, '#cfd8dc', false); Mx(new THREE.SphereGeometry(1.7, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2), '#ffd54f', 0, 3.9, -0.5);
       pole(-3.6, 3.6, 6, flag); label('CITY HALL'); break;
     case 'houses':
+      if (lvl > 1) {   // upgrade: floors stacked one by one (5 for the apartment block, 12 for the skyscraper), narrower every 4 floors
+        const floors = lvl === 2 ? 5 : 12, fh = 1.1, cols = ['#b0bec5', '#90a4ae'];
+        for (let f = 0; f < floors; f++) {
+          const w = 6.4 - Math.floor(f / 4) * 0.8, d = 5.4 - Math.floor(f / 4) * 0.8;
+          Wn(0, f * fh, 0, w, fh, d, cols[(f >> 1) & 1]); B(0, f * fh + fh - 0.1, 0, w + 0.3, 0.1, d + 0.3, '#eceff1', false);
+        }
+        const top = floors * fh; B(0, top, 0, 2, 0.5, 2, '#78909c', false);
+        if (lvl === 3) { B(0, top + 0.5, 0, 0.12, 3, 0.12, '#9e9e9e', false); Mx(new THREE.SphereGeometry(0.15, 8, 6), '#e53935', 0, top + 3.6, 0); }
+        door(0, (5.4 / 2) + 0.06, '#37474f', 1.4, 2); collider(6.4, top, 5.4);
+        label(lvl === 2 ? 'APARTMENT BLOCK' : 'SKYSCRAPER'); break;
+      }
       [[-2.4, -2, '#ef9a9a'], [2.4, -2, '#90caf9'], [0, 1.6, '#fff59d']].forEach(([dx, dz, c]) => {
         Wn(dx, 0, dz, 3, 2.4, 3, c); roof(dx, 2.4, dz, 3.3, 3.3, 1.6, '#8d3b2f'); B(dx + 0.8, 2.6, dz - 0.5, 0.4, 1.5, 0.4, '#795548', false); door(dx, dz + 1.52, '#5d4037', 0.6, 1.3);
       });
@@ -14768,8 +14779,17 @@ function drawBuilding(id, x, z, g, flag, river, site) {
       if (site) { B(-2.4, 0.1, 10, 1.6, 0.35, 12, '#8d6e63', false); for (let k = 0; k < 6; k++) B(-2.4 + (k % 2 ? 0.7 : -0.7), -0.6, 5 + k * 2, 0.25, 1.05, 0.25, '#5d4037', false); B(1.8, -0.3, 11, 2.6, 1.2, 6, '#1565c0', false); B(1.8, 0.9, 10, 1.8, 1, 2, '#fafafa', false); }
       label('PORT'); break;
     case 'stadium': {
-      const ring = Mx(new THREE.CylinderGeometry(4.3, 4.3, 2.6, 28, 1, true), null, 0, 1.3, 0, null, new THREE.MeshLambertMaterial({ color: '#90a4ae', side: THREE.DoubleSide }));
-      ring.receiveShadow = true; B(0, 0, 0, 6, 0.12, 5, '#43a047', false); collider(8.6, 2.6, 8.6); label('STADIUM'); break;
+      const hh = [1, 1.6, 2.3][lvl - 1] || 1, ringH = 2.6 * hh;   // an upgraded stadium is the same model, taller, with extra details
+      const ring = Mx(new THREE.CylinderGeometry(4.3, 4.3, ringH, 28, 1, true), null, 0, ringH / 2, 0, null, new THREE.MeshLambertMaterial({ color: lvl > 1 ? '#b0bec5' : '#90a4ae', side: THREE.DoubleSide }));
+      ring.receiveShadow = true; B(0, 0, 0, 6, 0.12, 5, '#43a047', false); collider(8.6, ringH, 8.6);
+      if (lvl > 1) {
+        B(0, 0.12, 0, 0.1, 0.02, 5, '#fafafa', false); B(0, 0.12, 0, 6, 0.02, 0.1, '#fafafa', false);   // pitch lines
+        Mx(new THREE.TorusGeometry(4.3, 0.18, 6, 28), '#eceff1', 0, ringH, 0, [Math.PI / 2, 0, 0]);       // rim
+        [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(([sx, sz]) => { B(sx * 3.1, 0, sz * 3.1, 0.3, ringH + 1.6, 0.3, '#78909c', false); B(sx * 3.1, ringH + 1.6, sz * 3.1, 1, 0.4, 0.6, '#fff59d', false); });   // floodlights
+        for (let k = 0; k < 12; k++) { const a = k / 12 * Math.PI * 2; B(Math.cos(a) * 4.3, ringH * 0.35, Math.sin(a) * 4.3, 0.5, 0.5, 0.5, k % 2 ? '#e53935' : '#1e88e5', false); }   // seat colours
+      }
+      if (lvl > 2) { Mx(new THREE.CylinderGeometry(4.5, 4.0, 0.3, 28, 1, true), null, 0, ringH + 0.2, 0, null, new THREE.MeshLambertMaterial({ color: '#cfd8dc', side: THREE.DoubleSide })); pole(0, -3.2, ringH + 3, flag); }
+      label(['STADIUM', 'GRAND STADIUM', 'MEGA STADIUM'][lvl - 1] || 'STADIUM'); break;
     }
     case 'airport':
       B(0, 0, 1.2, 9.4, 0.08, 2.6, '#37474f', false); for (let k = -3.5; k <= 3.5; k += 1.75) B(k, 0.08, 1.2, 0.9, 0.02, 0.2, '#fafafa', false);
@@ -14949,7 +14969,7 @@ function renderPlots() {
     }
     const b = n && n.buildings[i];
     if (b && river && !BRIDGES.includes(b)) part(x, 0, z, 8.6, 0.16, 8.6, '#7cc36b', { solid: false, parent: g, shadow: false });   // built before the river existed: a small island
-    if (b) drawBuilding(b, x, z, g, n.flag, river, site);
+    if (b) drawBuilding(b, x, z, g, n.flag, river, site, bLevel(n, i));
     s.layers.push({ g: city, refs: W.colliders.slice(c0) });
   });
   bakeStatic(city, new Set(W.flags.map(f => f.m).concat(W.spin))); W.scene.add(city);
@@ -14989,14 +15009,15 @@ SCEN.nation = {
   },
   menu: () => nationMenu()
 };
+const nLevelSum = n => Object.values(n.levels || {}).reduce((a, v) => a + v, 0);
 function applyNation(st) {
   if (!G || G.id !== 'nation') return;
-  const prevPlots = G.s.state && G.s.state.nation ? G.s.state.nation.plots.length + Object.keys(G.s.state.nation.buildings).length : -1;
+  const prevPlots = G.s.state && G.s.state.nation ? G.s.state.nation.plots.length + Object.keys(G.s.state.nation.buildings).length + nLevelSum(G.s.state.nation) : -1;
   G.s.state = st;
   if (st.features) FEAT = { mejoras: !!st.features.mejoras };
   if (st.goyux && !G.s.visit) { profile.xp = st.goyux.xp; profile.granted = st.goyux.granted; profile.nationNet = st.goyux.nationNet; store.set('profile', profile); }
   if (st.nation && !G.s.visit) store.set('nationCache', { name: st.nation.name, flag: st.nation.flag, score: st.stats.score, pop: st.stats.pop, buildings: Object.keys(st.nation.buildings).length });
-  const now = st.nation ? st.nation.plots.length + Object.keys(st.nation.buildings).length : -1;
+  const now = st.nation ? st.nation.plots.length + Object.keys(st.nation.buildings).length + nLevelSum(st.nation) : -1;
   if (now !== prevPlots) renderPlots();
   nationHud();
 }
@@ -15039,6 +15060,7 @@ async function launchNation(visit) {
   $('#home').hidden = true; $('#game').hidden = false;
   initThree(); resize();
   newWorld();
+  if (st.features) FEAT = { mejoras: !!st.features.mejoras };
   G = { id: 'nation', sc: SCEN.nation, t0: performance.now(), money: 0, good: 0, bad: 0, hints: 0, manners: 100, mistakes: [], obj: [], inv: [], over: false, s: { state: st, visit: visit || null, layers: [] } };
   W.spin = [];
   const plan = G.s.plan = islandPlan(st.nation ? st.nation.name : 'GOBLOX');
@@ -15237,11 +15259,18 @@ function buildMenu(i) {
 function buildingInfo(id, plot) {
   const b = BLD[id], own = !G.s.visit && plot != null && id !== 'cityhall', st = G.s.state;
   const btns = [{ t: 'Close', cls: own ? '' : 'primary', fn: closePanel }];
+  const lvl = bLevel(st.nation, plot), costs = FEAT.mejoras ? UPG_COST[id] : null, nextCost = costs && lvl <= costs.length ? costs[lvl - 1] : 0;
+  let upg = '';
+  if (costs && lvl > 1) upg += `<p class="panel-p">Level ${lvl} · ${escH(UPG_NAME[id][lvl - 1])} · effects ×${UPG_MULT[lvl]}</p>`;
+  if (own && nextCost) {
+    upg += `<p class="panel-p"><b>Upgrade available: ${escH(UPG_NAME[id][lvl])} · ${nextCost} GOYUX</b><br><small>Effects ×${UPG_MULT[lvl + 1]}. Pass a hard test: 4 grammar + 1 culture question (${UPG_NEED} of ${UPG_Q} correct).</small></p>`;
+    btns.push({ t: `Upgrade to ${UPG_NAME[id][lvl]} · ${nextCost} GOYUX`, cls: 'primary', disabled: st.goyux.total < nextCost, fn: () => { closePanel(); upgradeBuilding(plot); } });
+  }
   if (own) btns.push({ t: `Move to another plot · ${moveCost(id)} GOYUX`, cls: 'primary', disabled: st.goyux.total < moveCost(id), fn: () => {
     closePanel(); G.s.moving = { from: plot, id }; nationHud();
     notify('🚚 Moving ' + b[0], `Walk to an empty plot of yours and press E. Moving costs ${moveCost(id)} GOYUX. Use ✖ in the bar to cancel.`);
   } });
-  panel(`${b[1]} ${b[0]}`, '', `<p class="panel-p">${escH(b[5])}</p><div class="fxs">${fxChips(b[3])}</div>${READING[id] ? `<div class="quiz-text">${escH(READING[id].text)}</div>` : ''}`, btns, { onClose: () => {} });
+  panel(`${b[1]} ${b[0]}`, '', `<p class="panel-p">${escH(b[5])}</p><div class="fxs">${fxChips(lvl > 1 ? b[3].map(v => Math.round(v * UPG_MULT[lvl])) : b[3])}</div>${upg}${READING[id] ? `<div class="quiz-text">${escH(READING[id].text)}</div>` : ''}`, btns, { onClose: () => {} });
 }
 /* upgrade test: 4 hard grammar questions (levels 3-4 of the bank, or 4 only for the last upgrade) + 1 culture question */
 function upgradeBuilding(plot) {
