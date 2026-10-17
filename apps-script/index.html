@@ -14562,9 +14562,18 @@ const MONUMENTS = ['bigben', 'castle', 'stonehenge', 'newgrange', 'cntower', 'in
 const UNIQUE_B = ['cityhall', 'parliament', 'embassy', 'port', 'stadium', 'airport', 'mine', 'lighthouse'].concat(MONUMENTS);
 const TREATY_FX = { trade: [0, 0, 6, 0, 0, 0], culture: [0, 0, 0, 0, 6, 0], peace: [0, 4, 0, 4, 0, 0] };
 const TREATY_NAME = { trade: 'Trade Agreement', culture: 'Cultural Exchange', peace: 'Peace Treaty' };
+/* Upgrades. MIRROR of UPG in Code.gs. UPG[id][k] = [cost, extra effects] to reach level k+2; names[0] is level 1. */
+const UPG = {
+  houses: [[60, [30, 1, 2, 0, 0, -1]], [120, [60, 2, 4, 0, 0, -2]]],
+  stadium: [[80, [0, 4, 2, 0, 2, 0]], [140, [0, 6, 4, 0, 4, -1]]]
+};
+const UPG_NAME = { houses: ['Houses', 'Apartment blocks', 'Skyscrapers'], stadium: ['Stadium', 'Big stadium', 'Grand stadium'] };
+const lvlOf = (n, i) => clamp(Math.round(Number((n.levels || {})[i])) || 1, 1, 3);
+function lvlFx(id, lv) { const out = [0, 0, 0, 0, 0, 0], u = UPG[id]; if (u) for (let k = 0; k < Math.min(lv - 1, u.length); k++) u[k][1].forEach((d, i) => { out[i] += d; }); return out; }
 function nStats(n, treaties) {
   const s = { pop: 50, happy: 50, econ: 20, secu: 20, cult: 10, env: 60 };
   Object.values(n.buildings || {}).forEach(id => { const b = BLD[id]; if (b) N_KEYS.forEach((k, i) => { s[k] += b[3][i]; }); });
+  Object.keys(n.levels || {}).forEach(p => { const id = (n.buildings || {})[p]; lvlFx(id, lvlOf(n, p)).forEach((d, i) => { s[N_KEYS[i]] += d; }); });
   const per = {};
   (treaties || []).forEach(t => { per[t] = (per[t] || 0) + 1; if (per[t] <= 3 && TREATY_FX[t]) N_KEYS.forEach((k, i) => { s[k] += TREATY_FX[t][i]; }); });
   s.happy = clamp(s.happy, 0, 100); s.env = clamp(s.env, 0, 100);
@@ -15909,7 +15918,15 @@ const NAPI = {
       if (UNIQUE_B.includes(id) && Object.values(n.buildings).includes(id)) throw new Error('Your nation already has one.');
       if (!fitsPlot(id, i)) throw new Error(`${BLD[id][0]} can't be built there.`);
       if (s.goyux.total < b[2]) throw new Error(`You need ${b[2]} GOYUX for this building.`);
-      n.buildings[i] = id; n.spent += b[2]; store.set('nation', n);
+      n.buildings[i] = id; if (n.levels) delete n.levels[i]; n.spent += b[2]; store.set('nation', n);
+    });
+  },
+  upgrade(i) {
+    return NAPI.run('nationUpgrade', [i], () => {
+      const s = NAPI.local(), n = s.nation, id = n.buildings[i], up = UPG[id], lv = lvlOf(n, i);
+      if (!up || lv > up.length) throw new Error('That building cannot be upgraded.');
+      if (s.goyux.total < up[lv - 1][0]) throw new Error(`You need ${up[lv - 1][0]} GOYUX for this upgrade.`);
+      n.levels = n.levels || {}; n.levels[i] = lv + 1; n.spent += up[lv - 1][0]; store.set('nation', n);
     });
   },
   move(from, to) {
@@ -15917,7 +15934,7 @@ const NAPI = {
       const s = NAPI.local(), n = s.nation, id = n.buildings[from];
       if (!id || id === 'cityhall' || !n.plots.includes(to) || n.buildings[to] || !fitsPlot(id, to)) throw new Error('You cannot move that building there.');
       if (s.goyux.total < moveCost(id)) throw new Error(`You need ${moveCost(id)} GOYUX to move it.`);
-      delete n.buildings[from]; n.buildings[to] = id; n.spent += moveCost(id); store.set('nation', n);
+      delete n.buildings[from]; n.buildings[to] = id; n.spent += moveCost(id); n.levels = n.levels || {}; if (n.levels[from]) { n.levels[to] = n.levels[from]; delete n.levels[from]; } store.set('nation', n);
     });
   },
   tax() {
@@ -16150,7 +16167,7 @@ function addWindows(m, col, size = 1.5) {
 function waveFlags(t) {
   (W.flags || []).forEach(f => { const p = f.m.geometry.attributes.position; for (let k = 0; k < p.count; k++) { const u = p.getX(k); p.setZ(k, Math.sin(u * 3.2 - t * 5 + f.ph) * 0.13 * u); } p.needsUpdate = true; });
 }
-function drawBuilding(id, x, z, g, flag, river, site) {
+function drawBuilding(id, x, z, g, flag, river, site, lvl = 1) {
   const B = (dx, y, dz, w, h, d, col, solid = true) => part(x + dx, y, z + dz, w, h, d, col, { parent: g, solid });
   const Mx = (geo, col, dx, y, dz, rot, mat) => { const m = new THREE.Mesh(geo, mat || M(col)); m.position.set(x + dx, y, z + dz); if (rot) m.rotation.set(rot[0], rot[1], rot[2]); m.castShadow = true; g.add(m); return m; };
   const roof = (dx, y, dz, w, d, h, col) => { const r = Math.max(w, d); const m = Mx(new THREE.ConeGeometry(r * 0.72, h, 4), col, dx, y + h / 2, dz, [0, Math.PI / 4, 0]); m.scale.set(w / r, 1, d / r); };
@@ -16174,6 +16191,12 @@ function drawBuilding(id, x, z, g, flag, river, site) {
       B(0, 3.5, -0.3, 7.6, 0.4, 5.8, '#cfd8dc', false); Mx(new THREE.SphereGeometry(1.7, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2), '#ffd54f', 0, 3.9, -0.5);
       pole(-3.6, 3.6, 6, flag); label('CITY HALL'); break;
     case 'houses':
+      if (lvl > 1) {   // upgraded: apartment blocks (level 2) and skyscrapers (level 3)
+        const T = lvl > 2 ? [[-2.6, -2.2, 3, 15, '#90a4ae'], [2.6, -1.4, 3, 11, '#78909c'], [0, 2, 3, 8, '#b0bec5']] : [[-2.6, -2, 3.2, 6, '#ef9a9a'], [2.6, -1.4, 3.2, 5, '#90caf9'], [0, 2, 3.2, 4, '#fff59d']];
+        T.forEach(([dx, dz, w, h, c]) => { Wn(dx, 0, dz, w, h, w, c); B(dx, h, dz, w + 0.3, 0.25, w + 0.3, '#546e7a', false); if (lvl > 2) B(dx, h + 0.25, dz, 0.15, 2.2, 0.15, '#cfd8dc', false); });
+        door(0, 3.55, '#37474f', 1.2, 2);
+        label(lvl > 2 ? 'SKYSCRAPERS' : 'APARTMENTS'); break;
+      }
       [[-2.4, -2, '#ef9a9a'], [2.4, -2, '#90caf9'], [0, 1.6, '#fff59d']].forEach(([dx, dz, c]) => {
         Wn(dx, 0, dz, 3, 2.4, 3, c); roof(dx, 2.4, dz, 3.3, 3.3, 1.6, '#8d3b2f'); B(dx + 0.8, 2.6, dz - 0.5, 0.4, 1.5, 0.4, '#795548', false); door(dx, dz + 1.52, '#5d4037', 0.6, 1.3);
       });
@@ -16234,7 +16257,12 @@ function drawBuilding(id, x, z, g, flag, river, site) {
       label('PORT'); break;
     case 'stadium': {
       const ring = Mx(new THREE.CylinderGeometry(4.3, 4.3, 2.6, 28, 1, true), null, 0, 1.3, 0, null, new THREE.MeshLambertMaterial({ color: '#90a4ae', side: THREE.DoubleSide }));
-      ring.receiveShadow = true; B(0, 0, 0, 6, 0.12, 5, '#43a047', false); collider(8.6, 2.6, 8.6); label('STADIUM'); break;
+      ring.receiveShadow = true; B(0, 0, 0, 6, 0.12, 5, '#43a047', false); collider(8.6, 2.6, 8.6);
+      if (lvl > 1) {   // upgraded: upper stand, then floodlights and a roof ring
+        Mx(new THREE.CylinderGeometry(4.6, 4.6, 1.8, 28, 1, true), null, 0, 3.5, 0, null, new THREE.MeshLambertMaterial({ color: '#b0bec5', side: THREE.DoubleSide }));
+        if (lvl > 2) { Mx(new THREE.TorusGeometry(4.5, 0.18, 6, 32), '#eceff1', 0, 4.4, 0, [Math.PI / 2, 0, 0]); [[-4.7, -4.7], [4.7, -4.7], [-4.7, 4.7], [4.7, 4.7]].forEach(([dx, dz]) => { B(dx, 0, dz, 0.3, 7, 0.3, '#9e9e9e', false); B(dx, 7, dz, 1.1, 0.7, 0.5, '#fff59d', false); }); }
+      }
+      label(lvl > 2 ? 'GRAND STADIUM' : lvl > 1 ? 'BIG STADIUM' : 'STADIUM'); break;
     }
     case 'airport':
       B(0, 0, 1.2, 9.4, 0.08, 2.6, '#37474f', false); for (let k = -3.5; k <= 3.5; k += 1.75) B(k, 0.08, 1.2, 0.9, 0.02, 0.2, '#fafafa', false);
@@ -16414,7 +16442,7 @@ function renderPlots() {
     }
     const b = n && n.buildings[i];
     if (b && river && !BRIDGES.includes(b)) part(x, 0, z, 8.6, 0.16, 8.6, '#7cc36b', { solid: false, parent: g, shadow: false });   // built before the river existed: a small island
-    if (b) drawBuilding(b, x, z, g, n.flag, river, site);
+    if (b) drawBuilding(b, x, z, g, n.flag, river, site, lvlOf(n, i));
     s.layers.push({ g: city, refs: W.colliders.slice(c0) });
   });
   bakeStatic(city, new Set(W.flags.map(f => f.m).concat(W.spin))); W.scene.add(city);
@@ -16456,11 +16484,12 @@ SCEN.nation = {
 };
 function applyNation(st) {
   if (!G || G.id !== 'nation') return;
-  const prevPlots = G.s.state && G.s.state.nation ? G.s.state.nation.plots.length + Object.keys(G.s.state.nation.buildings).length : -1;
+  const lvSum = x => x ? Object.values(x.levels || {}).reduce((a, b) => a + b, 0) : 0;
+  const prevPlots = G.s.state && G.s.state.nation ? G.s.state.nation.plots.length + Object.keys(G.s.state.nation.buildings).length + lvSum(G.s.state.nation) : -1;
   G.s.state = st;
   if (st.goyux && !G.s.visit) { profile.xp = st.goyux.xp; profile.granted = st.goyux.granted; profile.nationNet = st.goyux.nationNet; store.set('profile', profile); }
   if (st.nation && !G.s.visit) store.set('nationCache', { name: st.nation.name, flag: st.nation.flag, score: st.stats.score, pop: st.stats.pop, buildings: Object.keys(st.nation.buildings).length });
-  const now = st.nation ? st.nation.plots.length + Object.keys(st.nation.buildings).length : -1;
+  const now = st.nation ? st.nation.plots.length + Object.keys(st.nation.buildings).length + lvSum(st.nation) : -1;
   if (now !== prevPlots) renderPlots();
   nationHud();
 }
@@ -16705,7 +16734,18 @@ function buildingInfo(id, plot) {
     closePanel(); G.s.moving = { from: plot, id }; nationHud();
     notify('🚚 Moving ' + b[0], `Walk to an empty plot of yours and press E. Moving costs ${moveCost(id)} GOYUX. Use ✖ in the bar to cancel.`);
   } });
-  panel(`${b[1]} ${b[0]}`, '', `<p class="panel-p">${escH(b[5])}</p><div class="fxs">${fxChips(b[3])}</div>${READING[id] ? `<div class="quiz-text">${escH(READING[id].text)}</div>` : ''}`, btns, { onClose: () => {} });
+  const nat = G.s.state.nation, lv = plot != null && nat ? lvlOf(nat, plot) : 1, up = UPG[id];
+  if (own && up && lv <= up.length) {
+    const cost = up[lv - 1][0];
+    btns.push({ t: `⬆ Upgrade to ${UPG_NAME[id][lv]} · ${cost} GOYUX`, cls: 'primary', disabled: st.goyux.total < cost, fn: () => {
+      closePanel();
+      runQuiz({ title: `Upgrade: ${UPG_NAME[id][lv]}`, graded: true, n: 2, onPass: async () => {
+        try { applyNation(await NAPI.upgrade(plot)); renderPlots(); notify('⬆ Upgraded!', `Your ${b[0].toLowerCase()} is now: ${UPG_NAME[id][lv]}.`, 'good'); }
+        catch (e) { notify('⚠️ Not upgraded', e.message, 'bad'); }
+      } });
+    } });
+  }
+  panel(`${b[1]} ${up ? UPG_NAME[id][lv - 1] : b[0]}`, '', `<p class="panel-p">${escH(b[5])}</p><div class="fxs">${fxChips(b[3])}</div>${READING[id] ? `<div class="quiz-text">${escH(READING[id].text)}</div>` : ''}`, btns, { onClose: () => {} });
 }
 function moveHere(to) {
   const mv = G.s.moving, b = BLD[mv.id];
